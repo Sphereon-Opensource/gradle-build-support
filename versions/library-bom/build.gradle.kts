@@ -116,9 +116,12 @@ dependencies {
         api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.9.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
 
+        // Spring
+        api("org.springframework.boot:spring-boot-starter-web:3.5.6")
 
-
-
+        // Reactive
+        api("org.reactivestreams:reactive-streams:1.0.4")
+        api("io.projectreactor:reactor-core:3.7.11")
     }
 }
 
