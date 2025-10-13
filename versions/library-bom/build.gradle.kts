@@ -80,6 +80,7 @@ dependencies {
         api("io.ktor:ktor-client-cio-wasm-js:3.3.0")
         api("io.ktor:ktor-client-okhttp:3.3.0")
         api("io.ktor:ktor-client-okhttp-jvm:3.3.0")
+        api("io.ktor:ktor-client-darwin:3.3.0")
         api("io.ktor:ktor-client-js:3.3.0")
         api("io.ktor:ktor-client-java:3.3.0")
         api("io.ktor:ktor-client-logging:3.3.0")
