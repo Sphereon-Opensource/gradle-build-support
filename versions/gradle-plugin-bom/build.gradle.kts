@@ -17,7 +17,6 @@ dependencies {
         api("com.sphereon.gradle.plugin.integration-tests:${version}")
         api("com.sphereon.gradle.plugin.project-publication:${version}")
 
-
         // Kotlin
         api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.20")
         api("org.jetbrains.kotlin.jvm:2.2.20")
@@ -34,13 +33,9 @@ dependencies {
         api("com.android.library:8.12.0")
         api("com.android.kotlin.multiplatform.library:8.12.0")
 
-
-
         // Compose
         api("org.jetbrains.compose.hot-reload:1.0.0-beta08")
         api("org.jetbrains.compose:1.9.0")
-
-
 
         // Kotest
         api("io.kotest.multiplatform:io.kotest.multiplatform.gradle.plugin:5.9.1")
@@ -55,7 +50,6 @@ dependencies {
         api("software.amazon.app.platform:0.0.9-SNAPSHOT")
         api("org.jetbrains.kotlinx.atomicfu:0.27.0")
 
-
         // NPM Publish
         api("dev.petuska.npm.publish:dev.petuska.npm.publish.gradle.plugin:3.5.3")
 
@@ -67,7 +61,6 @@ dependencies {
 
         // OpenAPI
         api("org.openapi.generator:7.13.0")
-
     }
 }
 
