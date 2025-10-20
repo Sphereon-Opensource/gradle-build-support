@@ -1,18 +1,14 @@
 package com.sphereon.gradle.plugin
 
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.findByType
 
 class ProjectPublicationPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         // Ensure required plugins are applied
         project.plugins.apply("maven-publish")
         project.plugins.apply("signing")
-        project.plugins.apply("com.vanniktech.maven.publish")
+        /*project.plugins.apply("com.vanniktech.maven.publish")
 
         // Configure immediately instead of in afterEvaluate to avoid capturing project objects
         project.extensions.findByType<MavenPublishBaseExtension>()?.apply {
@@ -42,14 +38,14 @@ class ProjectPublicationPlugin : Plugin<Project> {
             }
 
 
-            /*    // Configure signing if the property 'signing.gnupg.keyName' is set
+            *//*    // Configure signing if the property 'signing.gnupg.keyName' is set
                 if (project.hasProperty("signing.gnupg.keyName")) {
                     signing {
                         enabled.set(true)
                         useGpgCmd()
                     }
-                }*/
-        }
+                }*//*
+        }*/
 
         /*// Configure signing if the property 'signing.gnupg.keyName' is set.
         val signingExtension = project.extensions.findByType(SigningExtension::class.java)
