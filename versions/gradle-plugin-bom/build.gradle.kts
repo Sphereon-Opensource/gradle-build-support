@@ -60,7 +60,7 @@ dependencies {
         api("io.github.gradle-nexus.publish-plugin:io.github.gradle-nexus.publish-plugin.gradle.plugin:2.0.0")
 
         // OpenAPI
-        api("org.openapi.generator:7.15.0")
+        api("org.openapi.generator:7.16.0")
     }
 }
 
