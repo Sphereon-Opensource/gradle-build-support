@@ -119,6 +119,10 @@ dependencies {
 
         // Spring
         api("org.springframework.boot:spring-boot-starter-web:3.5.6")
+        api("org.springframework.boot:spring-boot-starter-test:3.5.6")
+
+        //Jakarta
+        api("jakarta.validation:jakarta.validation-api:3.1.1")
 
         // Reactive
         api("org.reactivestreams:reactive-streams:1.0.4")
