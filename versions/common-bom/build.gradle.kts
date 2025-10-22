@@ -54,11 +54,11 @@ dependencies {
         api("org.junit.jupiter:junit-jupiter-engine:5.13.4")
 
         // Kotest
-        api("io.kotest:kotest-assertions-core:5.9.1")
-        api("io.kotest:kotest-framework-engine:5.9.1")
-        api("io.kotest:kotest-framework-datatest:5.9.1")
-        api("io.kotest:kotest-runner-junit5:5.9.1")
-        api("io.kotest:kotest-property:5.9.1")
+        api("io.kotest:kotest-assertions-core:6.0.4")
+        api("io.kotest:kotest-framework-engine:6.0.4")
+        api("io.kotest:kotest-framework-datatest:6.0.4")
+        api("io.kotest:kotest-runner-junit5:6.0.4")
+        api("io.kotest:kotest-property:6.0.4")
 
             // assertk
         api("com.willowtreeapps.assertk:assertk:0.28.1")

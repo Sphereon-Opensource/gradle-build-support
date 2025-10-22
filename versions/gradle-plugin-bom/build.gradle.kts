@@ -38,13 +38,13 @@ dependencies {
         api("org.jetbrains.compose:1.9.0")
 
         // Kotest
-        api("io.kotest.multiplatform:io.kotest.multiplatform.gradle.plugin:5.9.1")
+        api("io.kotest:io.kotest.gradle.plugin:6.0.4")
 
         // Publishing
         api("com.vanniktech.maven.publish:0.31.0")
 
         // KSP
-        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.20-2.0.3")
+        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.20-2.0.4")
 
         // DI
         api("software.amazon.app.platform:0.0.9-SNAPSHOT")
