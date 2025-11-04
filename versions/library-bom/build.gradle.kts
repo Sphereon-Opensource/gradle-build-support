@@ -100,11 +100,11 @@ dependencies {
         api("io.ktor:ktor-server-test-host:3.3.0")
 
         // Azure
-        api("com.azure:azure-sdk-bom:1.2.34")
-        api("com.azure:azure-identity:1.2.34")
-        api("com.azure:azure-security-keyvault-administration:1.2.34")
-        api("com.azure:azure-security-keyvault-certificates:1.2.34")
-        api("com.azure:azure-security-keyvault-keys:1.2.34")
+        api("com.azure:azure-sdk-bom:1.3.0")
+        api("com.azure:azure-identity:1.18.1")
+        api("com.azure:azure-security-keyvault-administration:4.7.3")
+        api("com.azure:azure-security-keyvault-certificates:4.8.3")
+        api("com.azure:azure-security-keyvault-keys:4.10.3")
 
 
         // Apps, todo move to separate bom

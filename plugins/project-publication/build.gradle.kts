@@ -15,10 +15,16 @@ allprojects {
 }
 
 repositories {
-    mavenLocal()
     gradlePluginPortal()   // for kotlin-dsl & java-gradle-plugin
     mavenCentral()
     google()
+    // Keep maven local at the end!!!!
+    // https://slack-chats.kotlinlang.org/t/27045384/hi-there-i-have-a-very-annoying-internal-compiler-error-here
+    mavenLocal {
+        content {
+            includeGroupAndSubgroups("com.sphereon")
+        }
+    }
 }
 
 
