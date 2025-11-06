@@ -187,7 +187,7 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
                     freeCompilerArgs.add("-Xexpect-actual-classes")
                     freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
 //                    progressiveMode.set(true) //https://kotlinlang.org/docs/whatsnew13.html#progressive-mode
-                    languageVersion.set(KotlinVersion.KOTLIN_2_0)
+                    languageVersion.set(KotlinVersion.KOTLIN_2_1)
 //                    apiVersion.set(KOTLIN_2_1)
                 }
             }
