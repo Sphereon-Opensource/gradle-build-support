@@ -18,14 +18,20 @@ pluginManagement {
         maven {
             url = uri("https://nexus.sphereon.com/repository/sphereon-opensource-snapshots")
         }
-        mavenLocal()
+        // Keep maven local at the end!!!!
+        // https://slack-chats.kotlinlang.org/t/27045384/hi-there-i-have-a-very-annoying-internal-compiler-error-here
+        mavenLocal {
+            content {
+                includeGroupAndSubgroups("com.sphereon")
+            }
+        }
     }
 
 }
 
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
+
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -46,6 +52,13 @@ dependencyResolutionManagement {
         }
         maven {
             url = uri("https://nexus.sphereon.com/repository/sphereon-opensource-snapshots")
+        }
+        // Keep maven local at the end!!!!
+        // https://slack-chats.kotlinlang.org/t/27045384/hi-there-i-have-a-very-annoying-internal-compiler-error-here
+        mavenLocal {
+            content {
+                includeGroupAndSubgroups("com.sphereon")
+            }
         }
     }
 }

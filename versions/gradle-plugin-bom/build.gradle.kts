@@ -18,14 +18,14 @@ dependencies {
         api("com.sphereon.gradle.plugin.project-publication:${version}")
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.20")
-        api("org.jetbrains.kotlin.jvm:2.2.20")
-        api("org.jetbrains.kotlin.multiplatform:2.2.20")
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.20")
-        api("org.jetbrains.kotlin.plugin.serialization:2.2.20")
-        api("org.jetbrains.kotlin:kotlin-android-extensions:2.2.20")
-        api("org.jetbrains.kotlin.android:2.2.20")
-        api("org.jetbrains.kotlin.plugin.compose:2.2.20")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
+        api("org.jetbrains.kotlin.jvm:2.2.21")
+        api("org.jetbrains.kotlin.multiplatform:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
+        api("org.jetbrains.kotlin.plugin.serialization:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-android-extensions:2.2.21")
+        api("org.jetbrains.kotlin.android:2.2.21")
+        api("org.jetbrains.kotlin.plugin.compose:2.2.21")
 
         // Android
         api("com.android.tools.build:gradle:8.12.0")
@@ -35,7 +35,7 @@ dependencies {
 
         // Compose
         api("org.jetbrains.compose.hot-reload:1.0.0-beta08")
-        api("org.jetbrains.compose:1.9.0")
+        api("org.jetbrains.compose:1.9.2")
 
         // Kotest
         api("io.kotest:io.kotest.gradle.plugin:6.0.4")
@@ -44,11 +44,11 @@ dependencies {
         api("com.vanniktech.maven.publish:0.31.0")
 
         // KSP
-        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.20-2.0.4")
+        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.21-2.0.4")
 
         // DI
         api("software.amazon.app.platform:0.0.9-SNAPSHOT")
-        api("org.jetbrains.kotlinx.atomicfu:0.27.0")
+        api("org.jetbrains.kotlinx.atomicfu:0.29.0")
 
         // NPM Publish
         api("dev.petuska.npm.publish:dev.petuska.npm.publish.gradle.plugin:3.5.3")
