@@ -9,6 +9,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
@@ -186,7 +187,7 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
                     freeCompilerArgs.add("-Xexpect-actual-classes")
                     freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
 //                    progressiveMode.set(true) //https://kotlinlang.org/docs/whatsnew13.html#progressive-mode
-                    languageVersion.set(KOTLIN_2_1)
+                    languageVersion.set(KotlinVersion.KOTLIN_2_1)
 //                    apiVersion.set(KOTLIN_2_1)
                 }
             }
