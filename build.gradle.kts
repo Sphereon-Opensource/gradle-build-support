@@ -32,11 +32,6 @@ allprojects {
             // Ensure unique coordinates for different publication types
             publications.withType<MavenPublication> {
                 val publicationName = name
-                /*if (publicationName == "kotlinMultiplatform") {
-                    artifactId = "${project.name}-multiplatform"
-                } else */if (publicationName == "mavenKotlin") {
-                    artifactId = "${project.name}-jvm"
-                }
             }
         }
     }
