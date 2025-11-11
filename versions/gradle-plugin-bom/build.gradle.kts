@@ -44,7 +44,7 @@ dependencies {
         api("com.vanniktech.maven.publish:0.31.0")
 
         // KSP
-        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.10-2.0.4")
+        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.2")
 
         // DI
         api("software.amazon.app.platform:0.0.9-SNAPSHOT")
