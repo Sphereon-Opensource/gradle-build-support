@@ -18,14 +18,14 @@ dependencies {
         api("com.sphereon.gradle.plugin.project-publication:${version}")
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
-        api("org.jetbrains.kotlin.jvm:2.2.21")
-        api("org.jetbrains.kotlin.multiplatform:2.2.21")
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
-        api("org.jetbrains.kotlin.plugin.serialization:2.2.21")
-        api("org.jetbrains.kotlin:kotlin-android-extensions:2.2.21")
-        api("org.jetbrains.kotlin.android:2.2.21")
-        api("org.jetbrains.kotlin.plugin.compose:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
+        api("org.jetbrains.kotlin.jvm:2.2.10")
+        api("org.jetbrains.kotlin.multiplatform:2.2.10")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
+        api("org.jetbrains.kotlin.plugin.serialization:2.2.10")
+        api("org.jetbrains.kotlin:kotlin-android-extensions:2.2.10")
+        api("org.jetbrains.kotlin.android:2.2.10")
+        api("org.jetbrains.kotlin.plugin.compose:2.2.10")
 
         // Android
         api("com.android.tools.build:gradle:8.12.0")
@@ -44,7 +44,7 @@ dependencies {
         api("com.vanniktech.maven.publish:0.31.0")
 
         // KSP
-        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.21-2.0.4")
+        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.10-2.0.2")
 
         // DI
         api("software.amazon.app.platform:0.0.9-SNAPSHOT")
