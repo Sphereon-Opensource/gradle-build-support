@@ -61,6 +61,11 @@ dependencies {
 
         // OpenAPI
         api("org.openapi.generator:7.16.0")
+
+        // Spring boot
+        api("org.springframework.boot:3.5.6")
+        api("io.spring.dependency-management:1.1.7")
+
     }
 }
 
