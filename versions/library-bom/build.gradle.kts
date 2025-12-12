@@ -35,11 +35,11 @@ dependencies {
 
 
         // A-sit plus signum
-        api("at.asitplus.signum:indispensable:3.16.1")
-        api("at.asitplus.signum:indispensable-asn1:3.16.1")
-        api("at.asitplus.signum:indispensable-josef:3.16.1")
-        api("at.asitplus.signum:indispensable-cosef:3.16.1")
-        api("at.asitplus.signum:supreme:0.8.1")
+        api("at.asitplus.signum:indispensable:3.16.3")
+        api("at.asitplus.signum:indispensable-asn1:3.16.3")
+        api("at.asitplus.signum:indispensable-josef:3.16.3")
+        api("at.asitplus.signum:indispensable-cosef:3.16.3")
+        api("at.asitplus.signum:supreme:0.8.3")
 
         // Android
         api("androidx.startup:startup-runtime:1.2.0")

@@ -163,7 +163,7 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
     val sphereonlib = project.sphereonlib
 
     apply {
-        jvmToolchain(21)
+        jvmToolchain(17)
         applyDefaultHierarchyTemplate()
 
         //common dependencies
@@ -230,7 +230,7 @@ private fun KotlinMultiplatformExtension.commonOptIns() {
 private fun Project.setJvmCompilerOptions() {
     tasks.named<KotlinJvmCompile>(COMPILE_KOTLIN).configure {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 }
