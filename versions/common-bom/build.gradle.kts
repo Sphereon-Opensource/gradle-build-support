@@ -13,10 +13,10 @@ dependencies {
         api(platform(project(":versions:gradle-plugin-bom")))
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-test:2.2.10")
-        api("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
-        api("org.jetbrains.kotlin:kotlin-stdlib:2.2.10")
-        api("org.jetbrains.kotlin:kotlin-reflect:2.2.10")
+        api("org.jetbrains.kotlin:kotlin-test:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-test-junit:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
 
 
         // Kotlinx
@@ -43,7 +43,7 @@ dependencies {
         api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
 
         api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
-        api("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0")
+        api("org.jetbrains.kotlinx:kotlinx-io-core:0.8.2")
 
 
 
@@ -54,10 +54,10 @@ dependencies {
         api("org.junit.jupiter:junit-jupiter-engine:5.13.4")
 
         // Kotest
-        api("io.kotest:kotest-assertions-core:6.0.4")
-        api("io.kotest:kotest-framework-engine:6.0.4")
-        api("io.kotest:kotest-runner-junit5:6.0.4")
-        api("io.kotest:kotest-property:6.0.4")
+        api("io.kotest:kotest-assertions-core:6.0.6")
+        api("io.kotest:kotest-framework-engine:6.0.6")
+        api("io.kotest:kotest-runner-junit5:6.0.6")
+        api("io.kotest:kotest-property:6.0.6")
 
             // assertk
         api("com.willowtreeapps.assertk:assertk:0.28.1")
