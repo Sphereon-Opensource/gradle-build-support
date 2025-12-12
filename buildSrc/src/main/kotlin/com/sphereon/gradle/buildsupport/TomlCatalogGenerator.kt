@@ -65,11 +65,19 @@ fun Project.generateTomlFromBom(
         constraintsPattern.findAll(content).forEach { match ->
             val (group, name, version) = determineDependencyParts(match.groupValues, rootGroup, bomName, targetSection)
             if (group != null && name != null && version != null) {
+                // Check if this is a plugin-only dependency (empty group signals plugin ID format)
+                val isPluginOnly = group.isEmpty()
+
                 // Check if this dependency has already been processed
                 if (processedDependencies.add(Pair(group, name))) {
                     dependencies.add(Triple(group, name, version))
                     val versionKey = generateVersionKey(group, name)
                     addVersionSafely(versions, versionKey, version)
+
+                    // Mark as plugin dependency if it's a plugin-only format
+                    if (isPluginOnly) {
+                        pluginDependencies.add(Pair(group, name))
+                    }
                 }
             }
         }
@@ -123,6 +131,9 @@ fun Project.generateTomlFromBom(
                             platformMatch.groupValues, rootGroup, platformName, targetSection
                         )
                         if (pGroup != null && pName != null && pVersion != null) {
+                            // Check if this is a plugin-only dependency
+                            val isPluginOnly = pGroup.isEmpty()
+
                             // Check if this platform dependency has already been processed
                             if (!processedDependencies.contains(Pair(pGroup, pName))) {
                                 platformDeps.add(Triple(pGroup, pName, pVersion))
@@ -130,7 +141,7 @@ fun Project.generateTomlFromBom(
 
                                 // Check if this platform is a plugin BOM
                                 val isPluginBom = platformName.contains("gradle-plugin")
-                                if (isPluginBom) {
+                                if (isPluginBom || isPluginOnly) {
                                     // Mark dependencies from plugin BOMs as plugin dependencies
                                     // We'll add these to the main pluginDependencies set later
                                     platformPlatformDeps.add(Pair(pGroup, pName))
@@ -191,10 +202,18 @@ fun Project.generateTomlFromBom(
                                         nestedDepMatch.groupValues, rootGroup, nestedName, targetSection
                                     )
                                     if (nGroup != null && nName != null && nVersion != null) {
+                                        // Check if this is a plugin-only dependency
+                                        val isPluginOnly = nGroup.isEmpty()
+
                                         // Check if this nested dependency has already been processed
                                         if (processedDependencies.add(Pair(nGroup, nName))) {
                                             dependencies.add(Triple(nGroup, nName, nVersion))
                                             addVersionSafely(versions, generateVersionKey(nGroup, nName), nVersion)
+
+                                            // Mark as plugin dependency if it's a plugin-only format
+                                            if (isPluginOnly) {
+                                                pluginDependencies.add(Pair(nGroup, nName))
+                                            }
                                         }
                                     }
                                 }
@@ -265,8 +284,8 @@ fun Project.generateTomlFromBom(
             // Skip dependencies that should go to the plugins section
             if (!pluginDependencies.contains(Pair(group, name))) {
                 val key = generateLibraryKey(group, name)
-                // Only process this dependency if we haven't seen this key before
-                if (usedLibraryKeys.add(key)) {
+                // Only process this dependency if we have a valid key and haven't seen it before
+                if (key != null && usedLibraryKeys.add(key)) {
                     // Check if this is a platform dependency (either by name convention or by being added via platform())
                     val isPlatform = name.endsWith("-bom") || platformDependencies.contains(Pair(group, name))
 
@@ -295,10 +314,14 @@ fun Project.generateTomlFromBom(
                 val key = generatePluginKey(group, name)
                 // Only process this plugin if we haven't seen this key before
                 if (usedPluginKeys.add(key)) {
-                    val pluginId = if (name.contains(".gradle.plugin")) {
-                        name.substringBefore(".gradle.plugin")
-                    } else {
-                        "$group.$name"
+                    // Determine the plugin ID
+                    val pluginId = when {
+                        // Plugin-only dependency: group is empty, name contains the full plugin ID
+                        group.isEmpty() -> name
+                        // Standard plugin marker
+                        name.contains(".gradle.plugin") -> name.substringBefore(".gradle.plugin")
+                        // Construct from group and name
+                        else -> "$group.$name"
                     }
 
                     // Check if this is a platform dependency (either by name convention or by being added via platform())
@@ -338,8 +361,9 @@ private fun determineDependencyParts(
 ): Triple<String?, String?, String?> {
     return when {
         parts[2].isEmpty() -> {
-            val groupName = parts[1].substringBeforeLast(".")
-            Triple(groupName, parts[1].substringAfterLast("."), parts[3])
+            // This is a plugin ID format: "plugin.id:version"
+            // Store the full plugin ID in the name field, with empty group to signal it's a plugin
+            Triple("", parts[1], parts[3])
         }
 
         else -> Triple(parts[1], parts[2], parts[3])
@@ -350,8 +374,14 @@ private fun determineDependencyParts(
  * Generates a key for a version, removing redundancy if the group ends with the same name as the first part of the artifact.
  * For example, "dev.whyoleg.cryptography-cryptography-core" becomes "dev.whyoleg.cryptography-core".
  * Also replaces dots with hyphens as dots are not valid in TOML keys.
+ * For plugin-only dependencies (empty group), uses the plugin ID directly.
  */
 private fun generateVersionKey(group: String, name: String): String {
+    // For plugin-only dependencies (empty group), use the plugin ID directly
+    if (group.isEmpty()) {
+        return name.replace(".", "-")
+    }
+
     val groupLastPart = group.substringAfterLast(".")
     val key = if (name.startsWith("$groupLastPart-")) {
         "$group-${name.substring(groupLastPart.length + 1)}"
@@ -366,8 +396,14 @@ private fun generateVersionKey(group: String, name: String): String {
  * Generates a key for a library, removing redundancy if the group ends with the same name as the first part of the artifact.
  * For example, "dev.whyoleg.cryptography-cryptography-core" becomes "dev.whyoleg.cryptography-core".
  * Also replaces dots with hyphens as dots are not valid in TOML keys.
+ * Returns null for plugin-only dependencies (empty group) as they should not be in the libraries section.
  */
-private fun generateLibraryKey(group: String, name: String): String {
+private fun generateLibraryKey(group: String, name: String): String? {
+    // Plugin-only dependencies should not be in the libraries section
+    if (group.isEmpty()) {
+        return null
+    }
+
     val groupLastPart = group.substringAfterLast(".")
     val key = if (name.startsWith("$groupLastPart-")) {
         "$group-${name.substring(groupLastPart.length + 1)}"
@@ -382,8 +418,14 @@ private fun generateLibraryKey(group: String, name: String): String {
  * Generates a key for a plugin, removing redundancy if the group ends with the same name as the first part of the artifact.
  * For example, "dev.whyoleg.cryptography-cryptography-core" becomes "dev.whyoleg.cryptography-core".
  * Also replaces dots with hyphens as dots are not valid in TOML keys.
+ * For plugin-only dependencies (empty group), uses the plugin ID directly.
  */
 private fun generatePluginKey(group: String, name: String): String {
+    // For plugin-only dependencies (empty group), use the plugin ID directly
+    if (group.isEmpty()) {
+        return name.replace(".", "-")
+    }
+
     val groupLastPart = group.substringAfterLast(".")
     val key = if (name.startsWith("$groupLastPart-")) {
         "$group-${name.substring(groupLastPart.length + 1)}"
