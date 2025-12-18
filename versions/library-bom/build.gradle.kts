@@ -103,9 +103,8 @@ dependencies {
         api("io.ktor:ktor-server-content-negotiation:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-json:3.3.3")
         api("io.ktor:ktor-server-test-host:3.3.3")
-        api("io.ktor:ktor-serialization-kotli nx-cbor:3.3.3")
+        api("io.ktor:ktor-serialization-kotlinx-cbor:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-protobuf:3.3.3")
-        api("io.ktor:ktor-server-test-host:3.3.3")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
@@ -130,8 +129,10 @@ dependencies {
         api("app.cash.sqldelight:coroutines-extensions:2.2.1")
         api("app.cash.sqldelight:jdbc-driver:2.2.1")
         api("app.cash.sqldelight:sqlite-driver:2.2.1")
+        api("app.cash.sqldelight:native-driver:2.2.1")
         api("com.zaxxer:HikariCP:7.0.2")
         api("org.postgresql:postgresql:42.7.4")
+
 
         // Spring
         api("org.springframework.boot:spring-boot-starter-web:3.5.8")
