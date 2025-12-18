@@ -15,6 +15,7 @@ dependencies {
         // Kotlin
         api("org.jetbrains.kotlin:kotlin-test:2.2.21")
         api("org.jetbrains.kotlin:kotlin-test-junit:2.2.21")
+        api("org.jetbrains.kotlin:kotlin-test-junit5:2.2.21")
         api("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
         api("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
 
