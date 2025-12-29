@@ -53,6 +53,8 @@ dependencies {
         api("com.russhwolf:multiplatform-settings-datastore:1.3.0")
         api("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
 
+        api("io.konform:konform:0.11.1")
+
         // DI
         api("me.tatarka.inject:kotlin-inject-compiler-ksp:0.8.1-SNAPSHOT")
         api("me.tatarka.inject:kotlin-inject-runtime:0.8.1-SNAPSHOT")
@@ -105,6 +107,9 @@ dependencies {
         api("io.ktor:ktor-server-test-host:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-cbor:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-protobuf:3.3.3")
+        api("io.ktor:ktor-server-test-host:3.3.3")
+        api("io.ktor:ktor-server-auth:3.3.3")
+        api("io.ktor:ktor-server-auth-jwt:3.3.3")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
