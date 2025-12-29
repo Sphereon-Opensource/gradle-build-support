@@ -33,7 +33,6 @@ dependencies {
         api("dev.whyoleg.cryptography:cryptography-provider-openssl3-shared:0.5.0")
         api("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:0.5.0")
 
-
         // A-sit plus signum
         api("at.asitplus.signum:indispensable:3.16.3")
         api("at.asitplus.signum:indispensable-asn1:3.16.3")
@@ -61,7 +60,14 @@ dependencies {
         api("software.amazon.lastmile.kotlin.inject.anvil:runtime:0.1.6")
         api("software.amazon.lastmile.kotlin.inject.anvil:runtime-optional:0.1.6")
         api("software.amazon.lastmile.kotlin.inject.anvil:compiler:0.1.6")
+        api("software.amazon.app.platform:kotlin-inject-public:0.0.9-SNAPSHOT")
+        api("software.amazon.app.platform:kotlin-inject-impl:0.0.9-SNAPSHOT")
         api("software.amazon.app.platform:kotlin-inject-contribute-public:0.0.9-SNAPSHOT")
+        api("software.amazon.app.platform:scope-public:0.0.9-SNAPSHOT")
+        api("software.amazon.app.platform:di-common-public:0.0.9-SNAPSHOT")
+        api("software.amazon.app.platform:presenter-molecule-impl:0.0.9-SNAPSHOT")
+        api("software.amazon.app.platform:presenter-molecule-public:0.0.9-SNAPSHOT")
+        api("software.amazon.app.platform:renderer-compose-multiplatform-public:0.0.9-SNAPSHOT")
         api("software.amazon.app.platform:kotlin-inject-contribute-impl-code-generators:0.0.9-SNAPSHOT")
         api("com.willowtreeapps.assertk:assertk:0.28.1")
 
@@ -94,11 +100,11 @@ dependencies {
         api("io.ktor:ktor-server-cio:3.3.3")
         api("io.ktor:ktor-server-netty:3.3.3")
         api("io.ktor:ktor-server-jetty:3.3.3")
+        api("io.ktor:ktor-server-content-negotiation:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-json:3.3.3")
         api("io.ktor:ktor-server-test-host:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-cbor:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-protobuf:3.3.3")
-        api("io.ktor:ktor-server-test-host:3.3.3")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
@@ -117,6 +123,16 @@ dependencies {
         api("androidx.activity:activity-compose:1.10.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.9.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
+
+        // Database
+        api("app.cash.sqldelight:runtime:2.2.1")
+        api("app.cash.sqldelight:coroutines-extensions:2.2.1")
+        api("app.cash.sqldelight:jdbc-driver:2.2.1")
+        api("app.cash.sqldelight:sqlite-driver:2.2.1")
+        api("app.cash.sqldelight:native-driver:2.2.1")
+        api("com.zaxxer:HikariCP:7.0.2")
+        api("org.postgresql:postgresql:42.7.4")
+
 
         // Spring
         api("org.springframework.boot:spring-boot-starter-web:3.5.8")
