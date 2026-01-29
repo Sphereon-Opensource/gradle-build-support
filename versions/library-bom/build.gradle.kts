@@ -137,6 +137,7 @@ dependencies {
         api("app.cash.sqldelight:native-driver:2.2.1")
         api("com.zaxxer:HikariCP:7.0.2")
         api("org.postgresql:postgresql:42.7.4")
+        api("com.mysql:mysql-connector-j:9.0.0")
 
         // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
         api("io.github.smyrgeorge:sqlx4k-postgres:0.71.0")
@@ -146,6 +147,7 @@ dependencies {
         // TestContainers
         api("org.testcontainers:testcontainers:1.21.0")
         api("org.testcontainers:postgresql:1.21.0")
+        api("org.testcontainers:mysql:1.21.0")
 
         // Spring
         api("org.springframework.boot:spring-boot-starter-web:3.5.8")
