@@ -137,25 +137,7 @@ dependencies {
         api("app.cash.sqldelight:native-driver:2.2.1")
         api("com.zaxxer:HikariCP:7.0.2")
         api("org.postgresql:postgresql:42.7.4")
-
-        // Keycloak SPI
-        api("org.keycloak:keycloak-core:26.0.0")
-        api("org.keycloak:keycloak-server-spi:26.0.0")
-        api("org.keycloak:keycloak-server-spi-private:26.0.0")
-        api("org.keycloak:keycloak-services:26.0.0")
-        api("org.keycloak:keycloak-admin-client:26.0.0")
-
-        // JBoss
-        api("org.jboss.logging:jboss-logging:3.5.3.Final")
-
-        // Testing - MockK
-        api("io.mockk:mockk:1.13.9")
-
-        // Testing - Testcontainers
-        api("org.testcontainers:testcontainers:1.21.0")
-        api("org.testcontainers:postgresql:1.21.0")
-        api("org.testcontainers:mysql:1.21.0")
-        api("org.testcontainers:junit-jupiter:1.21.0")
+        api("com.mysql:mysql-connector-j:9.2.0")
 
         // Keycloak SPI
         api("org.keycloak:keycloak-core:26.0.0")
@@ -171,6 +153,12 @@ dependencies {
         api("io.mockk:mockk:1.13.14")
         api("org.junit.jupiter:junit-jupiter-engine:5.11.0")
         api("org.slf4j:slf4j-simple:2.0.16")
+
+        // Testing - Testcontainers
+        api("org.testcontainers:testcontainers:1.21.0")
+        api("org.testcontainers:postgresql:1.21.0")
+        api("org.testcontainers:mysql:1.21.0")
+        api("org.testcontainers:junit-jupiter:1.21.0")
 
         // Docker-java (for Testcontainers)
         api("com.github.docker-java:docker-java-core:3.4.1")
