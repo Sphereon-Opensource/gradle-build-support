@@ -6,7 +6,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.findByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -15,8 +20,8 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 private const val COMPILE_KOTLIN = "compileKotlin"
 lateinit var Logger: Logger
@@ -26,7 +31,9 @@ val optIns = listOf(
     "kotlinx.serialization.ExperimentalSerializationApi",
     "kotlin.uuid.ExperimentalUuidApi",
     "kotlin.ExperimentalUnsignedTypes",
-    "kotlin.time.ExperimentalTime"
+    "kotlin.time.ExperimentalTime",
+    "com.github.michaelbull.result.annotation.UnsafeResultValueAccess",
+    "com.github.michaelbull.result.annotation.UnsafeResultErrorAccess"
 )
 
 private fun log(message: String) = Logger.lifecycle("Sphereon: $message")
@@ -222,6 +229,7 @@ private fun KotlinMultiplatformExtension.commonOptIns() {
             compileTaskProvider.get().compilerOptions {
                 freeCompilerArgs.add("-Xexpect-actual-classes")
                 freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+                freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
             }
         }
     }

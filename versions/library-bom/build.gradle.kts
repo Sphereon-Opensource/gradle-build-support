@@ -56,25 +56,25 @@ dependencies {
         api("io.konform:konform:0.11.1")
 
         // DI
-        api("me.tatarka.inject:kotlin-inject-compiler-ksp:0.8.1-SNAPSHOT")
-        api("me.tatarka.inject:kotlin-inject-runtime:0.8.1-SNAPSHOT")
-        api("me.tatarka.inject:kotlin-inject-runtime-kmp:0.8.1-SNAPSHOT")
-        api("software.amazon.lastmile.kotlin.inject.anvil:runtime:0.1.6")
-        api("software.amazon.lastmile.kotlin.inject.anvil:runtime-optional:0.1.6")
-        api("software.amazon.lastmile.kotlin.inject.anvil:compiler:0.1.6")
-        api("software.amazon.app.platform:kotlin-inject-public:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:kotlin-inject-impl:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:kotlin-inject-contribute-public:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:scope-public:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:di-common-public:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:presenter-molecule-impl:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:presenter-molecule-public:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:renderer-compose-multiplatform-public:0.0.9-SNAPSHOT")
-        api("software.amazon.app.platform:kotlin-inject-contribute-impl-code-generators:0.0.9-SNAPSHOT")
+        api("me.tatarka.inject:kotlin-inject-compiler-ksp:0.9.0")
+        api("me.tatarka.inject:kotlin-inject-runtime:0.9.0")
+        api("me.tatarka.inject:kotlin-inject-runtime-kmp:0.9.0")
+        api("software.amazon.lastmile.kotlin.inject.anvil:runtime:0.1.7")
+        api("software.amazon.lastmile.kotlin.inject.anvil:runtime-optional:0.1.7")
+        api("software.amazon.lastmile.kotlin.inject.anvil:compiler:0.1.7")
+        api("software.amazon.app.platform:kotlin-inject-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:kotlin-inject-impl:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:kotlin-inject-contribute-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:scope-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:di-common-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:presenter-molecule-impl:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:presenter-molecule-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:renderer-compose-multiplatform-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:kotlin-inject-contribute-impl-code-generators:0.0.10-SNAPSHOT")
         api("com.willowtreeapps.assertk:assertk:0.28.1")
 
 
-        api("com.michael-bull.kotlin-result:kotlin-result:2.0.3")
+        api("com.michael-bull.kotlin-result:kotlin-result:2.1.0")
 
 
         // KTOR
