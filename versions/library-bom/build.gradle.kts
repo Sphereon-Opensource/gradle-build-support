@@ -139,6 +139,12 @@ dependencies {
         api("org.postgresql:postgresql:42.7.4")
         api("com.mysql:mysql-connector-j:9.2.0")
 
+        // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
+        api("io.github.smyrgeorge:sqlx4k-postgres:0.71.0")
+        api("io.github.smyrgeorge:sqlx4k-mysql:0.71.0")
+        api("io.github.smyrgeorge:sqlx4k-sqldelight:0.71.0")
+
+
         // Keycloak SPI
         api("org.keycloak:keycloak-core:26.0.0")
         api("org.keycloak:keycloak-server-spi:26.0.0")
