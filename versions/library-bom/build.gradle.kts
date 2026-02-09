@@ -107,9 +107,9 @@ dependencies {
         api("io.ktor:ktor-server-test-host:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-cbor:3.3.3")
         api("io.ktor:ktor-serialization-kotlinx-protobuf:3.3.3")
-        api("io.ktor:ktor-server-test-host:3.3.3")
         api("io.ktor:ktor-server-auth:3.3.3")
         api("io.ktor:ktor-server-auth-jwt:3.3.3")
+        api("io.ktor:ktor-server-status-pages:3.3.3")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
@@ -153,7 +153,6 @@ dependencies {
         api("io.mockk:mockk:1.13.14")
         api("org.junit.jupiter:junit-jupiter-engine:5.11.0")
         api("org.slf4j:slf4j-simple:2.0.16")
-        api("com.mysql:mysql-connector-j:9.0.0")
 
         // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
         api("io.github.smyrgeorge:sqlx4k-postgres:0.71.0")
@@ -161,10 +160,6 @@ dependencies {
         api("io.github.smyrgeorge:sqlx4k-sqldelight:0.71.0")
 
         // TestContainers
-        api("org.testcontainers:testcontainers:1.21.0")
-        api("org.testcontainers:postgresql:1.21.0")
-        api("org.testcontainers:mysql:1.21.0")
-        // Testing - Testcontainers
         api("org.testcontainers:testcontainers:1.21.0")
         api("org.testcontainers:postgresql:1.21.0")
         api("org.testcontainers:mysql:1.21.0")
