@@ -137,6 +137,22 @@ dependencies {
         api("app.cash.sqldelight:native-driver:2.2.1")
         api("com.zaxxer:HikariCP:7.0.2")
         api("org.postgresql:postgresql:42.7.4")
+        api("com.mysql:mysql-connector-j:9.2.0")
+
+        // Keycloak SPI
+        api("org.keycloak:keycloak-core:26.0.0")
+        api("org.keycloak:keycloak-server-spi:26.0.0")
+        api("org.keycloak:keycloak-server-spi-private:26.0.0")
+        api("org.keycloak:keycloak-services:26.0.0")
+        api("org.keycloak:keycloak-admin-client:26.0.0")
+
+        // JBoss Logging (provided by Keycloak at runtime)
+        api("org.jboss.logging:jboss-logging:3.6.1.Final")
+
+        // Testing
+        api("io.mockk:mockk:1.13.14")
+        api("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+        api("org.slf4j:slf4j-simple:2.0.16")
         api("com.mysql:mysql-connector-j:9.0.0")
 
         // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
@@ -148,6 +164,16 @@ dependencies {
         api("org.testcontainers:testcontainers:1.21.0")
         api("org.testcontainers:postgresql:1.21.0")
         api("org.testcontainers:mysql:1.21.0")
+        // Testing - Testcontainers
+        api("org.testcontainers:testcontainers:1.21.0")
+        api("org.testcontainers:postgresql:1.21.0")
+        api("org.testcontainers:mysql:1.21.0")
+        api("org.testcontainers:junit-jupiter:1.21.0")
+
+        // Docker-java (for Testcontainers)
+        api("com.github.docker-java:docker-java-core:3.4.1")
+        api("com.github.docker-java:docker-java-transport-httpclient5:3.4.1")
+        api("com.github.docker-java:docker-java-api:3.4.1")
 
         // Spring
         api("org.springframework.boot:spring-boot-starter-web:3.5.8")
