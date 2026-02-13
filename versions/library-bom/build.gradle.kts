@@ -110,6 +110,8 @@ dependencies {
         api("io.ktor:ktor-server-auth:3.3.3")
         api("io.ktor:ktor-server-auth-jwt:3.3.3")
         api("io.ktor:ktor-server-status-pages:3.3.3")
+        api("io.ktor:ktor-server-cors:3.3.3")
+        api("io.ktor:ktor-server-call-logging:3.3.3")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
