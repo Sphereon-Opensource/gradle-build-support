@@ -93,6 +93,10 @@ class ConventionsPlugin : Plugin<Project> {
                             "js" -> {
                                 setupNodeJsEnvironment()
                             }
+                            "wasmJs" -> {
+                                // wasmJs uses the same Node.js environment for test execution
+                                setupNodeJsEnvironment()
+                            }
                         }
                     }
                 }

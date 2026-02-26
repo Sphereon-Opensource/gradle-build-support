@@ -18,14 +18,14 @@ dependencies {
         api("com.sphereon.gradle.plugin.project-publication:${version}")
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.0")
-        api("org.jetbrains.kotlin.jvm:2.3.0")
-        api("org.jetbrains.kotlin.multiplatform:2.3.0")
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.0")
-        api("org.jetbrains.kotlin.plugin.serialization:2.3.0")
-        api("org.jetbrains.kotlin:kotlin-android-extensions:2.3.0")
-        api("org.jetbrains.kotlin.android:2.3.0")
-        api("org.jetbrains.kotlin.plugin.compose:2.3.0")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20-RC")
+        api("org.jetbrains.kotlin.jvm:2.3.20-RC")
+        api("org.jetbrains.kotlin.multiplatform:2.3.20-RC")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20-RC")
+        api("org.jetbrains.kotlin.plugin.serialization:2.3.20-RC")
+        api("org.jetbrains.kotlin:kotlin-android-extensions:2.3.20-RC")
+        api("org.jetbrains.kotlin.android:2.3.20-RC")
+        api("org.jetbrains.kotlin.plugin.compose:2.3.20-RC")
 
         // Android
         api("com.android.tools.build:gradle:8.12.0")
