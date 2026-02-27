@@ -15,6 +15,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
@@ -75,10 +76,11 @@ class ConventionsPlugin : Plugin<Project> {
                     configureKotlinMultiplatform()
                     commonOptIns()
 
-                    // Configure all Kotlin/JS compilation tasks in this project
+                    // Configure all Kotlin/JS compilation tasks with additive compiler args
+                    // Note: moduleKind and target must be set per-module in js { compilerOptions { } }
+                    // because the KMP plugin overrides convention plugin settings at a later lifecycle point
                     project.tasks.withType<Kotlin2JsCompile>().configureEach {
                         compilerOptions {
-                            Logger.debug("Applying JavaScript BigInt compiler options to all JS tasks: $name")
                             freeCompilerArgs.add("-Xes-long-as-bigint")
                             freeCompilerArgs.add("-XXLanguage:+JsAllowLongInExportedDeclarations")
                         }
@@ -90,12 +92,9 @@ class ConventionsPlugin : Plugin<Project> {
                         }
                         when (name) {
                             //                        "jvm" -> setJvmCompilerOptions()
-                            "js" -> {
+                            "js", "wasmJs" -> {
                                 setupNodeJsEnvironment()
-                            }
-                            "wasmJs" -> {
-                                // wasmJs uses the same Node.js environment for test execution
-                                setupNodeJsEnvironment()
+                                (this as KotlinJsTargetDsl).useEsModules()
                             }
                         }
                     }
