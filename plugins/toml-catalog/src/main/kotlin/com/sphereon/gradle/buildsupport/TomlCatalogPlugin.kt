@@ -42,6 +42,7 @@ class TomlCatalogPlugin @Inject constructor(
         val generateTomlCatalogTask = project.tasks.register("generateTomlCatalog") {
             group = "versioning"
             description = "Generates TOML version catalogs for this BOM"
+            notCompatibleWithConfigurationCache("Accesses Project model to parse BOM constraints")
 
             outputs.dir(outputDir)
 

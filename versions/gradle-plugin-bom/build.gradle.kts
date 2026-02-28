@@ -47,7 +47,7 @@ dependencies {
 
         // DI
         api("software.amazon.app.platform:0.0.10-SNAPSHOT")
-        api("org.jetbrains.kotlinx.atomicfu:0.29.0")
+        api("org.jetbrains.kotlinx.atomicfu:0.31.0")
 
         // NPM Publish (JetBrains fork, supports wasmJs)
         api("org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin:3.6.0")

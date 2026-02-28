@@ -2,6 +2,7 @@ rootProject.name = "gradle-build-support"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
+    includeBuild("plugins/toml-catalog")
     repositories {
         google {
             mavenContent {

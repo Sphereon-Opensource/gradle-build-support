@@ -388,8 +388,8 @@ private fun generateVersionKey(group: String, name: String): String {
     } else {
         "$group-$name"
     }
-    // Replace dots with hyphens as dots are not valid in TOML keys
-    return key.replace(".", "-")
+    // Replace dots with hyphens as dots are not valid in TOML keys, lowercase for consistent accessor generation
+    return key.replace(".", "-").lowercase()
 }
 
 /**
@@ -410,8 +410,8 @@ private fun generateLibraryKey(group: String, name: String): String? {
     } else {
         "$group-$name"
     }
-    // Replace dots with hyphens as dots are not valid in TOML keys
-    return key.replace(".", "-").replace("com-sphereon", "sphereon")
+    // Replace dots with hyphens as dots are not valid in TOML keys, lowercase for consistent accessor generation
+    return key.replace(".", "-").lowercase().replace("com-sphereon", "sphereon")
 }
 
 /**
@@ -432,8 +432,8 @@ private fun generatePluginKey(group: String, name: String): String {
     } else {
         "$group-$name"
     }
-    // Replace dots with hyphens as dots are not valid in TOML keys
-    return key.replace(".", "-").replace("com-sphereon", "sphereon")
+    // Replace dots with hyphens as dots are not valid in TOML keys, lowercase for consistent accessor generation
+    return key.replace(".", "-").lowercase().replace("com-sphereon", "sphereon")
 }
 
 /**

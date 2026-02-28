@@ -13,6 +13,9 @@ dependencies {
     constraints {
         api(platform(project(":versions:common-bom")))
 
+        // Atomicfu (runtime library; Kotlin 2.3+ compiler handles transformations natively)
+        api("org.jetbrains.kotlinx:atomicfu:0.31.0")
+
         // KotlinCrypto
         api("org.kotlincrypto.core:digest:0.8.0")
         api("org.kotlincrypto.hash:sha1:0.8.0")
@@ -140,6 +143,7 @@ dependencies {
         api("com.zaxxer:HikariCP:7.0.2")
         api("org.postgresql:postgresql:42.7.4")
         api("com.mysql:mysql-connector-j:9.2.0")
+        api("org.xerial:sqlite-jdbc:3.47.1.0")
 
         // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
         api("io.github.smyrgeorge:sqlx4k-postgres:0.71.0")
@@ -158,7 +162,8 @@ dependencies {
         api("org.jboss.logging:jboss-logging:3.6.1.Final")
 
         // Testing
-        api("io.mockk:mockk:1.13.14")
+        api("io.mockk:mockk:1.14.6")
+        api("app.cash.turbine:turbine:1.2.0")
         api("org.junit.jupiter:junit-jupiter-engine:5.11.0")
         api("org.slf4j:slf4j-simple:2.0.16")
 
@@ -188,6 +193,47 @@ dependencies {
         // Reactive
         api("org.reactivestreams:reactive-streams:1.0.4")
         api("io.projectreactor:reactor-core:3.7.11")
+
+        // gRPC
+        api("io.grpc:grpc-netty-shaded:1.70.0")
+        api("io.grpc:grpc-protobuf:1.70.0")
+        api("io.grpc:grpc-stub:1.70.0")
+        api("io.grpc:grpc-kotlin-stub:1.4.1")
+        api("io.grpc:grpc-services:1.70.0")
+        api("io.grpc:grpc-api:1.70.0")
+        api("com.google.protobuf:protobuf-kotlin:4.29.3")
+
+        // XML / Trust
+        api("io.github.pdvrieze.xmlutil:core:0.90.1")
+        api("io.github.pdvrieze.xmlutil:serialization:0.90.1")
+
+        // Crypto (Bouncy Castle)
+        api("org.bouncycastle:bcprov-jdk18on:1.79")
+        api("org.bouncycastle:bcpkix-jdk18on:1.79")
+        api("org.bouncycastle:bcutil-jdk18on:1.79")
+
+        // Utility
+        api("io.github.g0dkar:qrcode-kotlin:4.5.0")
+
+        // Code generation
+        api("com.squareup:kotlinpoet:2.0.0")
+        api("com.squareup:kotlinpoet-ksp:2.0.0")
+
+        // Logging
+        api("ch.qos.logback:logback-classic:1.5.16")
+
+        // Email
+        api("org.simplejavamail:simple-java-mail:8.12.6")
+
+        // Template
+        api("com.github.spullara.mustache.java:compiler:0.9.14")
+
+        // AndroidX Test
+        api("androidx.test:core:1.6.1")
+        api("androidx.test:rules:1.6.1")
+
+        // Compile Testing
+        api("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0")
     }
 }
 
