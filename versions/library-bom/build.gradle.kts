@@ -81,6 +81,7 @@ dependencies {
 
 
         // KTOR
+        api("io.ktor:ktor-http:3.3.3")
         api("io.ktor:ktor-client-core:3.3.3")
         api("io.ktor:ktor-client-core-jvm:3.3.3")
         api("io.ktor:ktor-client-core-js:3.3.3")

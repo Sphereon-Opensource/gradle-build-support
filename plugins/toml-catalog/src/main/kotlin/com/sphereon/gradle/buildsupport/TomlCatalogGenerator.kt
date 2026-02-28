@@ -250,24 +250,35 @@ fun Project.generateTomlFromBom(
             name.endsWith("-bom") || platformDependencies.contains(Pair(group, name))
         }
 
-        // Include versions section if includeVersions is true or if we have platform dependencies
-        if (includeVersions || hasPlatformDeps) {
+        // Include versions section if includeVersions is true or if we have platform dependencies or third-party plugins
+        if (includeVersions || hasPlatformDeps || pluginDependencies.isNotEmpty()) {
             writer.appendLine("[versions]")
             versions.forEach { (key, version) ->
-                // For non-versioned catalogs, only include versions for platform dependencies
-                val isPlatformVersion = if (!includeVersions) {
-                    // Extract group and name from the version key
-                    val parts = key.split("-", limit = 2)
-                    val group = parts[0]
-                    val name = if (parts.size > 1) parts[1] else ""
-
-                    // Check if this is a platform dependency
-                    name.endsWith("-bom") || platformDependencies.contains(Pair(group, name))
+                val shouldIncludeVersion = if (!includeVersions) {
+                    // For non-versioned catalogs (composite build mode):
+                    // Include versions for platform deps AND third-party plugins (not from root group)
+                    val matchingDep = dependencies.find { (g, n, _) ->
+                        generateVersionKey(g, n) == key
+                    }
+                    val isPlatform = matchingDep?.let { (g, n, _) ->
+                        n.endsWith("-bom") || platformDependencies.contains(Pair(g, n))
+                    } ?: false
+                    val isThirdPartyPlugin = matchingDep?.let { (g, n, _) ->
+                        // Entry is a plugin if explicitly tracked OR if targetSection == "plugins"
+                        // (all entries in a plugin BOM appear in [plugins] section)
+                        val isInPluginSection = pluginDependencies.contains(Pair(g, n)) || targetSection == "plugins"
+                        isInPluginSection && if (g.isEmpty()) {
+                            !n.startsWith("com.sphereon")
+                        } else {
+                            !g.startsWith(rootGroup)
+                        }
+                    } ?: false
+                    isPlatform || isThirdPartyPlugin
                 } else {
                     true // Include all versions for versioned catalogs
                 }
 
-                if (isPlatformVersion) {
+                if (shouldIncludeVersion) {
                     writer.appendLine("$key = \"$version\"")
                 }
             }
@@ -327,9 +338,17 @@ fun Project.generateTomlFromBom(
                     // Check if this is a platform dependency (either by name convention or by being added via platform())
                     val isPlatform = name.endsWith("-bom") || platformDependencies.contains(Pair(group, name))
 
-                    // For non-versioned TOML, only include version references for actual platform/BOM dependencies
-                    // For plugins, we only want version references if it's a plugin BOM (like gradle-plugin-bom)
-                    val shouldIncludeVersionRef = includeVersions || (isPlatform && name.endsWith("-bom"))
+                    // For non-versioned TOML (composite build mode):
+                    // - Include version refs for platform/BOM dependencies
+                    // - Include version refs for third-party plugins (not from root group)
+                    // - Exclude version refs for Sphereon plugins (resolved from included build)
+                    val isInternalPlugin = if (group.isEmpty()) {
+                        // Plugin-only format: check plugin ID prefix
+                        name.startsWith("com.sphereon")
+                    } else {
+                        group.startsWith(rootGroup)
+                    }
+                    val shouldIncludeVersionRef = includeVersions || (isPlatform && name.endsWith("-bom")) || !isInternalPlugin
 
                     if (shouldIncludeVersionRef) {
                         // Use version reference if versions are included or if it's a platform/BOM dependency
