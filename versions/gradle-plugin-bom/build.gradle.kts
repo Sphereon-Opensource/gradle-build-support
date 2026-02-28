@@ -44,14 +44,14 @@ dependencies {
         api("com.vanniktech.maven.publish:0.31.0")
 
         // KSP
-        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.5")
+        api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
         api("software.amazon.app.platform:0.0.10-SNAPSHOT")
         api("org.jetbrains.kotlinx.atomicfu:0.29.0")
 
-        // NPM Publish
-        api("dev.petuska.npm.publish:dev.petuska.npm.publish.gradle.plugin:3.5.3")
+        // NPM Publish (JetBrains fork, supports wasmJs)
+        api("org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin:3.6.0")
 
         // BuildKonfig
         api("com.codingfeline.buildkonfig:0.17.0")

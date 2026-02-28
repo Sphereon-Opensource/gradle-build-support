@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
@@ -83,6 +84,7 @@ class ConventionsPlugin : Plugin<Project> {
                         compilerOptions {
                             freeCompilerArgs.add("-Xes-long-as-bigint")
                             freeCompilerArgs.add("-XXLanguage:+JsAllowLongInExportedDeclarations")
+                            freeCompilerArgs.add("-Xenable-suspend-function-exporting")
                         }
                     }
 
@@ -98,6 +100,11 @@ class ConventionsPlugin : Plugin<Project> {
                             }
                         }
                     }
+
+                    // kotlinx-io uses eval('require')('os') internally, which fails in ESM mode.
+                    // Provide require to ESM modules via a CJS preload shim.
+                    // See: https://github.com/Kotlin/kotlinx-io/issues/345
+                    configureEsmRequireShim()
                 }
             }
         }
@@ -243,6 +250,27 @@ private fun Project.setJvmCompilerOptions() {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+    }
+}
+
+/**
+ * Configures a CJS preload shim for JS/wasmJs test tasks.
+ *
+ * kotlinx-io uses `eval('require')('os')` internally, which fails in ESM mode because
+ * `require` is not available in ES modules. This configures a preload script that provides
+ * `require` on globalThis via Node.js `--require` flag.
+ *
+ * See: https://github.com/Kotlin/kotlinx-io/issues/345
+ */
+private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
+    val shimFile = project.rootProject.file("gradle-build-support/js/esm-require-shim.cjs")
+    if (!shimFile.exists()) {
+        log("ESM require shim not found at ${shimFile.absolutePath}, skipping")
+        return
+    }
+    project.tasks.withType<KotlinJsTest>().configureEach {
+        nodeJsArgs.add("--require")
+        nodeJsArgs.add(shimFile.absolutePath)
     }
 }
 
