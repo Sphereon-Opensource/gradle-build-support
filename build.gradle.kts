@@ -6,6 +6,11 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
 dependencies {
     implementation(gradleApi())
 }
