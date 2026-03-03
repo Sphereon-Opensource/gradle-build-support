@@ -99,11 +99,11 @@ class IntegrationTestPlugin : Plugin<Project> {
     }
 
     private fun configureMultiplatformCompilation(project: Project) {
-        project.afterEvaluate {
-            val kotlinExt = project.extensions.findByType(KotlinMultiplatformExtension::class.java) ?: return@afterEvaluate
-            val jvmTarget = kotlinExt.targets.find { it.name == "jvm" } ?: return@afterEvaluate
+        project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
+            val kotlinExt = project.extensions.findByType(KotlinMultiplatformExtension::class.java) ?: return@withId
+            val jvmTarget = kotlinExt.targets.find { it.name == "jvm" } ?: return@withId
 
-            val testCompilation = jvmTarget.compilations.findByName(SourceSet.TEST_SOURCE_SET_NAME) ?: return@afterEvaluate
+            val testCompilation = jvmTarget.compilations.findByName(SourceSet.TEST_SOURCE_SET_NAME) ?: return@withId
 
             val integrationTestCompilation = jvmTarget.compilations.maybeCreate(INTEGRATION_TEST)
             integrationTestCompilation.defaultSourceSet.kotlin.srcDir("src/jvmIntegrationTest/kotlin")

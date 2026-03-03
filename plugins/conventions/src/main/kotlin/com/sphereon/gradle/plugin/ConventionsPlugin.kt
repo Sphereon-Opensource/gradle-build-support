@@ -48,14 +48,8 @@ class ConventionsPlugin : Plugin<Project> {
         with(project) {
             if (project == project.rootProject) {
                 // Apply Nexus publishing configuration to the root project
+                // (includes subprojects maven-publish wiring)
                 configureNexusPublishing()
-
-                // Configure subprojects
-                project.subprojects {
-                    plugins.withId("maven-publish") {
-                        apply(plugin = "com.sphereon.gradle.plugin.project-publication")
-                    }
-                }
             }
 
             // Hook into Multiplatform projects
@@ -124,8 +118,9 @@ class ConventionsPlugin : Plugin<Project> {
         }
 
         // Check if the license content mentions Apache 2.0
-        val isApacheLicense = licenseFile.readText().contains("Apache License", ignoreCase = true) &&
-                licenseFile.readText().contains("Version 2.0", ignoreCase = true)
+        val licenseContent = licenseFile.readText()
+        val isApacheLicense = licenseContent.contains("Apache License", ignoreCase = true) &&
+                licenseContent.contains("Version 2.0", ignoreCase = true)
 
         if (!isApacheLicense) {
             throw GradleException("Publishing to Sonatype is not allowed: The license is not Apache 2.0.")

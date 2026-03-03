@@ -5,6 +5,11 @@ import org.gradle.api.Project
 import java.io.File
 import kotlin.reflect.jvm.jvmName
 
+// Pre-compiled regex patterns (avoid recompilation per task execution)
+private val constraintsPattern = """api\("([^:"]+)(?::([^:"]+))?:([^"]+)"\)""".toRegex()
+private val platformProjectPattern = """api\(platform\(project\("([^"]+)"\)\)\)""".toRegex()
+private val platformExternalPattern = """api\(platform\("([^:"]+)(?::([^:"]+))?:([^"]+)"\)\)""".toRegex()
+
 /**
  * Function to generate TOML version catalog files from a BOM
  *
@@ -61,7 +66,6 @@ fun Project.generateTomlFromBom(
         val content = buildFile.readText()
 
         // Parse regular dependencies
-        val constraintsPattern = """api\("([^:"]+)(?::([^:"]+))?:([^"]+)"\)""".toRegex()
         constraintsPattern.findAll(content).forEach { match ->
             val (group, name, version) = determineDependencyParts(match.groupValues, rootGroup, bomName, targetSection)
             if (group != null && name != null && version != null) {
@@ -83,7 +87,6 @@ fun Project.generateTomlFromBom(
         }
 
         // Parse project platform dependencies and recursively process them
-        val platformProjectPattern = """api\(platform\(project\("([^"]+)"\)\)\)""".toRegex()
         platformProjectPattern.findAll(content).forEach { match ->
             val projectPath = match.groupValues[1]
             // Get the project reference
@@ -172,8 +175,7 @@ fun Project.generateTomlFromBom(
                     }
 
                     // Recursively process nested platform dependencies
-                    val nestedPlatformPattern = """api\(platform\(project\("([^"]+)"\)\)\)""".toRegex()
-                    nestedPlatformPattern.findAll(platformContent).forEach { nestedMatch ->
+                    platformProjectPattern.findAll(platformContent).forEach { nestedMatch ->
                         val nestedProjectPath = nestedMatch.groupValues[1]
                         val nestedProject = project.project(nestedProjectPath)
 
@@ -225,7 +227,6 @@ fun Project.generateTomlFromBom(
         }
 
         // Parse external platform dependencies
-        val platformExternalPattern = """api\(platform\("([^:"]+)(?::([^:"]+))?:([^"]+)"\)\)""".toRegex()
         platformExternalPattern.findAll(content).forEach { match ->
             val (group, name, version) = determineDependencyParts(match.groupValues, rootGroup, bomName, targetSection)
             if (group != null && name != null && version != null) {
@@ -244,6 +245,13 @@ fun Project.generateTomlFromBom(
         }
     }
 
+    // Pre-build lookup map for O(1) version key resolution (replaces O(n) .find() calls)
+    val depsByVersionKey = mutableMapOf<String, Triple<String, String, String>>()
+    dependencies.forEach { dep ->
+        val key = generateVersionKey(dep.first, dep.second)
+        depsByVersionKey.putIfAbsent(key, dep)
+    }
+
     outputFile.writer().use { writer ->
         // Check if we have any platform dependencies
         val hasPlatformDeps = dependencies.any { (group, name, _) ->
@@ -257,9 +265,7 @@ fun Project.generateTomlFromBom(
                 val shouldIncludeVersion = if (!includeVersions) {
                     // For non-versioned catalogs (composite build mode):
                     // Include versions for platform deps AND third-party plugins (not from root group)
-                    val matchingDep = dependencies.find { (g, n, _) ->
-                        generateVersionKey(g, n) == key
-                    }
+                    val matchingDep = depsByVersionKey[key]
                     val isPlatform = matchingDep?.let { (g, n, _) ->
                         n.endsWith("-bom") || platformDependencies.contains(Pair(g, n))
                     } ?: false
