@@ -279,6 +279,17 @@ private fun Project.setupNodeJsEnvironment(): DomainObjectCollection<NodeJsPlugi
         allowInsecureProtocol.set(false)
     }
 
+    // kotlinNpmInstall runs at root project level — ensure root uses the same Node.js version
+    if (this@setupNodeJsEnvironment != rootProject) {
+        rootProject.plugins.withType<NodeJsPlugin> {
+            with(rootProject.the<NodeJsEnvSpec>()) {
+                version.set("22.15.0")
+                download.set(true)
+                allowInsecureProtocol.set(false)
+            }
+        }
+    }
+
     plugins.withType<YarnPlugin> {
         // TODO: This operates on the root project, not on this project
         with(the<YarnRootEnvSpec>()) {
