@@ -13,11 +13,11 @@ dependencies {
         api(platform(project(":versions:gradle-plugin-bom")))
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-test:2.3.20-RC")
-        api("org.jetbrains.kotlin:kotlin-test-junit:2.3.20-RC")
-        api("org.jetbrains.kotlin:kotlin-test-junit5:2.3.20-RC")
-        api("org.jetbrains.kotlin:kotlin-stdlib:2.3.20-RC")
-        api("org.jetbrains.kotlin:kotlin-reflect:2.3.20-RC")
+        api("org.jetbrains.kotlin:kotlin-test:2.3.20-RC2")
+        api("org.jetbrains.kotlin:kotlin-test-junit:2.3.20-RC2")
+        api("org.jetbrains.kotlin:kotlin-test-junit5:2.3.20-RC2")
+        api("org.jetbrains.kotlin:kotlin-stdlib:2.3.20-RC2")
+        api("org.jetbrains.kotlin:kotlin-reflect:2.3.20-RC2")
 
 
         // Kotlinx
