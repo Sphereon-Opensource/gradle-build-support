@@ -15,9 +15,19 @@ pluginManagement {
         gradlePluginPortal()
         maven {
             url = uri("https://nexus.sphereon.com/repository/sphereon-opensource-releases")
+            mavenContent { releasesOnly() }
+            content {
+                includeGroupAndSubgroups("com.sphereon")
+                includeGroupAndSubgroups("software.amazon")
+            }
         }
         maven {
             url = uri("https://nexus.sphereon.com/repository/sphereon-opensource-snapshots")
+            mavenContent { snapshotsOnly() }
+            content {
+                includeGroupAndSubgroups("com.sphereon")
+                includeGroupAndSubgroups("software.amazon")
+            }
         }
         // Keep maven local at the end!!!!
         // https://slack-chats.kotlinlang.org/t/27045384/hi-there-i-have-a-very-annoying-internal-compiler-error-here
@@ -44,15 +54,28 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         maven {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            mavenContent { snapshotsOnly() }
         }
         maven {
             url = uri("https://aws.oss.sonatype.org/content/repositories/snapshots/")
+            mavenContent { snapshotsOnly() }
+            content { includeGroupAndSubgroups("software.amazon") }
         }
         maven {
             url = uri("https://nexus.sphereon.com/repository/sphereon-opensource-releases")
+            mavenContent { releasesOnly() }
+            content {
+                includeGroupAndSubgroups("com.sphereon")
+                includeGroupAndSubgroups("software.amazon")
+            }
         }
         maven {
             url = uri("https://nexus.sphereon.com/repository/sphereon-opensource-snapshots")
+            mavenContent { snapshotsOnly() }
+            content {
+                includeGroupAndSubgroups("com.sphereon")
+                includeGroupAndSubgroups("software.amazon")
+            }
         }
         // Keep maven local at the end!!!!
         // https://slack-chats.kotlinlang.org/t/27045384/hi-there-i-have-a-very-annoying-internal-compiler-error-here
