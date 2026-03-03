@@ -2,6 +2,7 @@ package com.sphereon.gradle.buildsupport
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.component.SoftwareComponentFactory
@@ -90,6 +91,9 @@ class TomlCatalogPlugin @Inject constructor(
             .file("tomlCatalog/$catalogName.toml")
 
         // 1) one consumable configuration, platform+version-catalog
+        // The extra "sphereon.catalog.type" attribute differentiates this from Gradle's
+        // built-in versionCatalogElements (which has the same Category + Usage attributes),
+        // avoiding "identical attribute sets" errors under configuration cache.
         val catalogElements = project.configurations.create("${catalogName}CatalogElements") {
             isCanBeResolved = false
             isCanBeConsumed = true
@@ -101,6 +105,10 @@ class TomlCatalogPlugin @Inject constructor(
                 attribute(
                     Usage.USAGE_ATTRIBUTE,
                     project.objects.named(Usage.VERSION_CATALOG)
+                )
+                attribute(
+                    Attribute.of("sphereon.catalog.type", String::class.java),
+                    "toml-bom"
                 )
             }
             // primary, no classifier → the "versioned" TOML

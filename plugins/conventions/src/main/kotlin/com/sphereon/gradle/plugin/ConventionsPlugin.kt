@@ -237,10 +237,12 @@ private fun KotlinMultiplatformExtension.commonOptIns() {
     }
     targets.configureEach {
         compilations.configureEach {
-            compileTaskProvider.get().compilerOptions {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
-                freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
-                freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                    freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+                    freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
+                }
             }
         }
     }
