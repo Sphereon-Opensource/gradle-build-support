@@ -99,6 +99,9 @@ class ConventionsPlugin : Plugin<Project> {
                     // Provide require to ESM modules via a CJS preload shim.
                     // See: https://github.com/Kotlin/kotlinx-io/issues/345
                     configureEsmRequireShim()
+
+                    // KSP2: Auto-wire generated sources for non-JVM targets
+                    configureKspSourceSets()
                 }
             }
         }
@@ -269,6 +272,33 @@ private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
     project.tasks.withType<KotlinJsTest>().configureEach {
         nodeJsArgs.add("--require")
         nodeJsArgs.add(shimFile.absolutePath)
+    }
+}
+
+/**
+ * KSP2 fix: Auto-configure srcDir for KSP-generated output on non-JVM targets.
+ *
+ * JVM targets automatically include KSP-generated sources, but JS, wasmJs, and
+ * native targets require explicit srcDir configuration. Without this, test source
+ * sets cannot see @ContributesBinding implementations discovered during main KSP,
+ * causing empty @MergeComponent interfaces and missing provider errors.
+ */
+private fun KotlinMultiplatformExtension.configureKspSourceSets() {
+    project.plugins.withId("com.google.devtools.ksp") {
+        val kmpSourceSets = sourceSets
+        targets.configureEach {
+            val targetName = name
+            // JVM handles KSP srcDir automatically; skip metadata pseudo-target too
+            if (targetName == "metadata" || targetName == "jvm") return@configureEach
+
+            kmpSourceSets.findByName("${targetName}Main")?.kotlin?.srcDir(
+                project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Main/kotlin")
+            )
+            kmpSourceSets.findByName("${targetName}Test")?.kotlin?.apply {
+                srcDir(project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Main/kotlin"))
+                srcDir(project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Test/kotlin"))
+            }
+        }
     }
 }
 
