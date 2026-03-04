@@ -24,6 +24,8 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
 import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import org.gradle.api.file.ConfigurableFileCollection
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 private const val COMPILE_KOTLIN = "compileKotlin"
 lateinit var Logger: Logger
@@ -279,9 +281,27 @@ private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
  * KSP2 fix: Auto-configure srcDir for KSP-generated output on non-JVM targets.
  *
  * JVM targets automatically include KSP-generated sources, but JS, wasmJs, and
- * native targets require explicit srcDir configuration. Without this, test source
- * sets cannot see @ContributesBinding implementations discovered during main KSP,
- * causing empty @MergeComponent interfaces and missing provider errors.
+ * native targets require explicit srcDir configuration.
+ *
+ * **Why main KSP is added to test source sets:**
+ * KSP2 on non-JVM targets cannot discover `@ContributesBinding` implementations from
+ * compiled dependencies (KLIBs / JS output). The `@MergeComponent` processor needs to
+ * see main KSP-generated `@Origin` interfaces as SOURCE files to merge them into the
+ * test component. Without this, `TestAppComponentMerged` is empty and kotlin-inject
+ * fails with "Cannot find an @Inject constructor or provider" errors.
+ *
+ * **Compilation fix (all non-JVM targets):**
+ * Adding main KSP sources to the test source set causes compile-time conflicts:
+ * - Native: `-Xfragment-sources` conflicts — files get tagged as test-fragment
+ *   sources, but the same classes already exist in the main KLIB.
+ * - JS/wasmJs: Redeclaration errors — Amazon App Platform code generators
+ *   produce `ScopedComponent` wrappers in both main and test KSP output with
+ *   identical FQNs. When main KSP is added to the test source set, both copies
+ *   are visible to the compiler.
+ *
+ * Fix: For ALL non-JVM test compile tasks, reconstruct `sources` from source
+ * sets while excluding the main KSP directory. KSP has already processed them;
+ * the compiled classes come from the main dependency at link/module-import time.
  */
 private fun KotlinMultiplatformExtension.configureKspSourceSets() {
     project.plugins.withId("com.google.devtools.ksp") {
@@ -291,12 +311,46 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
             // JVM handles KSP srcDir automatically; skip metadata pseudo-target too
             if (targetName == "metadata" || targetName == "jvm") return@configureEach
 
-            kmpSourceSets.findByName("${targetName}Main")?.kotlin?.srcDir(
-                project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Main/kotlin")
-            )
-            kmpSourceSets.findByName("${targetName}Test")?.kotlin?.apply {
-                srcDir(project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Main/kotlin"))
-                srcDir(project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Test/kotlin"))
+            val mainKspDir = project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Main/kotlin")
+            val testKspDir = project.layout.buildDirectory.dir("generated/ksp/$targetName/${targetName}Test/kotlin")
+
+            // Main source set: own KSP output
+            kmpSourceSets.findByName("${targetName}Main")?.kotlin?.srcDir(mainKspDir)
+
+            // Test source set: own KSP output + main KSP output (for KSP discovery)
+            kmpSourceSets.findByName("${targetName}Test")?.kotlin?.srcDir(testKspDir)
+            kmpSourceSets.findByName("${targetName}Test")?.kotlin?.srcDir(mainKspDir)
+
+            // All non-JVM targets: exclude main KSP from the test compile task.
+            // Native: avoids -Xfragment-sources duplicate class conflicts.
+            // JS/wasmJs: avoids Redeclaration errors when test KSP regenerates
+            //   the same ScopedComponent wrappers that exist in main KSP output.
+            val mainKspAbsPath = mainKspDir.get().asFile.absolutePath.replace('\\', '/')
+            compilations.matching { it.name == "test" }.configureEach {
+                val compilation = this
+                compileTaskProvider.configure {
+                    val task = this
+                    if (task is KotlinNativeCompile || task is Kotlin2JsCompile) {
+                        // Reconstruct sources from all associated source sets,
+                        // excluding files under the main KSP output directory.
+                        // This avoids circular references (we read from source sets,
+                        // not from the task's own `sources` property).
+                        val filteredSources = project.objects.fileCollection()
+                        compilation.allKotlinSourceSets.forEach { sourceSet ->
+                            filteredSources.from(sourceSet.kotlin.filter { file ->
+                                !file.absolutePath.replace('\\', '/').startsWith(mainKspAbsPath)
+                            })
+                        }
+                        when (task) {
+                            // KGP declares `sources` as FileCollection (read-only API),
+                            // but the runtime type is ConfigurableFileCollection.
+                            is KotlinNativeCompile -> (task.sources as? ConfigurableFileCollection)?.setFrom(filteredSources)
+                            // Kotlin2JsCompile inherits setSource() from AbstractKotlinCompileTool
+                            // which replaces the internal sourceFiles backing the sources property.
+                            is Kotlin2JsCompile -> task.setSource(filteredSources)
+                        }
+                    }
+                }
             }
         }
     }
