@@ -383,7 +383,15 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
             target.set("es2015")
         }
         browser {
-            testTask { useMocha { timeout = "60000" } }
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+                // Browser tests are opt-in: many modules have transitive Node.js
+                // dependencies (ktor, whyoleg-cryptography) that webpack can't resolve.
+                // Modules that need browser tests can override: js { browser { testTask { enabled = true } } }
+                enabled = false
+            }
         }
         nodejs {
             testTask { useMocha { timeout = "60000" } }
