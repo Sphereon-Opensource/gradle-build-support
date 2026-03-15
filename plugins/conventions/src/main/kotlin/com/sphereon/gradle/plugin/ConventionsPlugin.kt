@@ -12,9 +12,11 @@ import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
@@ -104,6 +106,9 @@ class ConventionsPlugin : Plugin<Project> {
 
                     // KSP2: Auto-wire generated sources for non-JVM targets
                     configureKspSourceSets()
+
+                    // wasmJs npm-publish workaround (Kotlin 2.3.x mainFile provider bug)
+                    configureWasmJsNpmPublishWorkaround()
                 }
             }
         }
@@ -321,24 +326,27 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
             kmpSourceSets.findByName("${targetName}Test")?.kotlin?.srcDir(testKspDir)
             kmpSourceSets.findByName("${targetName}Test")?.kotlin?.srcDir(mainKspDir)
 
-            // All non-JVM targets: exclude main KSP from the test compile task.
+            // All non-JVM targets: exclude main KSP output from the test compile task.
+            // This includes both intra-module KSP output (this module's own main KSP dir)
+            // AND cross-module KSP output (added via srcDir from dependency modules).
             // Native: avoids -Xfragment-sources duplicate class conflicts.
             // JS/wasmJs: avoids Redeclaration errors when test KSP regenerates
             //   the same ScopedComponent wrappers that exist in main KSP output.
-            val mainKspAbsPath = mainKspDir.get().asFile.absolutePath.replace('\\', '/')
             compilations.matching { it.name == "test" }.configureEach {
                 val compilation = this
                 compileTaskProvider.configure {
                     val task = this
                     if (task is KotlinNativeCompile || task is Kotlin2JsCompile) {
                         // Reconstruct sources from all associated source sets,
-                        // excluding files under the main KSP output directory.
-                        // This avoids circular references (we read from source sets,
-                        // not from the task's own `sources` property).
+                        // excluding files under ANY KSP main output directory
+                        // (own module or cross-module dependencies).
                         val filteredSources = project.objects.fileCollection()
                         compilation.allKotlinSourceSets.forEach { sourceSet ->
                             filteredSources.from(sourceSet.kotlin.filter { file ->
-                                !file.absolutePath.replace('\\', '/').startsWith(mainKspAbsPath)
+                                val path = file.absolutePath.replace('\\', '/')
+                                // Exclude any file under a KSP main output directory
+                                // Pattern: .../generated/ksp/<target>/<target>Main/kotlin/...
+                                !path.contains("/generated/ksp/") || !path.contains("Main/kotlin")
                             })
                         }
                         when (task) {
@@ -351,6 +359,126 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Standard KMP target set: jvm, js (browser + nodejs), wasmJs (browser + nodejs), iOS, linuxX64.
+ *
+ * Modules opt-in by calling this instead of declaring targets manually.
+ * Modules needing custom targets (BLE, NFC, SQLite, AWS, Compose, mobile-only) keep their own declarations.
+ *
+ * JS/wasmJs are configured with ES modules, BigInt, and TypeScript generation.
+ * moduleKind and target are set here because the KMP plugin overrides convention plugin
+ * task-level settings at a later lifecycle point — they must be in the js {} block.
+ */
+@OptIn(ExperimentalWasmDsl::class)
+fun KotlinMultiplatformExtension.configureStandardTargets() {
+    jvm()
+    js {
+        compilerOptions {
+            moduleKind.set(JsModuleKind.MODULE_ES)
+            target.set("es2015")
+        }
+        browser {
+            testTask { useMocha { timeout = "60000" } }
+        }
+        nodejs {
+            testTask { useMocha { timeout = "60000" } }
+        }
+        binaries.library()
+        generateTypeScriptDefinitions()
+    }
+    wasmJs {
+        browser()
+        nodejs()
+        binaries.library()
+        generateTypeScriptDefinitions()
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    linuxX64()
+}
+
+/**
+ * Automatically adds KSP dependencies (kotlin-inject compiler, Amazon kotlin-inject-anvil
+ * contribute processors, and Anvil KSP compiler) to all KSP configurations for whatever
+ * targets the module declares — including test configurations.
+ *
+ * Replaces the verbose per-target `addKspDependencies("kspFoo")` pattern duplicated across 72+ modules.
+ *
+ * Usage in build.gradle.kts:
+ * ```
+ * dependencies {
+ *     addKspDependenciesForAllTargets()
+ * }
+ * ```
+ */
+fun Project.addKspDependenciesForAllTargets() {
+    val projectLibs = libs
+    val deps = dependencies
+    configurations.configureEach {
+        val configName = name
+        if (configName.startsWith("ksp") && configName.length > 3 && !configName.contains("Classpath")) {
+            deps.addProvider(configName, projectLibs.findLibrary("kotlin.inject.compiler.ksp").get())
+            deps.addProvider(configName, projectLibs.findLibrary("amz.kotlin.inject.contribute.public").get())
+            deps.addProvider(configName, projectLibs.findLibrary("amz.kotlin.inject.contribute.code.generators").get())
+            deps.addProvider(configName, projectLibs.findLibrary("anvil.compiler.ksp").get())
+        }
+    }
+}
+
+/**
+ * Adds KSP-generated source directories from dependency modules to this module's
+ * non-JVM main source sets, so that `@MergeComponent` in this module (including test
+ * components) can discover `@ContributesBinding` and `@Origin` interfaces from those dependencies.
+ *
+ * This is needed because KSP2 on non-JVM targets cannot discover `@ContributesBinding`
+ * implementations from compiled KLIBs/JS output — it needs the `@Origin` interfaces as
+ * source files. JVM doesn't need this because KSP can scan compiled JARs.
+ *
+ * Usage in build.gradle.kts:
+ * ```
+ * kotlin {
+ *     addCrossModuleKspSources(project(":lib-core-api-default"))
+ *     addCrossModuleKspSources(project(":lib-crypto-core-impl"))
+ * }
+ * ```
+ */
+fun KotlinMultiplatformExtension.addCrossModuleKspSources(vararg depProjects: Project) {
+    val nonJvmTargets = targets.filter { it.name != "jvm" && it.name != "metadata" }.map { it.name }
+    for (depProject in depProjects) {
+        for (target in nonJvmTargets) {
+            val kspDir = depProject.layout.buildDirectory.dir("generated/ksp/$target/${target}Main/kotlin")
+            sourceSets.findByName("${target}Main")?.kotlin?.srcDir(kspDir)
+        }
+    }
+}
+
+/**
+ * Workaround for broken wasmJs npm-publish tasks on Kotlin 2.3.x.
+ *
+ * The JetBrains npm-publish plugin's `mainFile` provider has no value for wasmJs targets,
+ * causing assembleWasmJsPackage, packWasmJsPackage, and publishWasmJsPackageToNpmjsRegistry
+ * to fail. This replaces those tasks with no-ops.
+ *
+ * Auto-applied when both the npm-publish plugin and a wasmJs target are present.
+ * Consolidates the identical workaround previously duplicated in 6 modules.
+ */
+private fun KotlinMultiplatformExtension.configureWasmJsNpmPublishWorkaround() {
+    // Only apply if npm-publish plugin is applied.
+    // The wasmJs target check is deferred to afterEvaluate because this runs during
+    // plugin application, before the module's kotlin {} block declares targets.
+    project.plugins.withId("org.jetbrains.kotlin.npm.publish") {
+        project.afterEvaluate {
+            val hasWasmJs = targets.any { it.name == "wasmJs" }
+            if (!hasWasmJs) return@afterEvaluate
+
+            listOf("assembleWasmJsPackage", "packWasmJsPackage", "publishWasmJsPackageToNpmjsRegistry").forEach { taskName ->
+                try { tasks.replace(taskName) } catch (_: Exception) {}
             }
         }
     }
