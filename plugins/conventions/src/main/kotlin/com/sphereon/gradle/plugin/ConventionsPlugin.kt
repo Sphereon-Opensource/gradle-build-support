@@ -203,8 +203,8 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
                     freeCompilerArgs.add("-Xexpect-actual-classes")
                     freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
 //                    progressiveMode.set(true) //https://kotlinlang.org/docs/whatsnew13.html#progressive-mode
-                    // Pinned to KOTLIN_2_0 for React Native / legacy external client compatibility
-                    languageVersion.set(KotlinVersion.KOTLIN_2_0)
+                    // Minimum 2.2 required by Metro DI compiler plugin
+                    languageVersion.set(KotlinVersion.KOTLIN_2_2)
 //                    apiVersion.set(KOTLIN_2_1)
                 }
             }
