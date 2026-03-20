@@ -8,6 +8,13 @@ import org.gradle.kotlin.dsl.getByType
 val Project.sphereonlib
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("sphereonlib")
 
+val Project.sphereonplug
+    get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("sphereonplug")
+
+/** Project-local version catalog (gradle/libs.versions.toml) */
+val Project.libs
+    get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
 /*
 val Project.androidLibs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("androidLibs")*/
