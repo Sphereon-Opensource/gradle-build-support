@@ -9,7 +9,6 @@ import org.gradle.api.component.SoftwareComponentFactory
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.findByType
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import javax.inject.Inject
 
@@ -26,97 +25,100 @@ class TomlCatalogPlugin @Inject constructor(
     private val scf: SoftwareComponentFactory
 ) : Plugin<Project> {
     override fun apply(project: Project) {
-        // Ensure the maven-publish plugin is applied
-        /*if (!project.plugins.hasPlugin("maven-publish")) {
-            project.plugins.apply("maven-publish")
-        }*/
-
-        // ensure we have both containers
         project.pluginManager.apply("org.gradle.java-platform")
         project.pluginManager.apply("maven-publish")
 
         val isPluginBom = project.name.contains("gradle-plugin")
         val targetSection = if (isPluginBom) "plugins" else "libraries"
-        val outputDir = project.layout.buildDirectory.dir("tomlCatalog").get().asFile
+        val outputDir = project.layout.buildDirectory.dir("tomlCatalog")
 
-        // Register a task to generate both TOML files
-        val generateTomlCatalogTask = project.tasks.register("generateTomlCatalog") {
+        // Pre-resolve all project data during configuration time (CC-safe)
+        val projectName = project.name
+        val projectGroup = project.group.toString()
+        val projectVersion = project.version.toString()
+        val rootGroup = project.rootProject.group.toString()
+        val buildFileContent = project.file("build.gradle.kts").let { if (it.exists()) it.readText() else "" }
+
+        // Pre-resolve nested project metadata (group, name, version, build file content)
+        val nestedProjectData = mutableMapOf<String, ProjectData>()
+        collectNestedProjectData(project, buildFileContent, nestedProjectData)
+
+        val generateTomlCatalogTask = project.tasks.register("generateTomlCatalog", GenerateTomlCatalogTask::class.java) {
             group = "versioning"
             description = "Generates TOML version catalogs for this BOM"
-            notCompatibleWithConfigurationCache("Accesses Project model to parse BOM constraints")
 
-            outputs.dir(outputDir)
-
-            doLast {
-                outputDir.mkdirs()
-
-                // Generate TOML file with versions
-                project.generateTomlFromBom(
-                    outputDir = outputDir,
-                    targetSection = targetSection,
-                    includeVersions = true
-                )
-
-                // Generate TOML file without versions (for use with BOM)
-                project.generateTomlFromBom(
-                    outputDir = outputDir,
-                    targetSection = targetSection,
-                    includeVersions = false
-                )
-            }
+            this.bomName.set(projectName)
+            this.bomGroup.set(projectGroup)
+            this.bomVersion.set(projectVersion)
+            this.rootGroup.set(rootGroup)
+            this.targetSection.set(targetSection)
+            this.buildFileContent.set(buildFileContent)
+            this.nestedProjects.set(nestedProjectData.mapValues { (_, v) -> "${v.group}|${v.name}|${v.version}|${v.buildFileContent}" })
+            this.outputDirectory.set(outputDir)
         }
 
-        // Configure Maven publications for both TOML files during configuration phase
         configureTomlPublications(project)
     }
 
     /**
-     * Configures Maven publications for both TOML files.
+     * Recursively collect project metadata for all platform project references
+     * found in build file content. This runs during configuration time.
      */
+    private fun collectNestedProjectData(
+        project: Project,
+        content: String,
+        collected: MutableMap<String, ProjectData>,
+        depth: Int = 0
+    ) {
+        if (depth > 5) return // safety limit
+        val pattern = """api\(platform\(project\("([^"]+)"\)\)\)""".toRegex()
+        pattern.findAll(content).forEach { match ->
+            val path = match.groupValues[1]
+            if (!collected.containsKey(path)) {
+                try {
+                    val nested = project.project(path)
+                    val nestedBuildFile = nested.file("build.gradle.kts")
+                    val nestedContent = if (nestedBuildFile.exists()) nestedBuildFile.readText() else ""
+                    collected[path] = ProjectData(
+                        group = nested.group.toString(),
+                        name = nested.name,
+                        version = nested.version.toString(),
+                        buildFileContent = nestedContent
+                    )
+                    collectNestedProjectData(project, nestedContent, collected, depth + 1)
+                } catch (_: Exception) {
+                    // project not found, skip
+                }
+            }
+        }
+    }
+
     private fun configureTomlPublications(project: Project) {
         val publishing = project.extensions.findByType(PublishingExtension::class) ?: return
 
-        // build the "sphereon"-prefixed catalog name
         val tokens = project.name.split("-")
             .joinToString("") { it.replaceFirstChar(Char::uppercase) }
         val catalogName = "sphereon$tokens"
 
-        // locate your TOML-gen task
         val genToml = project.tasks.named("generateTomlCatalog")
 
-        // lazy Providers for the two files
         val versionedToml = project.layout.buildDirectory
             .file("tomlCatalog/$catalogName.versioned.toml")
         val bomToml = project.layout.buildDirectory
             .file("tomlCatalog/$catalogName.toml")
 
-        // 1) one consumable configuration, platform+version-catalog
-        // The extra "sphereon.catalog.type" attribute differentiates this from Gradle's
-        // built-in versionCatalogElements (which has the same Category + Usage attributes),
-        // avoiding "identical attribute sets" errors under configuration cache.
         val catalogElements = project.configurations.create("${catalogName}CatalogElements") {
             isCanBeResolved = false
             isCanBeConsumed = true
             attributes {
-                attribute(
-                    Category.CATEGORY_ATTRIBUTE,
-                    project.objects.named(Category.REGULAR_PLATFORM)
-                )
-                attribute(
-                    Usage.USAGE_ATTRIBUTE,
-                    project.objects.named(Usage.VERSION_CATALOG)
-                )
-                attribute(
-                    Attribute.of("sphereon.catalog.type", String::class.java),
-                    "toml-bom"
-                )
+                attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.REGULAR_PLATFORM))
+                attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.VERSION_CATALOG))
+                attribute(Attribute.of("sphereon.catalog.type", String::class.java), "toml-bom")
             }
-            // primary, no classifier → the "versioned" TOML
             outgoing.artifact(versionedToml) {
                 builtBy(genToml)
                 extension = "toml"
             }
-            // secondary, classifier="bom" → the version-less BOM TOML
             outgoing.artifact(bomToml) {
                 builtBy(genToml)
                 extension = "toml"
@@ -124,27 +126,25 @@ class TomlCatalogPlugin @Inject constructor(
             }
         }
 
-        // 2) one AdhocComponent from that configuration
         val componentName = "${catalogName}Catalog"
         val catalogComponent = scf.adhoc(componentName).apply {
-            // declare the single version-catalog variant
             addVariantsFromConfiguration(catalogElements) { /* no-op */ }
         }
         project.components.add(catalogComponent)
 
-        // 3) one MavenPublication that pulls in both artifacts
         publishing.publications.create("bomCatalog", MavenPublication::class.java) {
             from(catalogComponent)
-            artifactId = project.name       // e.g. "common-bom"
+            artifactId = project.name
             version = project.version.toString()
             groupId = project.group.toString()
             pom { packaging = "pom" }
         }
-
-        project.logger.lifecycle(
-            "⚙️ Configured single publication '${project.name}: ${project.group}:${project.name}:${project.version}' " +
-                    "with two TOMLs (primary, plus classifier=bom)"
-        )
     }
-
 }
+
+data class ProjectData(
+    val group: String,
+    val name: String,
+    val version: String,
+    val buildFileContent: String
+)

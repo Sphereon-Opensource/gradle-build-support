@@ -399,8 +399,20 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
         generateTypeScriptDefinitions()
     }
     wasmJs {
-        browser()
-        nodejs()
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+                // Browser tests are disabled by default: runTest coroutine integration
+                // doesn't work with Karma on wasmJs (2s timeout, Promise not recognized).
+                // Modules that need browser tests can override: wasmJs { browser { testTask { enabled = true } } }
+                enabled = false
+            }
+        }
+        nodejs {
+            testTask { useMocha { timeout = "60000" } }
+        }
         binaries.library()
         generateTypeScriptDefinitions()
     }
