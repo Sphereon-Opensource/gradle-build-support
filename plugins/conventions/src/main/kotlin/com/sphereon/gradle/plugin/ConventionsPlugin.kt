@@ -181,7 +181,7 @@ class ConventionsPlugin : Plugin<Project> {
 }
 
 internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
-    log("Applying Kotlin Multiplatform kotlin configuration to project: ${project.name}")
+//    log("Applying Kotlin Multiplatform kotlin configuration to project: ${project.name}")
     val sphereonlib = project.sphereonlib
 
     apply {
@@ -210,7 +210,6 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
 //                    progressiveMode.set(true) //https://kotlinlang.org/docs/whatsnew13.html#progressive-mode
                     // Minimum 2.2 required by Metro DI compiler plugin
                     languageVersion.set(KotlinVersion.KOTLIN_2_2)
-//                    apiVersion.set(KOTLIN_2_1)
                 }
             }
 
@@ -225,7 +224,7 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
 }
 
 private fun KotlinMultiplatformExtension.commonOptIns() {
-    log("Applying default opt-ins to common source sets")
+//    log("Applying default opt-ins to common source sets")
 
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
