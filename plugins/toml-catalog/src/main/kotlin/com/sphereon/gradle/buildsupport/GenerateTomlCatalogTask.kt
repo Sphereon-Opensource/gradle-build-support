@@ -73,12 +73,12 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
         // Add the BOM itself
         if (processedDependencies.add(bGroup to bName)) {
             dependencies.add(Triple(bGroup, bName, bVersion))
-            addVersionSafely(versions, generateVersionKey(bGroup, bName), bVersion)
+            addVersionSafely(versions, generateVersionKey(bGroup, bName), bVersion, bomVersion = bVersion)
         }
 
         // Parse regular dependencies from build file
         parseDependencies(content, rGroup, bName, tSection, dependencies, versions,
-            platformDependencies, pluginDependencies, processedDependencies)
+            platformDependencies, pluginDependencies, processedDependencies, bomVersion = bVersion)
 
         // Parse project platform dependencies using pre-resolved nested project data
         val platformProjectPattern = """api\(platform\(project\("([^"]+)"\)\)\)""".toRegex()
@@ -91,7 +91,7 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
 
             if (processedDependencies.add(pGroup to pName)) {
                 dependencies.add(Triple(pGroup, pName, pVersion))
-                addVersionSafely(versions, generateVersionKey(pGroup, pName), pVersion)
+                addVersionSafely(versions, generateVersionKey(pGroup, pName), pVersion, bomVersion = bVersion)
                 platformDependencies.add(pGroup to pName)
                 if (pName.contains("gradle-plugin")) {
                     pluginDependencies.add(pGroup to pName)
@@ -101,7 +101,7 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
             // Parse dependencies from the nested platform's build file
             parseDependencies(pContent, rGroup, pName, tSection, dependencies, versions,
                 platformDependencies, pluginDependencies, processedDependencies,
-                isPluginBomContext = pName.contains("gradle-plugin"))
+                isPluginBomContext = pName.contains("gradle-plugin"), bomVersion = bVersion)
 
             // Parse nested platform project references
             platformProjectPattern.findAll(pContent).forEach nestedMatch@{ nestedMatch ->
@@ -113,12 +113,12 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
 
                 if (processedDependencies.add(nGroup to nName)) {
                     dependencies.add(Triple(nGroup, nName, nVersion))
-                    addVersionSafely(versions, generateVersionKey(nGroup, nName), nVersion)
+                    addVersionSafely(versions, generateVersionKey(nGroup, nName), nVersion, bomVersion = bVersion)
                     platformDependencies.add(nGroup to nName)
                 }
 
                 parseDependencies(nContent, rGroup, nName, tSection, dependencies, versions,
-                    platformDependencies, pluginDependencies, processedDependencies)
+                    platformDependencies, pluginDependencies, processedDependencies, bomVersion = bVersion)
             }
         }
 
@@ -129,7 +129,7 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
             if (group != null && name != null && version != null) {
                 if (processedDependencies.add(group to name)) {
                     dependencies.add(Triple(group, name, version))
-                    addVersionSafely(versions, generateVersionKey(group, name), version)
+                    addVersionSafely(versions, generateVersionKey(group, name), version, bomVersion = bVersion)
                     platformDependencies.add(group to name)
                 }
             }
@@ -153,6 +153,7 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
         pluginDependencies: MutableSet<Pair<String, String>>,
         processedDependencies: MutableSet<Pair<String, String>>,
         isPluginBomContext: Boolean = false,
+        bomVersion: String? = null,
     ) {
         val constraintsPattern = """api\("([^:"]+)(?::([^:"]+))?:([^"]+)"\)""".toRegex()
         constraintsPattern.findAll(content).forEach { match ->
@@ -161,7 +162,7 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
                 val isPluginOnly = group.isEmpty()
                 if (processedDependencies.add(group to name)) {
                     dependencies.add(Triple(group, name, version))
-                    addVersionSafely(versions, generateVersionKey(group, name), version)
+                    addVersionSafely(versions, generateVersionKey(group, name), version, bomVersion = bomVersion)
                     if (isPluginOnly || isPluginBomContext) {
                         pluginDependencies.add(group to name)
                     }
@@ -296,8 +297,10 @@ abstract class GenerateTomlCatalogTask : DefaultTask() {
             return key.replace(".", "-").lowercase().replace("com-sphereon", "sphereon")
         }
 
-        private fun addVersionSafely(versions: MutableMap<String, String>, key: String, version: String) {
-            val resolved = if (version == "\${version}" || version == "\$version") "unresolved" else version
+        private fun addVersionSafely(versions: MutableMap<String, String>, key: String, version: String, bomVersion: String? = null) {
+            val resolved = if (version == "\${version}" || version == "\$version") {
+                bomVersion ?: version
+            } else version
             val existing = versions[key]
             if (existing == null || existing == resolved) {
                 versions[key] = resolved
