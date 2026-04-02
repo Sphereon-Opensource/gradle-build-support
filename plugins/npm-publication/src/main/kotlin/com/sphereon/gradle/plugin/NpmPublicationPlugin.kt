@@ -43,7 +43,19 @@ class NpmPublicationPlugin : Plugin<Project> {
         // Apply the JetBrains npm-publish plugin
         project.pluginManager.apply("org.jetbrains.kotlin.npm-publish")
 
-        // Configure after evaluation so extension values are finalized
+        // Set outputModuleName eagerly so KGP picks it up for intermediate package.json.
+        // Uses a lazy provider so the extension value resolves when needed.
+        project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
+            val kmp = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
+            kmp.targets.configureEach(Action {
+                if (this is KotlinJsIrTarget) {
+                    val scopedName = project.provider { "${ext.scope.get()}/${ext.packageName.get()}" }
+                    outputModuleName.set(scopedName)
+                }
+            })
+        }
+
+        // Configure npm-publish extension after evaluation so all values are finalized
         project.afterEvaluate {
             if (!ext.enabled.get()) {
                 log.info("npm publication disabled for ${project.name}")
@@ -62,15 +74,11 @@ class NpmPublicationPlugin : Plugin<Project> {
 
             log.info("Configuring npm publication: $fullName@$npmVersion")
 
-            // Auto-set outputModuleName on the JS target
-            configureOutputModuleName(project, fullName)
-
             // Configure the npm-publish extension
             val npmPublish = project.extensions.getByType(NpmPublishExtension::class.java)
 
             // Registry: npmjs with token auth
             npmPublish.registries(Action {
-                // 'this' is NpmRegistries (NamedDomainObjectContainer<NpmRegistry>)
                 val registryName = "npmjs"
                 if (names.contains(registryName)) {
                     named(registryName).configure {
@@ -87,14 +95,11 @@ class NpmPublicationPlugin : Plugin<Project> {
 
             // Package configuration
             npmPublish.packages(Action {
-                // 'this' is NpmPackages (NamedDomainObjectContainer<NpmPackage>)
                 named("js").configure {
-                    // 'this' is NpmPackage
                     scope.set(npmScope)
                     packageName.set(npmPkgName)
 
                     packageJson(Action<PackageJson> {
-                        // 'this' is PackageJson — access typed properties directly
                         name.set(fullName)
                         version.set(npmVersion)
                         types.set(typesFile)
@@ -102,7 +107,6 @@ class NpmPublicationPlugin : Plugin<Project> {
                         homepage.set("https://github.com/sphereon-opensource/idk")
                         keywords.addAll("sphereon", "idk", "identity", "kotlin-multiplatform", "esm", "typescript")
 
-                        // Extra fields via the 'by' infix (inherited from JsonObject)
                         "type" by "module"
 
                         // Conditional exports for Node.js + browser + React Native
@@ -116,7 +120,6 @@ class NpmPublicationPlugin : Plugin<Project> {
                             })
                         })
 
-                        // Repository metadata
                         "repository" by json(Action {
                             "type" by "git"
                             "url" by "https://github.com/sphereon-opensource/idk"
@@ -128,19 +131,6 @@ class NpmPublicationPlugin : Plugin<Project> {
                     })
                 }
             })
-        }
-    }
-
-    private fun configureOutputModuleName(project: Project, fullName: String) {
-        project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
-            val kmp = project.extensions.findByType(KotlinMultiplatformExtension::class.java) ?: return@withId
-            kmp.targets.filterIsInstance<KotlinJsIrTarget>().forEach { jsTarget ->
-                // Only set if not already explicitly configured by the module
-                val current = jsTarget.outputModuleName.orNull
-                if (current == null || current == project.name) {
-                    jsTarget.outputModuleName.set(fullName)
-                }
-            }
         }
     }
 }
