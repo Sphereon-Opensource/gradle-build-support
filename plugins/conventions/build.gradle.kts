@@ -11,7 +11,6 @@ java {
 }
 allprojects {
     group = "com.sphereon.gradle.plugin"
-    version = "$version"
 }
 
 repositories {
