@@ -12,16 +12,13 @@ dependencies {
     constraints {
         // GRADLE PLUGINS
 
-        // Sphereon plugins — version must match the published gradle-build-support version
-        val gbsVersion = project.version.toString().also {
-            require(it != "unspecified" && it.isNotBlank()) {
-                "gradle-build-support project.version is not set — cannot generate plugin BOM with correct versions"
-            }
-        }
-        api("com.sphereon.gradle.plugin.conventions:$gbsVersion")
-        api("com.sphereon.gradle.plugin.integration-tests:$gbsVersion")
-        api("com.sphereon.gradle.plugin.project-publication:$gbsVersion")
-        api("com.sphereon.gradle.plugin.npm-publication:$gbsVersion")
+        // Sphereon plugins — use ${version} so the TOML generator resolves it to the BOM version.
+        // Do NOT use local variables like $gbsVersion — the generator parses this file as text
+        // and cannot evaluate Gradle expressions.
+        api("com.sphereon.gradle.plugin.conventions:${version}")
+        api("com.sphereon.gradle.plugin.integration-tests:${version}")
+        api("com.sphereon.gradle.plugin.project-publication:${version}")
+        api("com.sphereon.gradle.plugin.npm-publication:${version}")
 
         // Kotlin
         api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")

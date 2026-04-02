@@ -48,7 +48,10 @@ class NpmPublicationPlugin : Plugin<Project> {
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
             val kmp = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
             kmp.targets.configureEach(Action {
-                if (this is KotlinJsIrTarget) {
+                // Only set scoped outputModuleName for JS targets, not wasmJs.
+                // The wasmJs compiler doesn't create parent directories for scoped names
+                // containing '/', causing FileNotFoundException for the .wasm output.
+                if (this is KotlinJsIrTarget && this.platformType.name == "js") {
                     val scopedName = project.provider { "${ext.scope.get()}/${ext.packageName.get()}" }
                     outputModuleName.set(scopedName)
                 }
@@ -93,44 +96,47 @@ class NpmPublicationPlugin : Plugin<Project> {
                 }
             })
 
+            fun configurePackageJson(pkgJson: PackageJson, entryMjs: String, typesMts: String) {
+                pkgJson.apply {
+                    name.set(fullName)
+                    version.set(npmVersion)
+                    types.set(typesMts)
+                    license.set("Apache-2.0")
+                    homepage.set("https://github.com/sphereon-opensource/idk")
+                    keywords.addAll("sphereon", "idk", "identity", "kotlin-multiplatform", "esm", "typescript")
+
+                    "type" by "module"
+
+                    "exports" by json(Action {
+                        "." by json(Action {
+                            "types" by typesMts
+                            "react-native" by entryMjs
+                            "browser" by entryMjs
+                            "node" by entryMjs
+                            "default" by entryMjs
+                        })
+                    })
+
+                    "repository" by json(Action {
+                        "type" by "git"
+                        "url" by "https://github.com/sphereon-opensource/idk"
+                        "directory" by "lib/"
+                    })
+                    "bugs" by json(Action {
+                        "url" by "https://github.com/sphereon-opensource/idk/issues"
+                    })
+                }
+            }
+
             // Package configuration
             npmPublish.packages(Action {
                 named("js").configure {
                     scope.set(npmScope)
                     packageName.set(npmPkgName)
-
-                    packageJson(Action<PackageJson> {
-                        name.set(fullName)
-                        version.set(npmVersion)
-                        types.set(typesFile)
-                        license.set("Apache-2.0")
-                        homepage.set("https://github.com/sphereon-opensource/idk")
-                        keywords.addAll("sphereon", "idk", "identity", "kotlin-multiplatform", "esm", "typescript")
-
-                        "type" by "module"
-
-                        // Conditional exports for Node.js + browser + React Native
-                        "exports" by json(Action {
-                            "." by json(Action {
-                                "types" by typesFile
-                                "react-native" by entryFile
-                                "browser" by entryFile
-                                "node" by entryFile
-                                "default" by entryFile
-                            })
-                        })
-
-                        "repository" by json(Action {
-                            "type" by "git"
-                            "url" by "https://github.com/sphereon-opensource/idk"
-                            "directory" by "lib/"
-                        })
-                        "bugs" by json(Action {
-                            "url" by "https://github.com/sphereon-opensource/idk/issues"
-                        })
-                    })
+                    packageJson(Action<PackageJson> { configurePackageJson(this, entryFile, typesFile) })
                 }
             })
+
         }
     }
 }
