@@ -12,7 +12,6 @@ repositories {
 
 allprojects {
     group = "$group"
-    version = "$version"
 }
 
 gradlePlugin {
