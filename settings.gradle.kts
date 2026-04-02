@@ -95,5 +95,6 @@ include(":versions:library-bom")
 
 include(":plugins:conventions")
 include(":plugins:project-publication")
+include(":plugins:npm-publication")
 include(":plugins:integration-tests")
 

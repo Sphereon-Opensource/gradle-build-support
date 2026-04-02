@@ -16,6 +16,7 @@ dependencies {
         api("com.sphereon.gradle.plugin.conventions:${version}")
         api("com.sphereon.gradle.plugin.integration-tests:${version}")
         api("com.sphereon.gradle.plugin.project-publication:${version}")
+        api("com.sphereon.gradle.plugin.npm-publication:${version}")
 
         // Kotlin
         api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")

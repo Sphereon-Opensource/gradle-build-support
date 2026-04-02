@@ -364,7 +364,11 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
 }
 
 /**
- * Standard KMP target set: jvm, js (browser + nodejs), wasmJs (browser + nodejs), iOS, linuxX64.
+ * Standard KMP target set, gated by the `kmp.targets` system property.
+ *
+ * Supported values (comma-separated): jvm, js, wasmJs, ios, native, linuxX64, all.
+ * Default: "jvm" (fast local builds). Set via gradle.properties: `systemProp.kmp.targets=jvm`
+ * Override: `./gradlew build -Dkmp.targets=all` or `./gradlew build -Dkmp.targets=jvm,js`
  *
  * Modules opt-in by calling this instead of declaring targets manually.
  * Modules needing custom targets (BLE, NFC, SQLite, AWS, Compose, mobile-only) keep their own declarations.
@@ -375,51 +379,67 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
  */
 @OptIn(ExperimentalWasmDsl::class)
 fun KotlinMultiplatformExtension.configureStandardTargets() {
+    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
+        .split(",").map { it.trim().lowercase() }
+    val all = "all" in enabledTargets
+
     jvm()
-    js {
-        compilerOptions {
-            moduleKind.set(JsModuleKind.MODULE_ES)
-            target.set("es2015")
-        }
-        browser {
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
-                // Browser tests are opt-in: many modules have transitive Node.js
-                // dependencies (ktor, whyoleg-cryptography) that webpack can't resolve.
-                // Modules that need browser tests can override: js { browser { testTask { enabled = true } } }
-                enabled = false
+
+    if (all || "js" in enabledTargets) {
+        js {
+            compilerOptions {
+                moduleKind.set(JsModuleKind.MODULE_ES)
+                target.set("es2015")
             }
-        }
-        nodejs {
-            testTask { useMocha { timeout = "60000" } }
-        }
-        binaries.library()
-        generateTypeScriptDefinitions()
-    }
-    wasmJs {
-        browser {
-            testTask {
-                useKarma {
-                    useChromeHeadless()
+            browser {
+                testTask {
+                    useKarma {
+                        useChromeHeadless()
+                    }
+                    // Browser tests are opt-in: many modules have transitive Node.js
+                    // dependencies (ktor, whyoleg-cryptography) that webpack can't resolve.
+                    // Modules that need browser tests can override: js { browser { testTask { enabled = true } } }
+                    enabled = false
                 }
-                // Browser tests are disabled by default: runTest coroutine integration
-                // doesn't work with Karma on wasmJs (2s timeout, Promise not recognized).
-                // Modules that need browser tests can override: wasmJs { browser { testTask { enabled = true } } }
-                enabled = false
             }
+            nodejs {
+                testTask { useMocha { timeout = "60000" } }
+            }
+            binaries.library()
+            generateTypeScriptDefinitions()
         }
-        nodejs {
-            testTask { useMocha { timeout = "60000" } }
-        }
-        binaries.library()
-        generateTypeScriptDefinitions()
     }
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    linuxX64()
+
+    if (all || "wasmjs" in enabledTargets || "wasm" in enabledTargets) {
+        wasmJs {
+            browser {
+                testTask {
+                    useKarma {
+                        useChromeHeadless()
+                    }
+                    // Browser tests are disabled by default: runTest coroutine integration
+                    // doesn't work with Karma on wasmJs (2s timeout, Promise not recognized).
+                    // Modules that need browser tests can override: wasmJs { browser { testTask { enabled = true } } }
+                    enabled = false
+                }
+            }
+            nodejs {
+                testTask { useMocha { timeout = "60000" } }
+            }
+            binaries.library()
+            generateTypeScriptDefinitions()
+        }
+    }
+
+    if (all || "ios" in enabledTargets) {
+        iosX64()
+        iosArm64()
+        iosSimulatorArm64()
+    }
+
+    if (all || "native" in enabledTargets || "linuxx64" in enabledTargets) {
+        linuxX64()
+    }
 }
 
 /**
