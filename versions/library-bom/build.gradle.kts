@@ -40,11 +40,7 @@ dependencies {
         api("at.asitplus.awesn1:core:0.1.1")
         api("at.asitplus.awesn1:crypto:0.1.1")
 
-        // A-sit plus signum (kept for kms-provider-mobile only)
-        api("at.asitplus.signum:indispensable:3.20.0")
-        api("at.asitplus.signum:indispensable-asn1:3.20.0")
-        api("at.asitplus.signum:indispensable-josef:3.20.0")
-        api("at.asitplus.signum:indispensable-cosef:3.20.0")
+        // A-sit plus signum (kept for kms-provider-mobile only; supreme pulls indispensable transitively)
         api("at.asitplus.signum:supreme:0.12.0")
 
         // Android
