@@ -443,6 +443,50 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
 }
 
 /**
+ * Configures iOS targets only when `kmp.targets` includes "ios" or "all".
+ *
+ * Use this in modules that declare their own kotlin {} block instead of [configureStandardTargets].
+ * Eliminates iOS dependency resolution overhead when building JVM-only (`kmp.targets=jvm`).
+ */
+fun KotlinMultiplatformExtension.configureIosTargetsIfEnabled() {
+    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
+        .split(",").map { it.trim().lowercase() }
+    if ("all" in enabledTargets || "ios" in enabledTargets) {
+        iosX64()
+        iosArm64()
+        iosSimulatorArm64()
+    }
+}
+
+/**
+ * Configures the linuxX64 native target only when `kmp.targets` includes "native", "linuxx64", or "all".
+ */
+fun KotlinMultiplatformExtension.configureLinuxTargetIfEnabled() {
+    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
+        .split(",").map { it.trim().lowercase() }
+    if ("all" in enabledTargets || "native" in enabledTargets || "linuxx64" in enabledTargets) {
+        linuxX64()
+    }
+}
+
+/**
+ * Configures the wasmJs target only when `kmp.targets` includes "wasmjs", "wasm", or "all".
+ *
+ * Prevents the Kotlin npm-publish plugin from registering broken wasmJs tasks (Kotlin 2.3.x bug)
+ * when wasmJs is not in the active target set.
+ */
+@OptIn(ExperimentalWasmDsl::class)
+fun KotlinMultiplatformExtension.configureWasmJsTargetIfEnabled(
+    configure: (org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinWasmJsTargetDsl.() -> Unit)? = null
+) {
+    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
+        .split(",").map { it.trim().lowercase() }
+    if ("all" in enabledTargets || "wasmjs" in enabledTargets || "wasm" in enabledTargets) {
+        wasmJs { configure?.invoke(this) }
+    }
+}
+
+/**
  * Automatically adds KSP dependencies (kotlin-inject compiler, Amazon kotlin-inject-anvil
  * contribute processors, and Anvil KSP compiler) to all KSP configurations for whatever
  * targets the module declares — including test configurations.

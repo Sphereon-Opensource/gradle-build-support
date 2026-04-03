@@ -43,6 +43,21 @@ class NpmPublicationPlugin : Plugin<Project> {
         // Apply the JetBrains npm-publish plugin
         project.pluginManager.apply("org.jetbrains.kotlin.npm-publish")
 
+        // Fix wasmJs main provider: the npm-publish plugin auto-registers a wasmJs package
+        // but its main file has no value on Kotlin 2.3.x. Set a dummy value eagerly to prevent crash.
+        project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
+            try {
+                val npmPublishExt = project.extensions.getByType(NpmPublishExtension::class.java)
+                npmPublishExt.packages(Action {
+                    try {
+                        named("wasmJs").configure {
+                            main.set("${project.name}.uninstantiated.mjs")
+                        }
+                    } catch (_: Exception) { }
+                })
+            } catch (_: Exception) { }
+        }
+
         // Set outputModuleName eagerly so KGP picks it up for intermediate package.json.
         // Uses a lazy provider so the extension value resolves when needed.
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
