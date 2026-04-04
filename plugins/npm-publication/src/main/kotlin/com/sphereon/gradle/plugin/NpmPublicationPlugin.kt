@@ -40,6 +40,14 @@ class NpmPublicationPlugin : Plugin<Project> {
             repositoryUrl.convention("https://github.com/sphereon-opensource/idk")
         }
 
+        // Skip npm-publish plugin entirely when no JS/wasmJs targets are configured
+        val kmpTargets = (System.getProperty("kmp.targets") ?: "jvm").split(",").map { it.trim().lowercase() }
+        val hasJsTargets = "all" in kmpTargets || "js" in kmpTargets || "wasmjs" in kmpTargets || "wasm" in kmpTargets
+        if (!hasJsTargets) {
+            log.info("Skipping npm-publish for ${project.name}: no JS/wasmJs targets (kmp.targets=${kmpTargets.joinToString(",")})")
+            return
+        }
+
         // Apply the JetBrains npm-publish plugin
         project.pluginManager.apply("org.jetbrains.kotlin.npm-publish")
 
@@ -143,12 +151,16 @@ class NpmPublicationPlugin : Plugin<Project> {
                 }
             }
 
-            // Package configuration
+            // Package configuration (only when JS target is present)
             npmPublish.packages(Action {
-                named("js").configure {
-                    scope.set(npmScope)
-                    packageName.set(npmPkgName)
-                    packageJson(Action<PackageJson> { configurePackageJson(this, entryFile, typesFile) })
+                try {
+                    named("js").configure {
+                        scope.set(npmScope)
+                        packageName.set(npmPkgName)
+                        packageJson(Action<PackageJson> { configurePackageJson(this, entryFile, typesFile) })
+                    }
+                } catch (_: Exception) {
+                    log.info("Skipping npm package configuration for ${project.name}: no JS target")
                 }
             })
 

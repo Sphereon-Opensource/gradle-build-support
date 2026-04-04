@@ -470,6 +470,22 @@ fun KotlinMultiplatformExtension.configureLinuxTargetIfEnabled() {
 }
 
 /**
+ * Configures the JS target only when `kmp.targets` includes "js" or "all".
+ *
+ * Use this in modules that declare their own kotlin {} block instead of [configureStandardTargets].
+ * Prevents JS dependency resolution and npm infrastructure tasks when building JVM-only.
+ */
+fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
+    configure: (org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl.() -> Unit)? = null
+) {
+    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
+        .split(",").map { it.trim().lowercase() }
+    if ("all" in enabledTargets || "js" in enabledTargets) {
+        js { configure?.invoke(this) }
+    }
+}
+
+/**
  * Configures the wasmJs target only when `kmp.targets` includes "wasmjs", "wasm", or "all".
  *
  * Prevents the Kotlin npm-publish plugin from registering broken wasmJs tasks (Kotlin 2.3.x bug)
