@@ -43,7 +43,7 @@ dependencies {
         api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
 
-        api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
+        api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
         api("org.jetbrains.kotlinx:kotlinx-io-core:0.9.0")
         api("org.jetbrains.kotlinx:atomicfu:0.31.0")
 
