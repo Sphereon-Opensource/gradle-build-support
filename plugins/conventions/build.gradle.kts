@@ -40,5 +40,9 @@ gradlePlugin {
             id = "com.sphereon.gradle.plugin.conventions"
             implementationClass = "com.sphereon.gradle.plugin.ConventionsPlugin"
         }
+        create("serviceDeployable") {
+            id = "com.sphereon.gradle.plugin.service-deployable"
+            implementationClass = "com.sphereon.gradle.plugin.ServiceDeployablePlugin"
+        }
     }
 }
