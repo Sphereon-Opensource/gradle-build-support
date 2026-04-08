@@ -30,10 +30,10 @@ dependencies {
         api("org.jetbrains.kotlin.plugin.compose:2.3.20")
 
         // Android
-        api("com.android.tools.build:gradle:9.0.1")
-        api("com.android.application:9.0.1")
-        api("com.android.library:9.0.1")
-        api("com.android.kotlin.multiplatform.library:9.0.1")
+        api("com.android.tools.build:gradle:9.1.0")
+        api("com.android.application:9.1.0")
+        api("com.android.library:9.1.0")
+        api("com.android.kotlin.multiplatform.library:9.1.0")
 
         // Compose
         api("org.jetbrains.compose.hot-reload:1.0.0-beta08")
@@ -50,7 +50,7 @@ dependencies {
 
         // DI
         api("software.amazon.app.platform:0.0.10-SNAPSHOT")
-        api("org.jetbrains.kotlinx.atomicfu:0.31.0")
+        api("org.jetbrains.kotlinx.atomicfu:0.32.1")
 
         // NPM Publish (JetBrains fork, supports wasmJs)
         api("org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin:3.6.0")
@@ -65,11 +65,11 @@ dependencies {
         api("org.openapi.generator:7.16.0")
 
         // Spring boot
-        api("org.springframework.boot:3.5.8")
+        api("org.springframework.boot:3.5.13")
         api("io.spring.dependency-management:1.1.7")
 
         // Ktor
-        api("io.ktor.plugin:3.3.3")
+        api("io.ktor.plugin:3.4.2")
     }
 }
 

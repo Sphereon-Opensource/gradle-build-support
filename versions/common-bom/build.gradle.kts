@@ -21,9 +21,9 @@ dependencies {
 
 
         // Kotlinx
-        api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
-        api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-        api("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.9.0")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.10.0")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.10.0")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.10.2")
@@ -45,7 +45,7 @@ dependencies {
 
         api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
         api("org.jetbrains.kotlinx:kotlinx-io-core:0.9.0")
-        api("org.jetbrains.kotlinx:atomicfu:0.31.0")
+        api("org.jetbrains.kotlinx:atomicfu:0.32.1")
 
 
 
