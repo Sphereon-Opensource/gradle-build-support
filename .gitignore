@@ -19,6 +19,16 @@ out/
 ### Kotlin ###
 .kotlin
 
+### Extracted JAR artifacts (Kotlin compiler/gradle plugin) ###
+/com/
+/org/
+/misc/
+/cocoapods/
+/META-INF/
+/*.proto
+/kotlinManifest.properties
+/project.properties
+
 ### Eclipse ###
 .apt_generated
 .classpath

@@ -279,6 +279,23 @@ private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
         nodeJsArgs.add("--require")
         nodeJsArgs.add(shimFile.absolutePath)
     }
+
+    // Write .mocharc.yml with exit:true to the build output directories so Mocha
+    // force-exits after tests complete. Without this, DI graphs with HTTP clients
+    // and coroutine dispatchers keep the Node.js event loop alive indefinitely.
+    val mocharc = "exit: true\n"
+    for (dir in listOf("build/js", "build/wasm")) {
+        val buildDir = project.rootProject.file(dir)
+        project.tasks.withType<KotlinJsTest>().configureEach {
+            doFirst {
+                val rcFile = buildDir.resolve(".mocharc.yml")
+                if (!rcFile.exists()) {
+                    buildDir.mkdirs()
+                    rcFile.writeText(mocharc)
+                }
+            }
+        }
+    }
 }
 
 /**

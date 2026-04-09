@@ -21,13 +21,13 @@ dependencies {
         api("com.sphereon.gradle.plugin.npm-publication:${version}")
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
-        api("org.jetbrains.kotlin.jvm:2.3.20")
-        api("org.jetbrains.kotlin.multiplatform:2.3.20")
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
-        api("org.jetbrains.kotlin.plugin.serialization:2.3.20")
-        api("org.jetbrains.kotlin.android:2.3.20")
-        api("org.jetbrains.kotlin.plugin.compose:2.3.20")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21-RC")
+        api("org.jetbrains.kotlin.jvm:2.3.21-RC")
+        api("org.jetbrains.kotlin.multiplatform:2.3.21-RC")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21-RC")
+        api("org.jetbrains.kotlin.plugin.serialization:2.3.21-RC")
+        api("org.jetbrains.kotlin.android:2.3.21-RC")
+        api("org.jetbrains.kotlin.plugin.compose:2.3.21-RC")
 
         // Android
         api("com.android.tools.build:gradle:9.1.0")
@@ -51,6 +51,9 @@ dependencies {
         // DI
         api("software.amazon.app.platform:0.0.10-SNAPSHOT")
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
+
+        // Code Coverage
+        api("org.jetbrains.kotlinx.kover:0.9.4")
 
         // NPM Publish (JetBrains fork, supports wasmJs)
         api("org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin:3.6.0")
