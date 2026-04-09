@@ -5,9 +5,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
@@ -99,8 +101,10 @@ abstract class ServiceDeployableExtension {
     abstract val mainClass: org.gradle.api.provider.Property<String>
 }
 
+@DisableCachingByDefault(because = "Merges SPI service files from runtime JARs; inputs change with every dependency update")
 abstract class MergeServiceFilesTask : DefaultTask() {
     @get:InputFiles
+    @get:Classpath
     abstract val inputJars: ConfigurableFileCollection
 
     @get:OutputDirectory

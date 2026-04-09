@@ -9,6 +9,7 @@ import org.gradle.api.plugins.jvm.JvmTestSuite
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.testing.base.TestingExtension
@@ -201,6 +202,7 @@ private fun ensureTestSourceFolders(project: Project) {
  *
  * The actual integration tests are run by the dynamically registered test suites and tasks.
  */
+@DisableCachingByDefault(because = "Lifecycle-only task that delegates to dynamically registered test suites")
 abstract class DummyTestTask : Test() {
     override fun executeTests() {
         // deliberately empty
