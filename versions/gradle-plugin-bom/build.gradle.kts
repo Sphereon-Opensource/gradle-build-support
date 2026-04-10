@@ -76,6 +76,9 @@ dependencies {
 
         // Formatting
         api("org.jlleitschuh.gradle.ktlint:14.2.0")
+
+        // Static Analysis
+        api("io.gitlab.arturbosch.detekt:1.23.8")
     }
 }
 
