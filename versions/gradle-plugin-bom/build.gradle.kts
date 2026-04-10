@@ -73,6 +73,9 @@ dependencies {
 
         // Ktor
         api("io.ktor.plugin:3.4.2")
+
+        // Formatting
+        api("org.jlleitschuh.gradle.ktlint:14.2.0")
     }
 }
 
