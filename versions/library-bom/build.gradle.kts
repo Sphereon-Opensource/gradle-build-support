@@ -65,6 +65,8 @@ dependencies {
         api("software.amazon.lastmile.kotlin.inject.anvil:runtime:0.1.7")
         api("software.amazon.lastmile.kotlin.inject.anvil:runtime-optional:0.1.7")
         api("software.amazon.lastmile.kotlin.inject.anvil:compiler:0.1.7")
+        api("software.amazon.app.platform:metro-public:0.0.10-SNAPSHOT")
+        api("software.amazon.app.platform:metro-impl:0.0.10-SNAPSHOT")
         api("software.amazon.app.platform:kotlin-inject-public:0.0.10-SNAPSHOT")
         api("software.amazon.app.platform:kotlin-inject-impl:0.0.10-SNAPSHOT")
         api("software.amazon.app.platform:kotlin-inject-contribute-public:0.0.10-SNAPSHOT")
@@ -132,20 +134,20 @@ dependencies {
         api("androidx.test.espresso:espresso-core:3.6.1")
         api("androidx.appcompat:appcompat:1.7.1")
         api("androidx.constraintlayout:constraintlayout:2.2.1")
-        api("androidx.activity:activity-compose:1.10.1")
+        api("androidx.activity:activity-compose:1.10.3")
         api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.9.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
 
         // Database
-        api("app.cash.sqldelight:runtime:2.2.1")
-        api("app.cash.sqldelight:coroutines-extensions:2.2.1")
-        api("app.cash.sqldelight:jdbc-driver:2.2.1")
-        api("app.cash.sqldelight:sqlite-driver:2.2.1")
-        api("app.cash.sqldelight:native-driver:2.2.1")
+        api("app.cash.sqldelight:runtime:2.3.2")
+        api("app.cash.sqldelight:coroutines-extensions:2.3.2")
+        api("app.cash.sqldelight:jdbc-driver:2.3.2")
+        api("app.cash.sqldelight:sqlite-driver:2.3.2")
+        api("app.cash.sqldelight:native-driver:2.3.2")
         api("com.zaxxer:HikariCP:7.0.2")
-        api("org.postgresql:postgresql:42.7.4")
-        api("com.mysql:mysql-connector-j:9.2.0")
-        api("org.xerial:sqlite-jdbc:3.47.1.0")
+        api("org.postgresql:postgresql:42.7.10")
+        api("com.mysql:mysql-connector-j:9.6.0")
+        api("org.xerial:sqlite-jdbc:3.51.3.0")
 
         // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
         api("io.github.smyrgeorge:sqlx4k-postgres:0.71.0")
@@ -154,17 +156,17 @@ dependencies {
 
 
         // Keycloak SPI
-        api("org.keycloak:keycloak-core:26.0.0")
-        api("org.keycloak:keycloak-server-spi:26.0.0")
-        api("org.keycloak:keycloak-server-spi-private:26.0.0")
-        api("org.keycloak:keycloak-services:26.0.0")
-        api("org.keycloak:keycloak-admin-client:26.0.0")
+        api("org.keycloak:keycloak-core:26.6.0")
+        api("org.keycloak:keycloak-server-spi:26.6.0")
+        api("org.keycloak:keycloak-server-spi-private:26.6.0")
+        api("org.keycloak:keycloak-services:26.6.0")
+        api("org.keycloak:keycloak-admin-client:26.0.8")
 
         // JBoss Logging (provided by Keycloak at runtime)
         api("org.jboss.logging:jboss-logging:3.6.1.Final")
 
         // Testing
-        api("io.mockk:mockk:1.14.6")
+        api("io.mockk:mockk:1.14.9")
         api("app.cash.turbine:turbine:1.2.0")
         api("org.junit.jupiter:junit-jupiter-engine:5.11.0")
         api("org.slf4j:slf4j-simple:2.0.16")
@@ -214,12 +216,18 @@ dependencies {
         api("org.bouncycastle:bcpkix-jdk18on:1.79")
         api("org.bouncycastle:bcutil-jdk18on:1.79")
 
+        // SKIE (Swift/Kotlin interop annotations)
+        api("co.touchlab.skie:configuration-annotations:0.10.11")
+
+        // Kottage (KMP Key-Value Store)
+        api("io.github.irgaly.kottage:kottage:1.11.0")
+
         // Utility
         api("io.github.g0dkar:qrcode-kotlin:4.5.0")
 
         // Code generation
-        api("com.squareup:kotlinpoet:2.0.0")
-        api("com.squareup:kotlinpoet-ksp:2.0.0")
+        api("com.squareup:kotlinpoet:2.3.0")
+        api("com.squareup:kotlinpoet-ksp:2.3.0")
 
         // Logging
         api("ch.qos.logback:logback-classic:1.5.16")
@@ -232,7 +240,8 @@ dependencies {
 
         // AndroidX Test
         api("androidx.test:core:1.6.1")
-        api("androidx.test:rules:1.6.1")
+        api("androidx.test:rules:1.7.0")
+        api("androidx.test.ext:junit-ktx:1.3.0")
 
         // Compile Testing
         api("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0")
@@ -247,20 +256,4 @@ tasks.withType<PublishToMavenRepository>().configureEach {
 tasks.withType<PublishToMavenLocal>().configureEach {
     dependsOn(tasks.named("generateTomlCatalog"))
 }
-/*
-catalog {
-    versionCatalog {
-        from(files("build/tomlCatalog/sureCommonBom.toml"))
-    }
-}*/
-/*
 
-publishing {
-    publications {
-        create<MavenPublication>("bom") {
-            from(components["javaPlatform"])
-            artifactId = "library-bom"
-        }
-    }
-}
-*/

@@ -37,19 +37,22 @@ dependencies {
 
         // Compose
         api("org.jetbrains.compose.hot-reload:1.0.0-beta08")
-        api("org.jetbrains.compose:1.9.2")
+        api("org.jetbrains.compose:1.10.3")
 
         // Kotest
         api("io.kotest:io.kotest.gradle.plugin:6.0.4")
 
         // Publishing
-        api("com.vanniktech.maven.publish:0.31.0")
+        api("com.vanniktech.maven.publish:0.36.0")
 
         // KSP
         api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
         api("software.amazon.app.platform:0.0.10-SNAPSHOT")
+        api("dev.zacsweers.metro:0.12.1")
+
+
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
 
         // Code Coverage
@@ -73,6 +76,9 @@ dependencies {
 
         // Ktor
         api("io.ktor.plugin:3.4.2")
+
+        // Documentation
+        api("org.jetbrains.dokka:2.2.0")
 
         // Formatting
         api("org.jlleitschuh.gradle.ktlint:14.2.0")
