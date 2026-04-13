@@ -1,4 +1,7 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 plugins {
     `kotlin-dsl`
@@ -100,5 +103,14 @@ fun getNpmVersion(): String {
         commandLine("git", "rev-parse", "--short=7", "HEAD")
     }.standardOutput.asText.get().replace("\n", "").trim()
 
-    return "$baseVersion-build-$gitCommitHash"
+    // npm registry rejects republishing the same version. Add a monotonic build id
+    // (CI run number, or local UTC timestamp) so each SNAPSHOT publish is unique
+    // even when the same commit is built twice. Format: <base>-SNAPSHOT.<buildId>.<sha>
+    val buildId = System.getenv("GITHUB_RUN_NUMBER")
+        ?: DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+            .withZone(ZoneOffset.UTC)
+            .format(Instant.now())
+
+    val baseNoSuffix = baseVersion.removeSuffix("-SNAPSHOT")
+    return "$baseNoSuffix-SNAPSHOT.$buildId.$gitCommitHash"
 }

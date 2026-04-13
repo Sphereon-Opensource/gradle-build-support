@@ -2,6 +2,7 @@ package com.sphereon.gradle.plugin
 
 import dev.petuska.npm.publish.extension.NpmPublishExtension
 import dev.petuska.npm.publish.extension.domain.json.PackageJson
+import dev.petuska.npm.publish.task.NpmPublishTask
 import java.net.URI
 import org.gradle.api.Action
 import org.gradle.api.Plugin
@@ -164,6 +165,15 @@ class NpmPublicationPlugin : Plugin<Project> {
                 }
             })
 
+            // Route SNAPSHOT publishes to the `snapshot` dist-tag so that
+            // `npm install @sphereon/idk-foo` (no version) keeps resolving to the last
+            // released version rather than getting bumped to a snapshot on every CI run.
+            // Released versions still publish to `latest` (the npm-publish default).
+            if (npmVersion.contains("-SNAPSHOT")) {
+                project.tasks.withType(NpmPublishTask::class.java).configureEach {
+                    tag.set("snapshot")
+                }
+            }
         }
     }
 }
