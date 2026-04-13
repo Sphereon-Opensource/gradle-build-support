@@ -229,6 +229,11 @@ dependencies {
         api("com.squareup:kotlinpoet:2.3.0")
         api("com.squareup:kotlinpoet-ksp:2.3.0")
 
+        // Okio (file system + KMP I/O); fakefilesystem only used in tests
+        api("com.squareup.okio:okio:3.17.0")
+        api("com.squareup.okio:okio-nodefilesystem:3.17.0")
+        api("com.squareup.okio:okio-fakefilesystem:3.17.0")
+
         // Logging
         api("ch.qos.logback:logback-classic:1.5.16")
 
