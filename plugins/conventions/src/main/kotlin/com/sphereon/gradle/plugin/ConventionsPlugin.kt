@@ -209,7 +209,7 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
                     freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
 //                    progressiveMode.set(true) //https://kotlinlang.org/docs/whatsnew13.html#progressive-mode
                     // Minimum 2.2 required by Metro DI compiler plugin
-                    languageVersion.set(KotlinVersion.KOTLIN_2_2)
+                    languageVersion.set(KotlinVersion.KOTLIN_2_3)
                 }
             }
 
