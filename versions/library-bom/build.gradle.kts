@@ -52,6 +52,9 @@ dependencies {
         api("io.matthewnelson.encoding:base64:2.4.0")
         api("com.mayakapps.kache:kache:2.1.1")
         api("com.mayakapps.kache:file-kache:2.1.1")
+
+        // Unicode normalization (NFC/NFD/NFKC/NFKD) — multiplatform String.normalize(Form)
+        api("com.doist.x:normalize:1.3.3")
         api("com.russhwolf:multiplatform-settings:1.3.0")
         api("com.russhwolf:multiplatform-settings-datastore:1.3.0")
         api("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
