@@ -225,6 +225,9 @@ dependencies {
         // Utility
         api("io.github.g0dkar:qrcode-kotlin:4.5.0")
 
+        // Unicode normalization (for IDN / lib-core-idn-public)
+        api("com.doist.x:normalize:1.3.3")
+
         // Code generation
         api("com.squareup:kotlinpoet:2.3.0")
         api("com.squareup:kotlinpoet-ksp:2.3.0")
