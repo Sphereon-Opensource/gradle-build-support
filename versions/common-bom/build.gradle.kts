@@ -43,7 +43,17 @@ dependencies {
         api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
 
-        api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+        // Pinned to the 0.7.1 `0.6.x-compat` flavour: vanilla 0.7.1 moved
+        // `kotlinx.datetime.Instant` into `kotlin.time` (now a typealias) and
+        // ships no `kotlinx/datetime/Instant.class` on the runtime classpath.
+        // Kotlin Dataframe's CSV / convert bytecode still references the old
+        // class name and throws `NoClassDefFoundError: kotlinx/datetime/Instant`
+        // at ingest. The `-0.6.x-compat` variant keeps the legacy class
+        // alongside the new stdlib alias so both Dataframe (old call sites)
+        // and IDK code (already-on-stdlib call sites) resolve. Move back to
+        // plain 0.7.x once Dataframe ships a release compiled against
+        // `kotlin.time.Instant`.
+        api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
         api("org.jetbrains.kotlinx:kotlinx-io-core:0.9.0")
         api("org.jetbrains.kotlinx:atomicfu:0.32.1")
 

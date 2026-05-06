@@ -36,6 +36,12 @@ dependencies {
         api("dev.whyoleg.cryptography:cryptography-provider-openssl3-shared:0.6.0")
         api("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:0.6.0")
 
+        // libsodium-bindings — Argon2id password hashing (KMP). whyoleg cryptography-core
+        // 0.6.0 doesn't ship Argon2; libsodium-bindings wraps libsodium's
+        // crypto_pwhash_argon2id_* on JVM/JS/Native. Used by Argon2idPasswordHasher in
+        // lib-identity-auth-impl.
+        api("com.ionspin.kotlin:multiplatform-crypto-libsodium-bindings:0.9.2")
+
         // A-SIT Plus awesn1 (ASN.1 & structural PKI models)
         api("at.asitplus.awesn1:core:0.1.1")
         api("at.asitplus.awesn1:crypto:0.1.1")
@@ -52,6 +58,9 @@ dependencies {
         api("io.matthewnelson.encoding:base64:2.4.0")
         api("com.mayakapps.kache:kache:2.1.1")
         api("com.mayakapps.kache:file-kache:2.1.1")
+
+        // Unicode normalization (NFC/NFD/NFKC/NFKD) — multiplatform String.normalize(Form)
+        api("com.doist.x:normalize:1.3.3")
         api("com.russhwolf:multiplatform-settings:1.3.0")
         api("com.russhwolf:multiplatform-settings-datastore:1.3.0")
         api("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
@@ -176,16 +185,20 @@ dependencies {
         api("io.github.smyrgeorge:sqlx4k-mysql:0.71.0")
         api("io.github.smyrgeorge:sqlx4k-sqldelight:0.71.0")
 
-        // TestContainers
-        api("org.testcontainers:testcontainers:1.21.0")
-        api("org.testcontainers:postgresql:1.21.0")
-        api("org.testcontainers:mysql:1.21.0")
-        api("org.testcontainers:junit-jupiter:1.21.0")
+        // TestContainers — 1.21.4 release notes: "makes version 1.21.x works with recent
+        // Docker Engine changes." The 2.0.x line publishes only the core jar (no postgresql
+        // / junit-jupiter companions yet); 1.21.4 is the latest that ships the full module
+        // set including the Postgres + JUnit Jupiter integrations we depend on.
+        api("org.testcontainers:testcontainers:1.21.4")
+        api("org.testcontainers:postgresql:1.21.4")
+        api("org.testcontainers:mysql:1.21.4")
+        api("org.testcontainers:junit-jupiter:1.21.4")
 
-        // Docker-java (for Testcontainers)
-        api("com.github.docker-java:docker-java-core:3.4.1")
-        api("com.github.docker-java:docker-java-transport-httpclient5:3.4.1")
-        api("com.github.docker-java:docker-java-api:3.4.1")
+        // Docker-java (for Testcontainers) — 3.7.1 is what Testcontainers 2.0.x pins; safe
+        // to use with the 1.21.x module set since they share the same client surface.
+        api("com.github.docker-java:docker-java-core:3.7.1")
+        api("com.github.docker-java:docker-java-transport-httpclient5:3.7.1")
+        api("com.github.docker-java:docker-java-api:3.7.1")
 
         // Spring
         api("org.springframework.boot:spring-boot-starter-web:3.5.13")
