@@ -129,6 +129,10 @@ dependencies {
         api("io.ktor:ktor-server-cors:3.4.2")
         api("io.ktor:ktor-server-call-logging:3.4.2")
 
+        // JSON Schema (KMP-native, Draft 2020-12, MIT). Used by
+        // lib-jsonld-loader's ValidateJsonLdSchemaServiceCommand.
+        api("io.github.optimumcode:json-schema-validator:0.5.4")
+
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
         api("com.azure:azure-identity:1.18.1")
