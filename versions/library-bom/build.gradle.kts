@@ -133,6 +133,14 @@ dependencies {
         // lib-jsonld-loader's ValidateJsonLdSchemaServiceCommand.
         api("io.github.optimumcode:json-schema-validator:0.5.4")
 
+        // Temporal Java SDK — durable workflow runtime for VDX Phase 8.
+        // - temporal-sdk: WorkflowClient, Worker, activity/workflow APIs
+        // - temporal-testing: TestWorkflowEnvironment for in-process unit tests
+        // - temporal-kotlin: Kotlin coroutine helpers (workflows still authored against the Java API)
+        api("io.temporal:temporal-sdk:1.35.0")
+        api("io.temporal:temporal-testing:1.35.0")
+        api("io.temporal:temporal-kotlin:1.35.0")
+
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
         api("com.azure:azure-identity:1.18.1")
