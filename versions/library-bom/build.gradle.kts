@@ -140,6 +140,13 @@ dependencies {
         api("io.temporal:temporal-sdk:1.35.0")
         api("io.temporal:temporal-testing:1.35.0")
         api("io.temporal:temporal-kotlin:1.35.0")
+        // Required for Temporal's Jackson-based DataConverter to deserialise
+        // Kotlin data classes (workflow + activity payloads). Without it the
+        // worker silently fails every task with InvalidDefinitionException
+        // and the test/server retries forever — the caller-side `workflow.run(...)`
+        // hangs because the workflow never reaches a terminal state.
+        // See vdx-lib-temporal-impl's TemporalDataConverter.
+        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.4")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
