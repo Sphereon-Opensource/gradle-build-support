@@ -42,6 +42,7 @@ dependencies {
         api("org.jetbrains.kotlinx:kotlinx-coroutines-test-wasm-wasi:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
+        api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.2")
 
         // Pinned to the 0.7.1 `0.6.x-compat` flavour: vanilla 0.7.1 moved
         // `kotlinx.datetime.Instant` into `kotlin.time` (now a typealias) and
