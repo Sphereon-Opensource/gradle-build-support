@@ -21,13 +21,13 @@ dependencies {
         api("com.sphereon.gradle.plugin.npm-publication:${version}")
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21-RC")
-        api("org.jetbrains.kotlin.jvm:2.3.21-RC")
-        api("org.jetbrains.kotlin.multiplatform:2.3.21-RC")
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21-RC")
-        api("org.jetbrains.kotlin.plugin.serialization:2.3.21-RC")
-        api("org.jetbrains.kotlin.android:2.3.21-RC")
-        api("org.jetbrains.kotlin.plugin.compose:2.3.21-RC")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
+        api("org.jetbrains.kotlin.jvm:2.3.21")
+        api("org.jetbrains.kotlin.multiplatform:2.3.21")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
+        api("org.jetbrains.kotlin.plugin.serialization:2.3.21")
+        api("org.jetbrains.kotlin.android:2.3.21")
+        api("org.jetbrains.kotlin.plugin.compose:2.3.21")
 
         // Android
         api("com.android.tools.build:gradle:9.1.0")
@@ -49,8 +49,8 @@ dependencies {
         api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
-        api("software.amazon.app.platform:0.0.10-SNAPSHOT")
-        api("dev.zacsweers.metro:0.12.1")
+        api("software.amazon.app.platform:0.0.11SPH-SNAPSHOT")
+        api("dev.zacsweers.metro:1.0.0")
 
 
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")

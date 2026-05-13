@@ -13,11 +13,11 @@ dependencies {
         api(platform(project(":versions:gradle-plugin-bom")))
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-test:2.3.21-RC")
-        api("org.jetbrains.kotlin:kotlin-test-junit:2.3.21-RC")
-        api("org.jetbrains.kotlin:kotlin-test-junit5:2.3.21-RC")
-        api("org.jetbrains.kotlin:kotlin-stdlib:2.3.21-RC")
-        api("org.jetbrains.kotlin:kotlin-reflect:2.3.21-RC")
+        api("org.jetbrains.kotlin:kotlin-test:2.3.21")
+        api("org.jetbrains.kotlin:kotlin-test-junit:2.3.21")
+        api("org.jetbrains.kotlin:kotlin-test-junit5:2.3.21")
+        api("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
+        api("org.jetbrains.kotlin:kotlin-reflect:2.3.21")
 
 
         // Kotlinx
@@ -29,7 +29,6 @@ dependencies {
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-linuxx64:1.10.2")
-        api("org.jetbrains.kotlinx:kotlinx-coroutines-core-iosx64:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-iosarm64:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-iossimulatorarm64:1.10.2")
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core-wasm-js:1.10.2")

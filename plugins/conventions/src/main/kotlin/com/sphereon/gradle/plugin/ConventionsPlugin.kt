@@ -449,7 +449,6 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
     }
 
     if (all || "ios" in enabledTargets) {
-        iosX64()
         iosArm64()
         iosSimulatorArm64()
     }
@@ -469,7 +468,6 @@ fun KotlinMultiplatformExtension.configureIosTargetsIfEnabled() {
     val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
         .split(",").map { it.trim().lowercase() }
     if ("all" in enabledTargets || "ios" in enabledTargets) {
-        iosX64()
         iosArm64()
         iosSimulatorArm64()
     }
