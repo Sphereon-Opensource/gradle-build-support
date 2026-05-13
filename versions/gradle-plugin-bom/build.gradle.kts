@@ -49,7 +49,7 @@ dependencies {
         api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
-        api("software.amazon.app.platform:0.0.11SPH-SNAPSHOT")
+        api("software.amazon.app.platform:0.0.12SPH-SNAPSHOT")
         api("dev.zacsweers.metro:1.0.0")
 
 

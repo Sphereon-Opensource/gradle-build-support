@@ -453,7 +453,7 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
         iosSimulatorArm64()
     }
 
-    if (all || "native" in enabledTargets || "linuxx64" in enabledTargets) {
+    if (linuxX64TargetEnabled(enabledTargets)) {
         linuxX64()
     }
 }
@@ -475,13 +475,25 @@ fun KotlinMultiplatformExtension.configureIosTargetsIfEnabled() {
 
 /**
  * Configures the linuxX64 native target only when `kmp.targets` includes "native", "linuxx64", or "all".
+ *
+ * Skipped on Windows hosts: Kotlin/Native's MinGW toolchain ships no Linux system libraries, so
+ * modules with C-interop deps (e.g. libunistring via com.doist.x.normalize) fail at link time.
+ * Override with `-Dkmp.linuxOnWindows=true` if you have a Linux toolchain available.
  */
 fun KotlinMultiplatformExtension.configureLinuxTargetIfEnabled() {
     val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
         .split(",").map { it.trim().lowercase() }
-    if ("all" in enabledTargets || "native" in enabledTargets || "linuxx64" in enabledTargets) {
+    if (linuxX64TargetEnabled(enabledTargets)) {
         linuxX64()
     }
+}
+
+private fun linuxX64TargetEnabled(enabledTargets: List<String>): Boolean {
+    val requested = "all" in enabledTargets || "native" in enabledTargets || "linuxx64" in enabledTargets
+    if (!requested) return false
+    val isWindows = System.getProperty("os.name").orEmpty().lowercase().contains("windows")
+    val override = System.getProperty("kmp.linuxOnWindows")?.toBoolean() == true
+    return !isWindows || override
 }
 
 /**
