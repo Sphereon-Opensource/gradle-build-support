@@ -102,11 +102,15 @@ class IntegrationTestPlugin : Plugin<Project> {
     private fun configureMultiplatformCompilation(project: Project) {
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
             val kotlinExt = project.extensions.findByType(KotlinMultiplatformExtension::class.java) ?: return@withId
-            val jvmTarget = kotlinExt.targets.find { it.name == "jvm" } ?: return@withId
+            // Defer until the build script's kotlin { jvm() } call has created the target.
+            // Without this, the body runs during the plugins{} block (before the kotlin{}
+            // block executes) and finds no jvm target, silently registering nothing.
+            kotlinExt.targets.matching { it.name == "jvm" }.all jvmTargetBlock@{
+                val jvmTarget = this
+                val testCompilation = jvmTarget.compilations.findByName(SourceSet.TEST_SOURCE_SET_NAME)
+                    ?: return@jvmTargetBlock
 
-            val testCompilation = jvmTarget.compilations.findByName(SourceSet.TEST_SOURCE_SET_NAME) ?: return@withId
-
-            val integrationTestCompilation = jvmTarget.compilations.maybeCreate(INTEGRATION_TEST)
+                val integrationTestCompilation = jvmTarget.compilations.maybeCreate(INTEGRATION_TEST)
             integrationTestCompilation.defaultSourceSet.kotlin.srcDir("src/jvmIntegrationTest/kotlin")
             integrationTestCompilation.defaultSourceSet.resources.srcDir("src/jvmIntegrationTest/resources")
             integrationTestCompilation.associateWith(testCompilation)
@@ -123,6 +127,10 @@ class IntegrationTestPlugin : Plugin<Project> {
                 description = "Runs JVM integration tests"
                 group = LifecycleBasePlugin.VERIFICATION_GROUP
                 useJUnitPlatform()
+                systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+                systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+                systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
+                systemProperty("junit.jupiter.execution.parallel.config.dynamic.factor", "0.5")
 
                 dependsOn("compileIntegrationTestKotlinJvm")
 
@@ -150,6 +158,7 @@ class IntegrationTestPlugin : Plugin<Project> {
             /*project.tasks.named(JavaBasePlugin.CHECK_TASK_NAME) {
                 dependsOn(integrationTestTask)
             }*/
+            }
         }
     }
 
