@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
