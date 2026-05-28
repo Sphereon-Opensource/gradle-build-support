@@ -6,10 +6,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
@@ -17,10 +19,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsSubTargetContainerDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
@@ -94,7 +98,9 @@ class ConventionsPlugin : Plugin<Project> {
                             //                        "jvm" -> setJvmCompilerOptions()
                             "js", "wasmJs" -> {
                                 setupNodeJsEnvironment()
-                                (this as KotlinJsTargetDsl).useEsModules()
+                                val jsTarget = this as KotlinJsTargetDsl
+                                jsTarget.useEsModules()
+                                configureBrowserWebpackConfigDir(jsTarget)
                             }
                         }
                     }
@@ -296,6 +302,54 @@ private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
             }
         }
     }
+}
+
+/**
+ * Centralizes the webpack `node:`-scheme fix for browser (Karma) bundles across all JS/wasmJs modules.
+ *
+ * Ktor 3.5.0 replaced ktor-network's `eval('require')('node:net')` hack with a static `node:net`
+ * import (an ES-module compatibility fix). webpack cannot resolve `node:`-scheme imports for a
+ * browser target ("You may need an additional plugin to handle node: URIs"), and `resolve.fallback`
+ * does not match the `node:` prefix (webpack#14166). Any browser-tested module that transitively
+ * pulls a Node-only engine (e.g. ktor CIO) hits this.
+ *
+ * Rather than a per-module `webpack.config.d/` file, this redirects the browser target's webpack
+ * `configDirectory` (which feeds the run, production AND Karma test webpack configs) to a build
+ * directory that merges a shared `node:`-scheme fragment with any module-local `webpack.config.d`
+ * entries. The fragment strips the `node:` prefix and stubs the bare Node socket modules to `false`.
+ */
+private fun Project.configureBrowserWebpackConfigDir(target: KotlinJsTargetDsl) {
+    val sharedFragment = rootProject.file("gradle-build-support/js/webpack-node-scheme.js")
+    if (!sharedFragment.exists()) {
+        log("webpack node: fragment not found at ${sharedFragment.absolutePath}, skipping browser webpack config")
+        return
+    }
+
+    // whenBrowserConfigured lives on KotlinJsSubTargetContainerDsl (the concrete target implements
+    // it); KotlinJsTargetDsl itself does not expose it. Guards against enabling the browser
+    // sub-target on nodejs-only modules.
+    val browserContainer = target as? KotlinJsSubTargetContainerDsl ?: return
+
+    val targetName = target.name
+    val mergedDir = layout.buildDirectory.dir("webpack-config-merged/$targetName")
+    val moduleConfigD = projectDir.resolve("webpack.config.d")
+
+    val mergeTask = tasks.register<Sync>("merge${targetName.replaceFirstChar { it.uppercase() }}WebpackConfigDir") {
+        // webpack concatenates config.d files alphabetically; the "00-" prefix loads the fix first.
+        from(sharedFragment) { rename { "00-node-scheme.js" } }
+        // Preserve any module-local webpack.config.d entries (e.g. jsdom externals).
+        if (moduleConfigD.isDirectory) from(moduleConfigD)
+        into(mergedDir)
+    }
+
+    // commonWebpackConfig applies to the run, production AND Karma test webpack configs.
+    browserContainer.whenBrowserConfigured {
+        commonWebpackConfig { configDirectory = mergedDir.get().asFile }
+    }
+
+    // The merged config dir must be populated before any browser webpack / Karma test task reads it.
+    tasks.withType<KotlinWebpack>().configureEach { dependsOn(mergeTask) }
+    tasks.withType<KotlinJsTest>().configureEach { dependsOn(mergeTask) }
 }
 
 /**
