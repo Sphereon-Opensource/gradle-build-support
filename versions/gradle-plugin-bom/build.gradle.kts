@@ -30,10 +30,10 @@ dependencies {
         api("org.jetbrains.kotlin.plugin.compose:2.3.21")
 
         // Android
-        api("com.android.tools.build:gradle:9.1.0")
-        api("com.android.application:9.1.0")
-        api("com.android.library:9.1.0")
-        api("com.android.kotlin.multiplatform.library:9.1.0")
+        api("com.android.tools.build:gradle:9.2.1")
+        api("com.android.application:9.2.1")
+        api("com.android.library:9.2.1")
+        api("com.android.kotlin.multiplatform.library:9.2.1")
 
         // Compose
         api("org.jetbrains.compose.hot-reload:1.0.0-beta08")
@@ -49,8 +49,8 @@ dependencies {
         api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
-        api("software.amazon.app.platform:0.0.12SPH-SNAPSHOT")
-        api("dev.zacsweers.metro:1.0.0")
+        api("software.amazon.app.platform:0.0.15SPH-SNAPSHOT")
+        api("dev.zacsweers.metro:1.1.1")
 
 
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
@@ -75,7 +75,7 @@ dependencies {
         api("io.spring.dependency-management:1.1.7")
 
         // Ktor
-        api("io.ktor.plugin:3.4.2")
+        api("io.ktor.plugin:3.5.0")
 
         // Documentation
         api("org.jetbrains.dokka:2.2.0")
