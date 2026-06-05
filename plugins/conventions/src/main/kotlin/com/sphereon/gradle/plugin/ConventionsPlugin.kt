@@ -233,11 +233,16 @@ private fun Project.configureOpenApiCommonComponentsSync() {
     }
 }
 
-/** The module-relative dir containing a committed `openapi.yml` (ignoring build outputs), or null. */
+/**
+ * The module-relative dir of a committed `openapi.yml` that actually `$ref`s the shared
+ * `common-components.yml` (ignoring build outputs), or null. Gating on the reference keeps the sync
+ * from running for unrelated specs — e.g. an `openapi.yml` consumed by an openapi-generator task —
+ * which would otherwise have no use for the copy and can trip Gradle's strict task-output validation.
+ */
 private fun Project.detectOpenapiDir(): String? =
     projectDir.walkTopDown()
         .filter { "/build/" !in it.absolutePath.replace('\\', '/') }
-        .firstOrNull { it.isFile && it.name == "openapi.yml" }
+        .firstOrNull { it.isFile && it.name == "openapi.yml" && it.readText().contains("common-components") }
         ?.parentFile?.relativeTo(projectDir)?.path?.replace('\\', '/')
 
 internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
