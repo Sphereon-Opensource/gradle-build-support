@@ -118,10 +118,10 @@ class ConventionsPlugin : Plugin<Project> {
                 }
             }
 
-            // Copy the canonical shared OpenAPI common-components.yml into any module that ships an
-            // openapi.yml, IDK/EDK/VDX-wide (supersedes the per-layer `sphereon.openapi-common-components`
-            // script plugin; that plugin still wins if a module explicitly applies it).
-            configureOpenApiCommonComponentsSync()
+            // OpenAPI specs (and the shared common-components.yml) are resolved in place from the
+            // `openapi` git submodule via the OpenApiResolver helpers (Project.openapiSpec / .openapiSharedDir).
+            // No per-module copy/sync is needed: every spec keeps same-directory `./common-components.yml`
+            // refs and the synced copy ships in the submodule alongside it.
         }
     }
 
@@ -190,60 +190,6 @@ class ConventionsPlugin : Plugin<Project> {
         }
     }
 }
-
-/**
- * Copies the canonical shared `common-components.yml` (owned by IDK lib-core-api-public) into a
- * module's openapi directory so its `openapi.yml` can keep clean `./common-components.yml#/...`
- * references. Runs for any module that ships a committed `openapi.yml`, across the IDK/EDK/VDX
- * composite roots. Skipped when the legacy `sphereon.openapi-common-components` script plugin is
- * applied (it does the same sync). The copied file is git-ignored by the consumer; edit only the
- * canonical file.
- */
-private fun Project.configureOpenApiCommonComponentsSync() {
-    afterEvaluate {
-        if (plugins.hasPlugin("sphereon.openapi-common-components")) return@afterEvaluate
-        val targetDir = detectOpenapiDir() ?: return@afterEvaluate
-
-        // Canonical source: IDK lib-core-api-public. The relative path depends on which composite
-        // build root is in effect (IDK / EDK / VDX / vdx-infra); probe in order, shortest depth last.
-        val canonicalSuffix = "lib/core/api/public/src/commonMain/resources/openapi/common-components.yml"
-        val canonical = listOf(
-            "idk/$canonicalSuffix",         // EDK-layer root   (rootProject = vdx/edk)
-            "edk/idk/$canonicalSuffix",     // VDX-layer root   (rootProject = vdx)
-            "vdx/edk/idk/$canonicalSuffix", // vdx-infra root
-            canonicalSuffix,                // IDK-layer root   (rootProject = vdx/edk/idk)
-        ).map { rootProject.layout.projectDirectory.file(it) }
-            .firstOrNull { it.asFile.exists() }
-        if (canonical == null) {
-            logger.warn("syncOpenApiCommonComponents not registered for $path: canonical common-components.yml not found")
-            return@afterEvaluate
-        }
-
-        val syncTask = tasks.register<org.gradle.api.tasks.Copy>("syncOpenApiCommonComponents") {
-            description = "Copies the canonical shared common-components.yml from IDK lib-core-api-public into this module's openapi dir."
-            group = "openapi"
-            from(canonical)
-            into(layout.projectDirectory.dir(targetDir))
-            inputs.file(canonical)
-        }
-        // Land the copy before resources are processed and before Kotlin compiles, for every
-        // (per-target) ProcessResources + compileKotlin task — including lazily-registered KMP tasks.
-        tasks.withType<org.gradle.language.jvm.tasks.ProcessResources>().configureEach { dependsOn(syncTask) }
-        tasks.matching { it.name.startsWith(COMPILE_KOTLIN) }.configureEach { dependsOn(syncTask) }
-    }
-}
-
-/**
- * The module-relative dir of a committed `openapi.yml` that actually `$ref`s the shared
- * `common-components.yml` (ignoring build outputs), or null. Gating on the reference keeps the sync
- * from running for unrelated specs — e.g. an `openapi.yml` consumed by an openapi-generator task —
- * which would otherwise have no use for the copy and can trip Gradle's strict task-output validation.
- */
-private fun Project.detectOpenapiDir(): String? =
-    projectDir.walkTopDown()
-        .filter { "/build/" !in it.absolutePath.replace('\\', '/') }
-        .firstOrNull { it.isFile && it.name == "openapi.yml" && it.readText().contains("common-components") }
-        ?.parentFile?.relativeTo(projectDir)?.path?.replace('\\', '/')
 
 internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
 //    log("Applying Kotlin Multiplatform kotlin configuration to project: ${project.name}")
