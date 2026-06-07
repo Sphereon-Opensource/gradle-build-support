@@ -118,10 +118,10 @@ class ConventionsPlugin : Plugin<Project> {
                 }
             }
 
-            // OpenAPI specs (and the shared common-components.yml) are resolved in place from the
-            // `openapi` git submodule via the OpenApiResolver helpers (Project.openapiSpec / .openapiSharedDir).
-            // No per-module copy/sync is needed: every spec keeps same-directory `./common-components.yml`
-            // refs and the synced copy ships in the submodule alongside it.
+            // OpenAPI specs are resolved in place from the `openapi` git submodule via the
+            // OpenApiResolver helper (Project.openapiSpec). No per-module copy/sync is needed: the
+            // repo is a single flat folder, so every spec keeps same-directory `./common-components.yml`
+            // refs that resolve against the one root copy shipped in the submodule.
         }
     }
 

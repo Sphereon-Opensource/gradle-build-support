@@ -9,9 +9,9 @@ import java.io.File
  * IDK / EDK / VDX), replacing the old per-module `syncOpenApiCommonComponents` copy task.
  *
  * Build scripts call [openapiSpec] to point an openapi-generator `inputSpec` at a spec in the
- * submodule. Every spec keeps same-directory `./common-components.yml` (and `./<bundle>.yml`)
- * refs, and the submodule ships those siblings alongside each spec, so the generator resolves
- * them in place — no copy step.
+ * submodule. The repo is a single flat folder, so every spec keeps same-directory
+ * `./common-components.yml` (and `./<bundle>.yml`) refs that the generator resolves in place —
+ * no copy step.
  *
  * A full VDX-infra checkout contains THREE physical openapi checkouts (`vdx/openapi`,
  * `vdx/edk/openapi`, `vdx/edk/idk/openapi`), one per nested product submodule. They must be
@@ -31,7 +31,7 @@ private val OPENAPI_CHECKOUT_CANDIDATES = listOf(
 private fun Project.openapiCheckoutCandidates(): List<File> =
     OPENAPI_CHECKOUT_CANDIDATES
         .map { rootProject.layout.projectDirectory.dir(it).asFile }
-        .filter { it.isDirectory && File(it, "shared/common-components.yml").isFile }
+        .filter { it.isDirectory && File(it, "common-components.yml").isFile }
 
 /**
  * The authoritative `openapi` submodule checkout for this build. Throws if none is present
@@ -79,8 +79,8 @@ private fun headSha(checkout: File): String? {
 }
 
 /**
- * Resolves a repo-relative spec path (e.g. `"idk/kms-openapi.yml"`, `"vdx/party-manager-openapi.yml"`)
- * to its file in the openapi submodule. Throws if the spec is missing.
+ * Resolves a repo-relative spec path (a bare filename in the flat repo, e.g. `"kms-openapi.yml"`,
+ * `"party-manager-openapi.yml"`) to its file in the openapi submodule. Throws if the spec is missing.
  */
 fun Project.openapiSpec(repoRelativePath: String): File {
     val checkout = openapiCheckout()
@@ -90,6 +90,3 @@ fun Project.openapiSpec(repoRelativePath: String): File {
     }
     return spec
 }
-
-/** The shared component directory of the openapi submodule (`shared/`). */
-fun Project.openapiSharedDir(): File = openapiCheckout().resolve("shared")
