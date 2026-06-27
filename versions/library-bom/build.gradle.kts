@@ -46,8 +46,8 @@ dependencies {
         api("at.asitplus.awesn1:core:0.3.0")
         api("at.asitplus.awesn1:crypto:0.3.0")
 
-        // A-sit plus signum (kept for kms-provider-mobile only; supreme pulls indispensable transitively)
-        api("at.asitplus.signum:supreme:0.12.0")
+        // A-SIT Plus signum/supreme (kept for kms-provider-mobile only; supreme pulls indispensable transitively)
+        api("at.asitplus.signum:supreme:0.15.0")
 
         // Android
         api("androidx.startup:startup-runtime:1.2.0")
