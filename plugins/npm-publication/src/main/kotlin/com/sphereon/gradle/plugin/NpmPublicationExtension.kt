@@ -10,6 +10,7 @@ import org.gradle.api.provider.Property
  * ```kotlin
  * npmPublication {
  *     packageName.set("idk-my-custom-name")
+ *     license.set("AGPL-3.0-only")
  * }
  * ```
  */
@@ -25,4 +26,7 @@ interface NpmPublicationExtension {
 
     /** Repository URL for package.json metadata. Default: `https://github.com/nicolo-ribeiro/npm-publish` is overridden */
     val repositoryUrl: Property<String>
+
+    /** SPDX license expression written to the publishable package.json. Default: `Apache-2.0`. */
+    val license: Property<String>
 }

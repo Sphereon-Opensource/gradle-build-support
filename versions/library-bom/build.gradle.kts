@@ -67,6 +67,21 @@ dependencies {
 
         api("io.konform:konform:0.11.1")
 
+        // Compose Multiplatform 1.11.1 family. Keep direct library coordinates in the shared
+        // catalog because the Gradle plugin's `compose.*` dependency accessors are deprecated.
+        api("org.jetbrains.compose.runtime:runtime:1.11.1")
+        api("org.jetbrains.compose.foundation:foundation:1.11.1")
+        api("org.jetbrains.compose.ui:ui:1.11.1")
+        api("org.jetbrains.compose.ui:ui-test:1.11.1")
+        api("org.jetbrains.compose.ui:ui-tooling-preview:1.11.1")
+        api("org.jetbrains.compose.material3:material3:1.11.0-alpha07")
+        api("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+        api("org.jetbrains.compose.desktop:desktop-jvm-windows-x64:1.11.1")
+        api("org.jetbrains.compose.desktop:desktop-jvm-linux-x64:1.11.1")
+        api("org.jetbrains.compose.desktop:desktop-jvm-linux-arm64:1.11.1")
+        api("org.jetbrains.compose.desktop:desktop-jvm-macos-x64:1.11.1")
+        api("org.jetbrains.compose.desktop:desktop-jvm-macos-arm64:1.11.1")
+
         // DI
 //        api("me.tatarka.inject:kotlin-inject-compiler-ksp:0.9.0")
 //        api("me.tatarka.inject:kotlin-inject-runtime:0.9.0")
@@ -83,6 +98,7 @@ dependencies {
         api("software.amazon.app.platform:di-common-public:0.0.15SPH-SNAPSHOT")
         api("software.amazon.app.platform:presenter-molecule-impl:0.0.15SPH-SNAPSHOT")
         api("software.amazon.app.platform:presenter-molecule-public:0.0.15SPH-SNAPSHOT")
+        api("software.amazon.app.platform:presenter-backstack-nav3-public:0.0.15SPH-SNAPSHOT")
         api("software.amazon.app.platform:renderer-compose-multiplatform-public:0.0.15SPH-SNAPSHOT")
         api("software.amazon.app.platform:kotlin-inject-contribute-impl-code-generators:0.0.15SPH-SNAPSHOT")
         api("com.willowtreeapps.assertk:assertk:0.28.1")
@@ -163,6 +179,8 @@ dependencies {
         api("androidx.appcompat:appcompat:1.7.1")
         api("androidx.constraintlayout:constraintlayout:2.2.1")
         api("androidx.activity:activity-compose:1.10.3")
+        api("androidx.navigation3:navigation3-runtime:1.1.4")
+        api("org.jetbrains.androidx.navigation3:navigation3-ui:1.1.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.9.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
 

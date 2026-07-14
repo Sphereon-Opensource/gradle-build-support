@@ -37,7 +37,7 @@ dependencies {
 
         // Compose
         api("org.jetbrains.compose.hot-reload:1.0.0-beta08")
-        api("org.jetbrains.compose:1.10.3")
+        api("org.jetbrains.compose:1.11.1")
 
         // Kotest
         api("io.kotest:io.kotest.gradle.plugin:6.0.4")
