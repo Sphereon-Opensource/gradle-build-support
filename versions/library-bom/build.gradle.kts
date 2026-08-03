@@ -43,8 +43,8 @@ dependencies {
         api("com.ionspin.kotlin:multiplatform-crypto-libsodium-bindings:0.9.5")
 
         // A-SIT Plus awesn1 (ASN.1 & structural PKI models)
-        api("at.asitplus.awesn1:core:0.3.0")
-        api("at.asitplus.awesn1:crypto:0.3.0")
+        api("at.asitplus.awesn1:core:0.4.0")
+        api("at.asitplus.awesn1:crypto:0.4.0")
 
         // A-SIT Plus signum/supreme (kept for kms-provider-mobile only; supreme pulls indispensable transitively)
         api("at.asitplus.signum:supreme:0.15.0")
