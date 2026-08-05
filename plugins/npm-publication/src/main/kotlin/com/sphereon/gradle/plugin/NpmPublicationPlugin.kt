@@ -20,7 +20,7 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
  * - package.json enrichment for dual-target support (Node.js + browser + React Native)
  * - Conditional exports with `node`, `browser`, `react-native`, `types`, and `default` conditions
  * - TypeScript definition references
- * - Apache-2.0 license and repository metadata
+ * - Configurable SPDX license and repository metadata
  *
  * Usage in module build.gradle.kts:
  * ```kotlin
@@ -39,6 +39,7 @@ class NpmPublicationPlugin : Plugin<Project> {
             scope.convention("@sphereon")
             enabled.convention(true)
             repositoryUrl.convention("https://github.com/sphereon-opensource/idk")
+            license.convention("Apache-2.0")
         }
 
         // Skip npm-publish plugin entirely when no JS/wasmJs targets are configured
@@ -125,7 +126,7 @@ class NpmPublicationPlugin : Plugin<Project> {
                     name.set(fullName)
                     version.set(npmVersion)
                     types.set(typesMts)
-                    license.set("Apache-2.0")
+                    license.set(ext.license.get())
                     homepage.set("https://github.com/sphereon-opensource/idk")
                     keywords.addAll("sphereon", "idk", "identity", "kotlin-multiplatform", "esm", "typescript")
 

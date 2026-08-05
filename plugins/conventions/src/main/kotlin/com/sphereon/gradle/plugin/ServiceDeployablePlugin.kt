@@ -62,6 +62,13 @@ class ServiceDeployablePlugin : Plugin<Project> {
                 outputDir.set(project.layout.buildDirectory.dir("merged-services/META-INF/services"))
             }
 
+            project.tasks.named<Jar>("jvmJar") {
+                duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+                from(project.provider { mainCompilation.output.classesDirs })
+                from(project.provider { mainCompilation.output.resourcesDir })
+                dependsOn("jvmMainClasses")
+            }
+
             project.tasks.register<Jar>("buildFatJar") {
                 group = "build"
                 description = "Build executable fat JAR for ${project.name}"

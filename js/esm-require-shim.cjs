@@ -9,4 +9,5 @@
  * See: https://github.com/Kotlin/kotlinx-io/issues/345
  */
 const { createRequire } = require('module');
-globalThis.require = createRequire(__filename);
+const requireBase = process.argv[1] || __filename;
+globalThis.require = createRequire(requireBase);
