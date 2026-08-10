@@ -518,6 +518,36 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
 }
 
 /**
+ * Backend KMP target set: the JVM, plus the linuxX64 native target when `kmp.targets` asks for it
+ * ("native", "linuxx64" or "all") — and never js, wasmJs, ios or android.
+ *
+ * Use this instead of [configureStandardTargets] for modules that only ever run inside a server:
+ * persistence APIs and their implementations, store-backed executors, transport servers. It is not
+ * a smaller [configureStandardTargets]; it is a different statement. It says the module's
+ * `commonMain` is shared by every *backend* runtime, so code belongs there rather than in `jvmMain`
+ * even while the JVM is the only backend runtime that ships today. `jvmMain` then keeps its narrow
+ * meaning: this file needs a JVM-only API — JDBC, `java.time`, reflection — and nothing else does.
+ *
+ * That distinction is what makes the SQLDelight native-driver roadmap a target flip rather than a
+ * source migration: when the native drivers land, a backend module already has its logic in
+ * `commonMain` and only the driver wiring stays JVM-specific.
+ *
+ * Deliberately excludes the client targets. A backend module that advertised js/ios would force
+ * every dependency to publish variants no browser or phone will ever load, and a module whose
+ * `commonMain` reaches a server-only API cannot honour that promise anyway.
+ */
+fun KotlinMultiplatformExtension.configureBackendTargets() {
+    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
+        .split(",").map { it.trim().lowercase() }
+
+    jvm()
+
+    if (linuxX64TargetEnabled(enabledTargets)) {
+        linuxX64()
+    }
+}
+
+/**
  * Configures iOS targets only when `kmp.targets` includes "ios" or "all".
  *
  * Use this in modules that declare their own kotlin {} block instead of [configureStandardTargets].
