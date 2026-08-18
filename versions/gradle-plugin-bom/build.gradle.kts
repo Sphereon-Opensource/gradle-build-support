@@ -29,6 +29,9 @@ dependencies {
         api("org.jetbrains.kotlin.android:2.3.21")
         api("org.jetbrains.kotlin.plugin.compose:2.3.21")
 
+        // Dependency analysis
+        api("com.autonomousapps.dependency-analysis:3.18.0")
+
         // Android
         api("com.android.tools.build:gradle:9.2.1")
         api("com.android.application:9.2.1")

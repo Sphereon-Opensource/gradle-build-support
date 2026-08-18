@@ -9,6 +9,7 @@ re-(use) part of our build support.
 ### Plugins
 
 - **ConventionsPlugin** (`com.sphereon.gradle.plugin.conventions`): Applies standard conventions for Kotlin Multiplatform projects.
+- **DependencyAnalysisConventionPlugin** (`com.sphereon.gradle.plugin.dependency-analysis`): Makes Autonomous Apps dependency analysis permanently available from the Kotlin plugin classloader. The top-level build applies it to the projects being analyzed so composite included builds do not load conflicting analyzer copies.
 - **IntegrationTestPlugin** (`com.sphereon.gradle.plugin.integration-tests`): Adds support for integration tests.
 - **ProjectPublicationPlugin** (`com.sphereon.gradle.plugin.project-publication`): Configures Maven publication with consistent POM metadata and signing.
 - **TomlCatalogPlugin** (`com.sphereon.gradle.toml-catalog`): Generates TOML version catalogs from BOMs.
