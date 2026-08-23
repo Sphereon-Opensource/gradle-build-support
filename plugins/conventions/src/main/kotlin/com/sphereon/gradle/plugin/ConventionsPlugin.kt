@@ -88,7 +88,10 @@ class ConventionsPlugin : Plugin<Project> {
                             // wasmJs rejects these. JS still requires them (2.4.20-RC).
                             if (!name.contains("Wasm", ignoreCase = true)) {
                                 freeCompilerArgs.add("-Xes-long-as-bigint")
-                                freeCompilerArgs.add("-Xes-generator")
+                                // Kotlin 2.4.20-RC renamed -Xes-generator to -Xes-generators.
+                                // The old flag is rejected; without the new one, JS test executables
+                                // fail: "Suspend lambdas cannot be exported without using generators".
+                                freeCompilerArgs.add("-Xes-generators")
                                 freeCompilerArgs.add("-Xenable-suspend-function-exporting")
                                 freeCompilerArgs.add("-Xsuspend-lambda-exporting")
                             }
