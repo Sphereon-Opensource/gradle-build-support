@@ -84,9 +84,17 @@ class ConventionsPlugin : Plugin<Project> {
                     // because the KMP plugin overrides convention plugin settings at a later lifecycle point
                     project.tasks.withType<Kotlin2JsCompile>().configureEach {
                         compilerOptions {
-                            freeCompilerArgs.add("-Xes-long-as-bigint")
                             freeCompilerArgs.add("-XXLanguage:+JsAllowLongInExportedDeclarations")
-                            freeCompilerArgs.add("-Xenable-suspend-function-exporting")
+                            // wasmJs rejects these. JS still requires them (2.4.20-RC).
+                            if (!name.contains("Wasm", ignoreCase = true)) {
+                                freeCompilerArgs.add("-Xes-long-as-bigint")
+                                // Kotlin 2.4.20-RC renamed -Xes-generator to -Xes-generators.
+                                // The old flag is rejected; without the new one, JS test executables
+                                // fail: "Suspend lambdas cannot be exported without using generators".
+                                freeCompilerArgs.add("-Xes-generators")
+                                freeCompilerArgs.add("-Xenable-suspend-function-exporting")
+                                freeCompilerArgs.add("-Xsuspend-lambda-exporting")
+                            }
                         }
                     }
 
@@ -220,7 +228,7 @@ internal fun KotlinMultiplatformExtension.configureKotlinMultiplatform() {
                     freeCompilerArgs.addAll(optIns.map { "-opt-in=$it" })
 //                    progressiveMode.set(true) //https://kotlinlang.org/docs/whatsnew13.html#progressive-mode
                     // Minimum 2.2 required by Metro DI compiler plugin
-                    languageVersion.set(KotlinVersion.KOTLIN_2_3)
+                    languageVersion.set(KotlinVersion.KOTLIN_2_4)
                 }
             }
 
@@ -598,6 +606,16 @@ fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
         .split(",").map { it.trim().lowercase() }
     if ("all" in enabledTargets || "js" in enabledTargets) {
         js { configure?.invoke(this) }
+    }
+}
+
+fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
+    moduleOutputName: String,
+    configure: org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl.() -> Unit
+) {
+    configureJsTargetIfEnabled {
+        outputModuleName.set(moduleOutputName)
+        configure()
     }
 }
 

@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.21"
+kotlin = "2.4.20-RC"
 nexus-publish = "2.0.0"
 dependency-analysis = "3.18.0"
 
