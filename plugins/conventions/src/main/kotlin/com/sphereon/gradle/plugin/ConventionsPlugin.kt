@@ -53,6 +53,10 @@ class ConventionsPlugin : Plugin<Project> {
         Logger = project.logger
         var isApplied = false
 
+        // Enterprise role/capability enforcement is part of the shared convention layer. This
+        // keeps direct EDK/IDK builds subject to the same boundary as the outer service build.
+        project.pluginManager.apply(EnterpriseArchitecturePlugin::class.java)
+
         with(project) {
             if (project == project.rootProject) {
                 // Apply Nexus publishing configuration to the root project

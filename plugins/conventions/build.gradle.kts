@@ -33,6 +33,13 @@ dependencies {
     implementation(libs.dependency.analysis.gradlePlugin)
     implementation(libs.nexus.publish)
     api("com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin:0.31.0")
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 gradlePlugin {
@@ -48,6 +55,10 @@ gradlePlugin {
         create("dependencyAnalysis") {
             id = "com.sphereon.gradle.plugin.dependency-analysis"
             implementationClass = "com.sphereon.gradle.plugin.DependencyAnalysisConventionPlugin"
+        }
+        create("enterpriseArchitecture") {
+            id = "com.sphereon.gradle.plugin.enterprise-architecture"
+            implementationClass = "com.sphereon.gradle.plugin.EnterpriseArchitecturePlugin"
         }
     }
 }
