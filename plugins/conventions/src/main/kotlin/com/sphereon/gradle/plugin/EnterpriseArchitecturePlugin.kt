@@ -319,6 +319,13 @@ class EnterpriseArchitecturePlugin : Plugin<Project> {
             })
         }
 
+        // OpenAPI REST modules copy generated sources into src before the architecture report
+        // scans that tree. Keep the task graph explicit so Gradle 9 cannot observe the report
+        // reading a producer's output without a declared dependency.
+        report.configure {
+            dependsOn(project.tasks.matching { it.name == "copyGeneratedSources" })
+        }
+
         project.afterEvaluate {
             report.configure {
                 resolvedRuntimeComponents.set(
