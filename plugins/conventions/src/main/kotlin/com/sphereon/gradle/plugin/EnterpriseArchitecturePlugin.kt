@@ -10,6 +10,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
@@ -18,6 +19,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 /**
@@ -67,6 +69,7 @@ private fun runtimeFamily(runtimeRole: String): String = when (runtimeRole) {
 
 private fun componentId(file: File): String = file.invariantSeparatorsPath
 
+@CacheableTask
 abstract class EnterpriseArchitectureReportTask : DefaultTask() {
     @get:Input
     abstract val projectPath: Property<String>
@@ -274,6 +277,7 @@ abstract class EnterpriseArchitectureReportTask : DefaultTask() {
     }
 }
 
+@DisableCachingByDefault(because = "This verification task has no outputs to cache")
 abstract class EnterpriseArchitectureCheckTask : DefaultTask() {
     @get:Input
     abstract val projectPath: Property<String>
