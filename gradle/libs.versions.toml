@@ -2,11 +2,13 @@
 kotlin = "2.4.20-RC"
 nexus-publish = "2.0.0"
 dependency-analysis = "3.18.0"
+agp = "9.2.1"
 
 [libraries]
 nexus-publish = { module = "io.github.gradle-nexus.publish-plugin:io.github.gradle-nexus.publish-plugin.gradle.plugin", version.ref = "nexus-publish" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 dependency-analysis-gradlePlugin = { module = "com.autonomousapps.dependency-analysis:com.autonomousapps.dependency-analysis.gradle.plugin", version.ref = "dependency-analysis" }
+android-gradleApi = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 
 [bundles]
 

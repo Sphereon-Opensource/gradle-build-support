@@ -1,25 +1,20 @@
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-
 plugins {
     `kotlin-dsl`
     `maven-publish`
     alias(libs.plugins.vanniktech.mavenPublish)
 }
-
 repositories {
     mavenCentral()
     gradlePluginPortal()
 }
-
 dependencies {
     implementation(gradleApi())
 }
 
 allprojects {
     group = "$group"
-    val npmVersion by extra { getNpmVersion() }
+    // This build publishes JVM plugins and BOMs, not npm packages. Consuming
+    // builds supply their own npmVersion when applying NpmPublicationPlugin.
 
     plugins.withType<MavenPublishPlugin> {
         configure<PublishingExtension> {
@@ -89,27 +84,4 @@ mavenPublishing {
                 useGpgCmd()
             }
         }*/
-}
-
-fun getNpmVersion(): String {
-    val baseVersion = project.version.toString()
-    if (!baseVersion.endsWith("-SNAPSHOT")) {
-        return baseVersion
-    }
-
-    // Get git commit hash
-    val gitCommitHash = providers.exec {
-        commandLine("git", "rev-parse", "--short=7", "HEAD")
-    }.standardOutput.asText.get().replace("\n", "").trim()
-
-    // npm registry rejects republishing the same version. Add a monotonic build id
-    // (CI run number, or local UTC timestamp) so each SNAPSHOT publish is unique
-    // even when the same commit is built twice. Format: <base>-SNAPSHOT.<buildId>.<sha>
-    val buildId = System.getenv("GITHUB_RUN_NUMBER")
-        ?: DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-            .withZone(ZoneOffset.UTC)
-            .format(Instant.now())
-
-    val baseNoSuffix = baseVersion.removeSuffix("-SNAPSHOT")
-    return "$baseNoSuffix-SNAPSHOT.$buildId.$gitCommitHash"
 }

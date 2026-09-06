@@ -64,6 +64,9 @@ class ConventionsPlugin : Plugin<Project> {
                 configureNexusPublishing()
             }
 
+            // Android SDK levels are a shared policy, not a per-module choice.
+            configureAndroidConventions()
+
             // Hook into Multiplatform projects
             project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
                 if (isApplied) { // Ensure configuration is only applied once

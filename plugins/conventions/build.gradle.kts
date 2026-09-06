@@ -30,6 +30,9 @@ repositories {
 dependencies {
     gradleApi()
     implementation(libs.kotlin.gradlePlugin)
+    // Android DSL types for the shared minSdk convention. compileOnly: AGP is on the buildscript
+    // classpath of the modules that apply it, and must not be forced onto those that do not.
+    compileOnly(libs.android.gradleApi)
     implementation(libs.dependency.analysis.gradlePlugin)
     implementation(libs.nexus.publish)
     api("com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin:0.31.0")
