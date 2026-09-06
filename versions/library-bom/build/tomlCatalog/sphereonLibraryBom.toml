@@ -1,0 +1,284 @@
+[versions]
+com-sphereon-gradle-library-bom = "0.9.0-SNAPSHOT"
+com-azure-sdk-bom = "1.3.0"
+com-sphereon-gradle-common-bom = "0.9.0-SNAPSHOT"
+com-sphereon-gradle-plugin-bom = "0.9.0-SNAPSHOT"
+org-jetbrains-kotlin-jvm = "2.4.20-RC"
+org-jetbrains-kotlin-multiplatform = "2.4.20-RC"
+org-jetbrains-kotlin-plugin-serialization = "2.4.20-RC"
+org-jetbrains-kotlin-android = "2.4.20-RC"
+org-jetbrains-kotlin-plugin-compose = "2.4.20-RC"
+com-autonomousapps-dependency-analysis = "3.18.0"
+com-android-application = "9.2.1"
+com-android-library = "9.2.1"
+com-android-kotlin-multiplatform-library = "9.2.1"
+org-jetbrains-compose-hot-reload = "1.0.0-beta08"
+org-jetbrains-compose = "1.11.1"
+com-vanniktech-maven-publish = "0.36.0"
+software-amazon-app-platform = "0.0.15SPH-SNAPSHOT"
+dev-zacsweers-metro = "1.4.2"
+org-jetbrains-kotlinx-kover = "0.9.4"
+com-codingfeline-buildkonfig = "0.17.0"
+org-openapi-generator = "7.16.0"
+org-springframework-boot = "3.5.13"
+io-spring-dependency-management = "1.1.7"
+io-ktor-plugin = "3.5.0"
+org-jetbrains-dokka = "2.2.0"
+org-jlleitschuh-gradle-ktlint = "14.2.0"
+io-gitlab-arturbosch-detekt = "1.23.8"
+
+[libraries]
+sphereon-gradle-library-bom = { module = "com.sphereon.gradle:library-bom", version.ref = "com-sphereon-gradle-library-bom" }
+org-jetbrains-kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu" }
+org-kotlincrypto-core-digest = { module = "org.kotlincrypto.core:digest" }
+org-kotlincrypto-hash-sha1 = { module = "org.kotlincrypto.hash:sha1" }
+org-kotlincrypto-hash-sha2 = { module = "org.kotlincrypto.hash:sha2" }
+org-kotlincrypto-hash-sha3 = { module = "org.kotlincrypto.hash:sha3" }
+dev-whyoleg-cryptography-core = { module = "dev.whyoleg.cryptography:cryptography-core" }
+dev-whyoleg-cryptography-serialization-pem = { module = "dev.whyoleg.cryptography:cryptography-serialization-pem" }
+dev-whyoleg-cryptography-serialization-asn1 = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1" }
+dev-whyoleg-cryptography-serialization-asn1-modules = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1-modules" }
+dev-whyoleg-cryptography-random = { module = "dev.whyoleg.cryptography:cryptography-random" }
+dev-whyoleg-cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal" }
+dev-whyoleg-cryptography-provider-cryptokit = { module = "dev.whyoleg.cryptography:cryptography-provider-cryptokit" }
+dev-whyoleg-cryptography-provider-webcrypto = { module = "dev.whyoleg.cryptography:cryptography-provider-webcrypto" }
+dev-whyoleg-cryptography-provider-jdk = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk" }
+dev-whyoleg-cryptography-provider-openssl3-api = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-api" }
+dev-whyoleg-cryptography-provider-openssl3-shared = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-shared" }
+dev-whyoleg-cryptography-provider-openssl3-prebuilt = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt" }
+com-ionspin-kotlin-multiplatform-crypto-libsodium-bindings = { module = "com.ionspin.kotlin:multiplatform-crypto-libsodium-bindings" }
+at-asitplus-awesn1-core = { module = "at.asitplus.awesn1:core" }
+at-asitplus-awesn1-crypto = { module = "at.asitplus.awesn1:crypto" }
+at-asitplus-awesn1-kxs = { module = "at.asitplus.awesn1:kxs" }
+at-asitplus-signum-supreme = { module = "at.asitplus.signum:supreme" }
+androidx-startup-runtime = { module = "androidx.startup:startup-runtime" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core" }
+co-touchlab-kermit = { module = "co.touchlab:kermit" }
+io-matthewnelson-encoding-base64 = { module = "io.matthewnelson.encoding:base64" }
+com-mayakapps-kache-kache = { module = "com.mayakapps.kache:kache" }
+com-mayakapps-kache-file-kache = { module = "com.mayakapps.kache:file-kache" }
+com-doist-x-normalize = { module = "com.doist.x:normalize" }
+com-russhwolf-multiplatform-settings = { module = "com.russhwolf:multiplatform-settings" }
+com-russhwolf-multiplatform-settings-datastore = { module = "com.russhwolf:multiplatform-settings-datastore" }
+com-russhwolf-multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines" }
+io-konform-konform = { module = "io.konform:konform" }
+org-jetbrains-compose-runtime-runtime = { module = "org.jetbrains.compose.runtime:runtime" }
+org-jetbrains-compose-foundation-foundation = { module = "org.jetbrains.compose.foundation:foundation" }
+org-jetbrains-compose-ui-ui = { module = "org.jetbrains.compose.ui:ui" }
+org-jetbrains-compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test" }
+org-jetbrains-compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview" }
+org-jetbrains-compose-material3-material3 = { module = "org.jetbrains.compose.material3:material3" }
+org-jetbrains-compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended" }
+org-jetbrains-compose-desktop-jvm-windows-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-windows-x64" }
+org-jetbrains-compose-desktop-jvm-linux-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-x64" }
+org-jetbrains-compose-desktop-jvm-linux-arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64" }
+org-jetbrains-compose-desktop-jvm-macos-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-x64" }
+org-jetbrains-compose-desktop-jvm-macos-arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64" }
+me-tatarka-inject-kotlin-inject-compiler-ksp = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp" }
+me-tatarka-inject-kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime" }
+me-tatarka-inject-kotlin-inject-runtime-kmp = { module = "me.tatarka.inject:kotlin-inject-runtime-kmp" }
+software-amazon-lastmile-kotlin-inject-anvil-runtime = { module = "software.amazon.lastmile.kotlin.inject.anvil:runtime" }
+software-amazon-lastmile-kotlin-inject-anvil-runtime-optional = { module = "software.amazon.lastmile.kotlin.inject.anvil:runtime-optional" }
+software-amazon-lastmile-kotlin-inject-anvil-compiler = { module = "software.amazon.lastmile.kotlin.inject.anvil:compiler" }
+software-amazon-app-platform-metro-public = { module = "software.amazon.app.platform:metro-public" }
+software-amazon-app-platform-metro-impl = { module = "software.amazon.app.platform:metro-impl" }
+software-amazon-app-platform-kotlin-inject-public = { module = "software.amazon.app.platform:kotlin-inject-public" }
+software-amazon-app-platform-kotlin-inject-impl = { module = "software.amazon.app.platform:kotlin-inject-impl" }
+software-amazon-app-platform-kotlin-inject-contribute-public = { module = "software.amazon.app.platform:kotlin-inject-contribute-public" }
+software-amazon-app-platform-scope-public = { module = "software.amazon.app.platform:scope-public" }
+software-amazon-app-platform-di-common-public = { module = "software.amazon.app.platform:di-common-public" }
+software-amazon-app-platform-presenter-molecule-impl = { module = "software.amazon.app.platform:presenter-molecule-impl" }
+software-amazon-app-platform-presenter-molecule-public = { module = "software.amazon.app.platform:presenter-molecule-public" }
+software-amazon-app-platform-presenter-backstack-nav3-public = { module = "software.amazon.app.platform:presenter-backstack-nav3-public" }
+software-amazon-app-platform-renderer-compose-multiplatform-public = { module = "software.amazon.app.platform:renderer-compose-multiplatform-public" }
+software-amazon-app-platform-kotlin-inject-contribute-impl-code-generators = { module = "software.amazon.app.platform:kotlin-inject-contribute-impl-code-generators" }
+com-willowtreeapps-assertk-assertk = { module = "com.willowtreeapps.assertk:assertk" }
+com-michael-bull-kotlin-result-kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result" }
+io-ktor-http = { module = "io.ktor:ktor-http" }
+io-ktor-client-core = { module = "io.ktor:ktor-client-core" }
+io-ktor-client-core-jvm = { module = "io.ktor:ktor-client-core-jvm" }
+io-ktor-client-core-js = { module = "io.ktor:ktor-client-core-js" }
+io-ktor-client-core-wasm-js = { module = "io.ktor:ktor-client-core-wasm-js" }
+io-ktor-client-cio = { module = "io.ktor:ktor-client-cio" }
+io-ktor-client-cio-jvm = { module = "io.ktor:ktor-client-cio-jvm" }
+io-ktor-client-cio-js = { module = "io.ktor:ktor-client-cio-js" }
+io-ktor-client-cio-wasm-js = { module = "io.ktor:ktor-client-cio-wasm-js" }
+io-ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp" }
+io-ktor-client-okhttp-jvm = { module = "io.ktor:ktor-client-okhttp-jvm" }
+io-ktor-client-darwin = { module = "io.ktor:ktor-client-darwin" }
+io-ktor-client-js = { module = "io.ktor:ktor-client-js" }
+io-ktor-client-js-wasm-js = { module = "io.ktor:ktor-client-js-wasm-js" }
+io-ktor-client-java = { module = "io.ktor:ktor-client-java" }
+io-ktor-client-logging = { module = "io.ktor:ktor-client-logging" }
+io-ktor-client-mock = { module = "io.ktor:ktor-client-mock" }
+io-ktor-client-mock-js = { module = "io.ktor:ktor-client-mock-js" }
+io-ktor-client-auth = { module = "io.ktor:ktor-client-auth" }
+io-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation" }
+io-ktor-client-serialization = { module = "io.ktor:ktor-client-serialization" }
+io-ktor-io = { module = "io.ktor:ktor-io" }
+io-ktor-server-core = { module = "io.ktor:ktor-server-core" }
+io-ktor-server-cio = { module = "io.ktor:ktor-server-cio" }
+io-ktor-server-netty = { module = "io.ktor:ktor-server-netty" }
+io-ktor-server-jetty = { module = "io.ktor:ktor-server-jetty" }
+io-ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation" }
+io-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json" }
+io-ktor-server-test-host = { module = "io.ktor:ktor-server-test-host" }
+io-ktor-serialization-kotlinx-cbor = { module = "io.ktor:ktor-serialization-kotlinx-cbor" }
+io-ktor-serialization-kotlinx-protobuf = { module = "io.ktor:ktor-serialization-kotlinx-protobuf" }
+io-ktor-server-auth = { module = "io.ktor:ktor-server-auth" }
+io-ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt" }
+io-ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages" }
+io-ktor-server-cors = { module = "io.ktor:ktor-server-cors" }
+io-ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging" }
+io-github-optimumcode-json-schema-validator = { module = "io.github.optimumcode:json-schema-validator" }
+io-temporal-sdk = { module = "io.temporal:temporal-sdk" }
+io-temporal-testing = { module = "io.temporal:temporal-testing" }
+io-temporal-kotlin = { module = "io.temporal:temporal-kotlin" }
+com-fasterxml-jackson-module-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+com-azure-sdk-bom = { module = "com.azure:azure-sdk-bom", version.ref = "com-azure-sdk-bom" }
+com-azure-identity = { module = "com.azure:azure-identity" }
+com-azure-security-keyvault-administration = { module = "com.azure:azure-security-keyvault-administration" }
+com-azure-security-keyvault-certificates = { module = "com.azure:azure-security-keyvault-certificates" }
+com-azure-security-keyvault-keys = { module = "com.azure:azure-security-keyvault-keys" }
+androidx-core-ktx = { module = "androidx.core:core-ktx" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit" }
+androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core" }
+androidx-appcompat-appcompat = { module = "androidx.appcompat:appcompat" }
+androidx-constraintlayout-constraintlayout = { module = "androidx.constraintlayout:constraintlayout" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime" }
+org-jetbrains-androidx-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui" }
+org-jetbrains-androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel" }
+org-jetbrains-androidx-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose" }
+app-cash-sqldelight-runtime = { module = "app.cash.sqldelight:runtime" }
+app-cash-sqldelight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions" }
+app-cash-sqldelight-jdbc-driver = { module = "app.cash.sqldelight:jdbc-driver" }
+app-cash-sqldelight-sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver" }
+app-cash-sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver" }
+com-zaxxer-hikaricp = { module = "com.zaxxer:HikariCP" }
+org-postgresql-postgresql = { module = "org.postgresql:postgresql" }
+com-mysql-connector-j = { module = "com.mysql:mysql-connector-j" }
+org-xerial-sqlite-jdbc = { module = "org.xerial:sqlite-jdbc" }
+io-github-smyrgeorge-sqlx4k-postgres = { module = "io.github.smyrgeorge:sqlx4k-postgres" }
+io-github-smyrgeorge-sqlx4k-mysql = { module = "io.github.smyrgeorge:sqlx4k-mysql" }
+io-github-smyrgeorge-sqlx4k-sqldelight = { module = "io.github.smyrgeorge:sqlx4k-sqldelight" }
+org-keycloak-core = { module = "org.keycloak:keycloak-core" }
+org-keycloak-server-spi = { module = "org.keycloak:keycloak-server-spi" }
+org-keycloak-server-spi-private = { module = "org.keycloak:keycloak-server-spi-private" }
+org-keycloak-services = { module = "org.keycloak:keycloak-services" }
+org-keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client" }
+org-jboss-logging-jboss-logging = { module = "org.jboss.logging:jboss-logging" }
+io-mockk-mockk = { module = "io.mockk:mockk" }
+app-cash-turbine-turbine = { module = "app.cash.turbine:turbine" }
+org-junit-jupiter-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+org-slf4j-simple = { module = "org.slf4j:slf4j-simple" }
+org-testcontainers-testcontainers = { module = "org.testcontainers:testcontainers" }
+org-testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
+org-testcontainers-mysql = { module = "org.testcontainers:mysql" }
+org-testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
+com-github-docker-java-core = { module = "com.github.docker-java:docker-java-core" }
+com-github-docker-java-transport-httpclient5 = { module = "com.github.docker-java:docker-java-transport-httpclient5" }
+com-github-docker-java-api = { module = "com.github.docker-java:docker-java-api" }
+org-springframework-boot-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+org-springframework-boot-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+jakarta-validation-jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api" }
+org-reactivestreams-reactive-streams = { module = "org.reactivestreams:reactive-streams" }
+io-projectreactor-reactor-core = { module = "io.projectreactor:reactor-core" }
+io-grpc-netty-shaded = { module = "io.grpc:grpc-netty-shaded" }
+io-grpc-protobuf = { module = "io.grpc:grpc-protobuf" }
+io-grpc-stub = { module = "io.grpc:grpc-stub" }
+io-grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub" }
+io-grpc-services = { module = "io.grpc:grpc-services" }
+io-grpc-api = { module = "io.grpc:grpc-api" }
+com-google-protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin" }
+io-github-pdvrieze-xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core" }
+io-github-pdvrieze-xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization" }
+org-bouncycastle-bcprov-jdk18on = { module = "org.bouncycastle:bcprov-jdk18on" }
+org-bouncycastle-bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on" }
+org-bouncycastle-bcutil-jdk18on = { module = "org.bouncycastle:bcutil-jdk18on" }
+co-touchlab-skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations" }
+io-github-irgaly-kottage-kottage = { module = "io.github.irgaly.kottage:kottage" }
+io-github-g0dkar-qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin" }
+com-squareup-kotlinpoet = { module = "com.squareup:kotlinpoet" }
+com-squareup-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp" }
+com-squareup-okio-okio = { module = "com.squareup.okio:okio" }
+com-squareup-okio-nodefilesystem = { module = "com.squareup.okio:okio-nodefilesystem" }
+com-squareup-okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem" }
+ch-qos-logback-classic = { module = "ch.qos.logback:logback-classic" }
+org-simplejavamail-simple-java-mail = { module = "org.simplejavamail:simple-java-mail" }
+com-github-spullara-mustache-java-compiler = { module = "com.github.spullara.mustache.java:compiler" }
+androidx-test-core = { module = "androidx.test:core" }
+androidx-test-rules = { module = "androidx.test:rules" }
+androidx-test-ext-junit-ktx = { module = "androidx.test.ext:junit-ktx" }
+com-github-tschuchortdev-kotlin-compile-testing-ksp = { module = "com.github.tschuchortdev:kotlin-compile-testing-ksp" }
+sphereon-gradle-common-bom = { module = "com.sphereon.gradle:common-bom", version.ref = "com-sphereon-gradle-common-bom" }
+org-jetbrains-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test" }
+org-jetbrains-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
+org-jetbrains-kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
+org-jetbrains-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
+org-jetbrains-kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+org-jetbrains-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
+org-jetbrains-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
+org-jetbrains-kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor" }
+org-jetbrains-kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" }
+org-jetbrains-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
+org-jetbrains-kotlinx-coroutines-core-js = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-js" }
+org-jetbrains-kotlinx-coroutines-core-jvm = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm" }
+org-jetbrains-kotlinx-coroutines-core-linuxx64 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-linuxx64" }
+org-jetbrains-kotlinx-coroutines-core-iosarm64 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-iosarm64" }
+org-jetbrains-kotlinx-coroutines-core-iossimulatorarm64 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-iossimulatorarm64" }
+org-jetbrains-kotlinx-coroutines-core-wasm-js = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-wasm-js" }
+org-jetbrains-kotlinx-coroutines-core-wasm-wasi = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core-wasm-wasi" }
+org-jetbrains-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test" }
+org-jetbrains-kotlinx-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive" }
+org-jetbrains-kotlinx-coroutines-test-js = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test-js" }
+org-jetbrains-kotlinx-coroutines-test-wasm-js = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test-wasm-js" }
+org-jetbrains-kotlinx-coroutines-test-wasm-wasi = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test-wasm-wasi" }
+org-jetbrains-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android" }
+org-jetbrains-kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing" }
+org-jetbrains-kotlinx-coroutines-jdk8 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8" }
+org-jetbrains-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime" }
+org-jetbrains-kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core" }
+io-kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
+io-kotest-framework-engine = { module = "io.kotest:kotest-framework-engine" }
+io-kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5" }
+io-kotest-property = { module = "io.kotest:kotest-property" }
+sphereon-gradle-plugin-bom = { module = "com.sphereon.gradle:gradle-plugin-bom", version.ref = "com-sphereon-gradle-plugin-bom" }
+org-jetbrains-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
+com-android-tools-build-gradle = { module = "com.android.tools.build:gradle" }
+io-kotest-io-kotest-gradle-plugin = { module = "io.kotest:io.kotest.gradle.plugin" }
+com-google-devtools-ksp-com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin" }
+org-jetbrains-kotlin-npm-publish-org-jetbrains-kotlin-npm-publish-gradle-plugin = { module = "org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin" }
+io-github-gradle-nexus-publish-plugin-io-github-gradle-nexus-publish-plugin-gradle-plugin = { module = "io.github.gradle-nexus.publish-plugin:io.github.gradle-nexus.publish-plugin.gradle.plugin" }
+
+[plugins]
+com-sphereon-gradle-plugin-conventions = { id = "com.sphereon.gradle.plugin.conventions" }
+com-sphereon-gradle-plugin-integration-tests = { id = "com.sphereon.gradle.plugin.integration-tests" }
+com-sphereon-gradle-plugin-project-publication = { id = "com.sphereon.gradle.plugin.project-publication" }
+com-sphereon-gradle-plugin-npm-publication = { id = "com.sphereon.gradle.plugin.npm-publication" }
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "org-jetbrains-kotlin-jvm" }
+org-jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "org-jetbrains-kotlin-multiplatform" }
+org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "org-jetbrains-kotlin-plugin-serialization" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+org-jetbrains-kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "org-jetbrains-kotlin-plugin-compose" }
+com-autonomousapps-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "com-autonomousapps-dependency-analysis" }
+com-android-application = { id = "com.android.application", version.ref = "com-android-application" }
+com-android-library = { id = "com.android.library", version.ref = "com-android-library" }
+com-android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "com-android-kotlin-multiplatform-library" }
+org-jetbrains-compose-hot-reload = { id = "org.jetbrains.compose.hot-reload", version.ref = "org-jetbrains-compose-hot-reload" }
+org-jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "org-jetbrains-compose" }
+com-vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "com-vanniktech-maven-publish" }
+software-amazon-app-platform = { id = "software.amazon.app.platform", version.ref = "software-amazon-app-platform" }
+dev-zacsweers-metro = { id = "dev.zacsweers.metro", version.ref = "dev-zacsweers-metro" }
+org-jetbrains-kotlinx-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "org-jetbrains-kotlinx-atomicfu" }
+org-jetbrains-kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "org-jetbrains-kotlinx-kover" }
+com-codingfeline-buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "com-codingfeline-buildkonfig" }
+org-openapi-generator = { id = "org.openapi.generator", version.ref = "org-openapi-generator" }
+org-springframework-boot = { id = "org.springframework.boot", version.ref = "org-springframework-boot" }
+io-spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "io-spring-dependency-management" }
+io-ktor-plugin = { id = "io.ktor.plugin", version.ref = "io-ktor-plugin" }
+org-jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "org-jetbrains-dokka" }
+org-jlleitschuh-gradle-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "org-jlleitschuh-gradle-ktlint" }
+io-gitlab-arturbosch-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "io-gitlab-arturbosch-detekt" }
+
+[bundles]

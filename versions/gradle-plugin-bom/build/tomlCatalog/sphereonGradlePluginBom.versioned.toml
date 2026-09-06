@@ -1,0 +1,83 @@
+[versions]
+com-sphereon-gradle-plugin-bom = "0.9.0-SNAPSHOT"
+com-sphereon-gradle-plugin-conventions = "0.9.0-SNAPSHOT"
+com-sphereon-gradle-plugin-integration-tests = "0.9.0-SNAPSHOT"
+com-sphereon-gradle-plugin-project-publication = "0.9.0-SNAPSHOT"
+com-sphereon-gradle-plugin-npm-publication = "0.9.0-SNAPSHOT"
+org-jetbrains-kotlin-gradle-plugin = "2.4.20-RC"
+org-jetbrains-kotlin-jvm = "2.4.20-RC"
+org-jetbrains-kotlin-multiplatform = "2.4.20-RC"
+org-jetbrains-kotlin-plugin-serialization = "2.4.20-RC"
+org-jetbrains-kotlin-android = "2.4.20-RC"
+org-jetbrains-kotlin-plugin-compose = "2.4.20-RC"
+com-autonomousapps-dependency-analysis = "3.18.0"
+com-android-tools-build-gradle = "9.2.1"
+com-android-application = "9.2.1"
+com-android-library = "9.2.1"
+com-android-kotlin-multiplatform-library = "9.2.1"
+org-jetbrains-compose-hot-reload = "1.0.0-beta08"
+org-jetbrains-compose = "1.11.1"
+io-kotest-io-kotest-gradle-plugin = "6.0.4"
+com-vanniktech-maven-publish = "0.36.0"
+com-google-devtools-ksp-com-google-devtools-ksp-gradle-plugin = "2.3.6"
+software-amazon-app-platform = "0.0.15SPH-SNAPSHOT"
+dev-zacsweers-metro = "1.4.2"
+org-jetbrains-kotlinx-atomicfu = "0.32.1"
+org-jetbrains-kotlinx-kover = "0.9.4"
+org-jetbrains-kotlin-npm-publish-org-jetbrains-kotlin-npm-publish-gradle-plugin = "3.6.0"
+com-codingfeline-buildkonfig = "0.17.0"
+io-github-gradle-nexus-publish-plugin-io-github-gradle-nexus-publish-plugin-gradle-plugin = "2.0.0"
+org-openapi-generator = "7.16.0"
+org-springframework-boot = "3.5.13"
+io-spring-dependency-management = "1.1.7"
+io-ktor-plugin = "3.5.0"
+org-jetbrains-dokka = "2.2.0"
+org-jlleitschuh-gradle-ktlint = "14.2.0"
+io-gitlab-arturbosch-detekt = "1.23.8"
+
+[libraries]
+sphereon-gradle-plugin-bom = { module = "com.sphereon.gradle:gradle-plugin-bom", version.ref = "com-sphereon-gradle-plugin-bom" }
+org-jetbrains-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "org-jetbrains-kotlin-gradle-plugin" }
+com-android-tools-build-gradle = { module = "com.android.tools.build:gradle", version.ref = "com-android-tools-build-gradle" }
+io-kotest-io-kotest-gradle-plugin = { module = "io.kotest:io.kotest.gradle.plugin", version.ref = "io-kotest-io-kotest-gradle-plugin" }
+com-google-devtools-ksp-com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "com-google-devtools-ksp-com-google-devtools-ksp-gradle-plugin" }
+org-jetbrains-kotlin-npm-publish-org-jetbrains-kotlin-npm-publish-gradle-plugin = { module = "org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin", version.ref = "org-jetbrains-kotlin-npm-publish-org-jetbrains-kotlin-npm-publish-gradle-plugin" }
+io-github-gradle-nexus-publish-plugin-io-github-gradle-nexus-publish-plugin-gradle-plugin = { module = "io.github.gradle-nexus.publish-plugin:io.github.gradle-nexus.publish-plugin.gradle.plugin", version.ref = "io-github-gradle-nexus-publish-plugin-io-github-gradle-nexus-publish-plugin-gradle-plugin" }
+
+[plugins]
+com-sphereon-gradle-plugin-conventions = { id = "com.sphereon.gradle.plugin.conventions", version.ref = "com-sphereon-gradle-plugin-conventions" }
+com-sphereon-gradle-plugin-integration-tests = { id = "com.sphereon.gradle.plugin.integration-tests", version.ref = "com-sphereon-gradle-plugin-integration-tests" }
+com-sphereon-gradle-plugin-project-publication = { id = "com.sphereon.gradle.plugin.project-publication", version.ref = "com-sphereon-gradle-plugin-project-publication" }
+com-sphereon-gradle-plugin-npm-publication = { id = "com.sphereon.gradle.plugin.npm-publication", version.ref = "com-sphereon-gradle-plugin-npm-publication" }
+org-jetbrains-kotlin-gradle-plugin = { id = "org.jetbrains.kotlin.kotlin-gradle-plugin", version.ref = "org-jetbrains-kotlin-gradle-plugin" }
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "org-jetbrains-kotlin-jvm" }
+org-jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "org-jetbrains-kotlin-multiplatform" }
+org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "org-jetbrains-kotlin-plugin-serialization" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+org-jetbrains-kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "org-jetbrains-kotlin-plugin-compose" }
+com-autonomousapps-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "com-autonomousapps-dependency-analysis" }
+com-android-tools-build-gradle = { id = "com.android.tools.build.gradle", version.ref = "com-android-tools-build-gradle" }
+com-android-application = { id = "com.android.application", version.ref = "com-android-application" }
+com-android-library = { id = "com.android.library", version.ref = "com-android-library" }
+com-android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "com-android-kotlin-multiplatform-library" }
+org-jetbrains-compose-hot-reload = { id = "org.jetbrains.compose.hot-reload", version.ref = "org-jetbrains-compose-hot-reload" }
+org-jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "org-jetbrains-compose" }
+io-kotest-io-kotest-gradle-plugin = { id = "io.kotest", version.ref = "io-kotest-io-kotest-gradle-plugin" }
+com-vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "com-vanniktech-maven-publish" }
+com-google-devtools-ksp-com-google-devtools-ksp-gradle-plugin = { id = "com.google.devtools.ksp", version.ref = "com-google-devtools-ksp-com-google-devtools-ksp-gradle-plugin" }
+software-amazon-app-platform = { id = "software.amazon.app.platform", version.ref = "software-amazon-app-platform" }
+dev-zacsweers-metro = { id = "dev.zacsweers.metro", version.ref = "dev-zacsweers-metro" }
+org-jetbrains-kotlinx-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "org-jetbrains-kotlinx-atomicfu" }
+org-jetbrains-kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "org-jetbrains-kotlinx-kover" }
+org-jetbrains-kotlin-npm-publish-org-jetbrains-kotlin-npm-publish-gradle-plugin = { id = "org.jetbrains.kotlin.npm-publish", version.ref = "org-jetbrains-kotlin-npm-publish-org-jetbrains-kotlin-npm-publish-gradle-plugin" }
+com-codingfeline-buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "com-codingfeline-buildkonfig" }
+io-github-gradle-nexus-publish-plugin-io-github-gradle-nexus-publish-plugin-gradle-plugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "io-github-gradle-nexus-publish-plugin-io-github-gradle-nexus-publish-plugin-gradle-plugin" }
+org-openapi-generator = { id = "org.openapi.generator", version.ref = "org-openapi-generator" }
+org-springframework-boot = { id = "org.springframework.boot", version.ref = "org-springframework-boot" }
+io-spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "io-spring-dependency-management" }
+io-ktor-plugin = { id = "io.ktor.plugin", version.ref = "io-ktor-plugin" }
+org-jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "org-jetbrains-dokka" }
+org-jlleitschuh-gradle-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "org-jlleitschuh-gradle-ktlint" }
+io-gitlab-arturbosch-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "io-gitlab-arturbosch-detekt" }
+
+[bundles]
