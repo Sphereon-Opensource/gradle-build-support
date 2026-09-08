@@ -34,6 +34,7 @@ pluginManagement {
         mavenLocal {
             content {
                 includeGroupAndSubgroups("com.sphereon")
+                includeGroupAndSubgroups("software.amazon")
             }
         }
     }
@@ -82,6 +83,7 @@ dependencyResolutionManagement {
         mavenLocal {
             content {
                 includeGroupAndSubgroups("com.sphereon")
+                includeGroupAndSubgroups("software.amazon")
             }
         }
     }
