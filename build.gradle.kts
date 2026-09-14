@@ -97,10 +97,14 @@ fun getNpmVersion(): String {
         return baseVersion
     }
 
-    // Get git commit hash
-    val gitCommitHash = providers.exec {
-        commandLine("git", "rev-parse", "--short=7", "HEAD")
-    }.standardOutput.asText.get().replace("\n", "").trim()
+    // Immutable coordinator snapshots intentionally omit .git metadata. Keep snapshot builds
+    // deterministic and usable by falling back to an explicit marker when the checkout hash is
+    // unavailable; normal working-tree and CI builds still include the short commit hash.
+    val gitCommitHash = runCatching {
+        providers.exec {
+            commandLine("git", "rev-parse", "--short=7", "HEAD")
+        }.standardOutput.asText.get().replace("\n", "").trim()
+    }.getOrNull()?.takeIf(String::isNotBlank) ?: "nogit"
 
     // npm registry rejects republishing the same version. Add a monotonic build id
     // (CI run number, or local UTC timestamp) so each SNAPSHOT publish is unique
