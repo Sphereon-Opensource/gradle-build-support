@@ -97,10 +97,11 @@ fun getNpmVersion(): String {
         return baseVersion
     }
 
-    // Get git commit hash
+    // Get git commit hash (snapshot build lanes carry no .git, hence the fallback)
     val gitCommitHash = providers.exec {
+        isIgnoreExitValue = true
         commandLine("git", "rev-parse", "--short=7", "HEAD")
-    }.standardOutput.asText.get().replace("\n", "").trim()
+    }.standardOutput.asText.get().replace("\n", "").trim().ifEmpty { "nogit" }
 
     // npm registry rejects republishing the same version. Add a monotonic build id
     // (CI run number, or local UTC timestamp) so each SNAPSHOT publish is unique
