@@ -92,10 +92,10 @@ class ConventionsPlugin : Plugin<Project> {
                     project.tasks.withType<Kotlin2JsCompile>().configureEach {
                         compilerOptions {
                             freeCompilerArgs.add("-XXLanguage:+JsAllowLongInExportedDeclarations")
-                            // wasmJs rejects these. JS still requires them (2.4.20-RC).
+                            // wasmJs rejects these. JS still requires them (Kotlin 2.4.20+).
                             if (!name.contains("Wasm", ignoreCase = true)) {
                                 freeCompilerArgs.add("-Xes-long-as-bigint")
-                                // Kotlin 2.4.20-RC renamed -Xes-generator to -Xes-generators.
+                                // Kotlin 2.4.20 renamed -Xes-generator to -Xes-generators.
                                 // The old flag is rejected; without the new one, JS test executables
                                 // fail: "Suspend lambdas cannot be exported without using generators".
                                 freeCompilerArgs.add("-Xes-generators")

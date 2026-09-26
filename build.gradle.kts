@@ -19,6 +19,13 @@ allprojects {
     plugins.withType<MavenPublishPlugin> {
         configure<PublishingExtension> {
             repositories {
+                val worktreeMavenRepo = System.getenv("WORKTREE_MAVEN_REPO")?.trim()?.takeIf { it.isNotEmpty() }
+                if (worktreeMavenRepo != null) {
+                    maven {
+                        name = "worktree"
+                        url = uri(worktreeMavenRepo)
+                    }
+                }
                 maven {
                     name = "sphereon-opensource"
                     val snapshotsUrl = "https://nexus.sphereon.com/repository/sphereon-opensource-snapshots/"
@@ -41,6 +48,13 @@ allprojects {
 
 mavenPublishing {
     repositories {
+        val worktreeMavenRepo = System.getenv("WORKTREE_MAVEN_REPO")?.trim()?.takeIf { it.isNotEmpty() }
+        if (worktreeMavenRepo != null) {
+            maven {
+                name = "worktree"
+                url = uri(worktreeMavenRepo)
+            }
+        }
         maven {
             name = "sphereon-opensource"
             val snapshotsUrl = "https://nexus.sphereon.com/repository/sphereon-opensource-snapshots/"
