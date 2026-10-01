@@ -296,11 +296,10 @@ private fun Project.setJvmCompilerOptions() {
  * See: https://github.com/Kotlin/kotlinx-io/issues/345
  */
 private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
-    val shimFile = project.rootProject.file("gradle-build-support/js/esm-require-shim.cjs")
-    if (!shimFile.exists()) {
-        log("ESM require shim not found at ${shimFile.absolutePath}, skipping")
-        return
-    }
+    val shimFile = bundledJsSupportFile(
+        project.rootProject.layout.buildDirectory.dir("sphereon-support").get().asFile,
+        "esm-require-shim.cjs",
+    )
     project.tasks.withType<KotlinJsTest>().configureEach {
         nodeJsArgs.add("--require")
         nodeJsArgs.add(shimFile.absolutePath)
@@ -339,11 +338,10 @@ private fun KotlinMultiplatformExtension.configureEsmRequireShim() {
  * entries. The fragment strips the `node:` prefix and stubs the bare Node socket modules to `false`.
  */
 private fun Project.configureBrowserWebpackConfigDir(target: KotlinJsTargetDsl) {
-    val sharedFragment = rootProject.file("gradle-build-support/js/webpack-node-scheme.js")
-    if (!sharedFragment.exists()) {
-        log("webpack node: fragment not found at ${sharedFragment.absolutePath}, skipping browser webpack config")
-        return
-    }
+    val sharedFragment = bundledJsSupportFile(
+        rootProject.layout.buildDirectory.dir("sphereon-support").get().asFile,
+        "webpack-node-scheme.js",
+    )
 
     // whenBrowserConfigured lives on KotlinJsSubTargetContainerDsl (the concrete target implements
     // it); KotlinJsTargetDsl itself does not expose it. Guards against enabling the browser
