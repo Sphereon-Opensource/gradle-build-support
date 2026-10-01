@@ -4,6 +4,7 @@ import groovy.json.JsonOutput
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.gradle.testfixtures.ProjectBuilder
+import org.gradle.testfixtures.internal.ProjectBuilderImpl
 import java.io.File
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
@@ -79,16 +80,23 @@ class OpenApiResolverArchiveTest {
         val artifact = File(repository, "com/sphereon/openapi/openapi-specs/$version/openapi-specs-$version.jar")
         artifact.parentFile.mkdirs()
         jar.copyTo(artifact)
+        File(artifact.parentFile, "openapi-specs-$version.pom").writeText(
+            """<project><modelVersion>4.0.0</modelVersion><groupId>com.sphereon.openapi</groupId><artifactId>openapi-specs</artifactId><version>$version</version><packaging>jar</packaging></project>""",
+        )
         val product = File(temporary, "product").apply { mkdirs() }
         File(product, "openapi-input.properties").writeText("openapiSpecsVersion=$version\n")
         val project = ProjectBuilder.builder().withProjectDir(product).build()
-        project.repositories.maven(org.gradle.api.Action<org.gradle.api.artifacts.repositories.MavenArtifactRepository> {
-            setUrl(repository.toURI())
-        })
-        val result = project.openapiCheckout()
-        assertEquals("components: {}\n", File(result, "common-components.yml").readText())
-        assertEquals(result, project.openapiCheckout())
-        assertFalse(File(product, "openapi").exists())
+        try {
+            project.repositories.maven(org.gradle.api.Action<org.gradle.api.artifacts.repositories.MavenArtifactRepository> {
+                setUrl(repository.toURI())
+            })
+            val result = project.openapiCheckout()
+            assertEquals("components: {}\n", File(result, "common-components.yml").readText())
+            assertEquals(result, project.openapiCheckout())
+            assertFalse(File(product, "openapi").exists())
+        } finally {
+            ProjectBuilderImpl.stop(project)
+        }
     }
 
     @Test
@@ -97,6 +105,10 @@ class OpenApiResolverArchiveTest {
         val checkout = File(product, "openapi").apply { mkdirs() }
         File(checkout, "common-components.yml").writeText("components: {}")
         val project = ProjectBuilder.builder().withProjectDir(product).build()
-        assertFails { project.openapiCheckout() }
+        try {
+            assertFails { project.openapiCheckout() }
+        } finally {
+            ProjectBuilderImpl.stop(project)
+        }
     }
 }
