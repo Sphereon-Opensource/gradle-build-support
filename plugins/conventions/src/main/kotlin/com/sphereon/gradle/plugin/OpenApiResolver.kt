@@ -3,90 +3,43 @@ package com.sphereon.gradle.plugin
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import java.io.File
+import java.util.Properties
 
-/**
- * Resolves OpenAPI specs from the `openapi` git submodule (the single source of truth shared by
- * IDK / EDK / VDX), replacing the old per-module `syncOpenApiCommonComponents` copy task.
- *
- * Build scripts call [openapiSpec] to point an openapi-generator `inputSpec` at a spec in the
- * submodule. The repo is a single flat folder, so every spec keeps same-directory
- * `./common-components.yml` (and `./<bundle>.yml`) refs that the generator resolves in place —
- * no copy step.
- *
- * A full VDX-infra checkout contains THREE physical openapi checkouts (`vdx/openapi`,
- * `vdx/edk/openapi`, `vdx/edk/idk/openapi`), one per nested product submodule. They must be
- * pinned in lockstep; [openapiCheckout] fails loud if any two point at different commits, and
- * returns the SHALLOWEST present checkout (the outermost product is authoritative, matching the
- * dependency arrow VDX -> EDK -> IDK).
- */
-
-// SHALLOWEST-first: the outermost product's pinned checkout wins.
-private val OPENAPI_CHECKOUT_CANDIDATES = listOf(
-    "openapi",             // standalone IDK / EDK / VDX root
-    "vdx/openapi",         // VDX-infra composite: VDX layer (authoritative outer)
-    "vdx/edk/openapi",     // EDK layer
-    "vdx/edk/idk/openapi", // IDK layer (innermost)
-)
-
-private fun Project.openapiCheckoutCandidates(): List<File> =
-    OPENAPI_CHECKOUT_CANDIDATES
-        .map { rootProject.layout.projectDirectory.dir(it).asFile }
-        .filter { it.isDirectory && File(it, "common-components.yml").isFile }
-
-/**
- * The authoritative `openapi` submodule checkout for this build. Throws if none is present
- * (submodule not initialised) or if present checkouts have diverged (gitlink pins out of lockstep).
- */
+/** Explicit source input for infra/release builds, otherwise a pinned Maven spec bundle. */
 fun Project.openapiCheckout(): File {
-    val present = openapiCheckoutCandidates()
-    if (present.isEmpty()) {
-        throw GradleException(
-            "openapi submodule not found under $rootDir. " +
-                "Run `git submodule update --init --recursive`.",
-        )
+    val root = rootProject
+    val explicit = providers.gradleProperty("openapiRepo").orNull
+        ?: providers.environmentVariable("VDX_OPENAPI_REPO").orNull
+    if (!explicit.isNullOrBlank()) {
+        val directory = root.file(explicit).canonicalFile
+        if (!File(directory, "common-components.yml").isFile || !File(directory, "manifest-catalog.json").isFile) {
+            throw GradleException("Explicit OpenAPI input is incomplete: $directory")
+        }
+        return directory
     }
-    val shaByCheckout = present.associateWith { headSha(it) }
-    val distinctShas = shaByCheckout.values.filterNotNull().toSet()
-    if (distinctShas.size > 1) {
-        val detail = shaByCheckout.entries.joinToString("\n  ") { "${it.key} = ${it.value}" }
-        throw GradleException(
-            "openapi submodule SHA mismatch across nested checkouts " +
-                "(bump all gitlink pins in lockstep):\n  $detail",
-        )
-    }
-    return present.first() // shallowest present == outermost authoritative
+    val cached = root.extensions.extraProperties
+    val cacheKey = "sphereonResolvedOpenApiInput"
+    if (cached.has(cacheKey)) return cached.get(cacheKey) as File
+    val pinFiles = listOf(File(root.rootDir, "openapi-input.properties"),
+        File(root.rootDir.parentFile, "openapi-input.properties"))
+    val pin = pinFiles.firstOrNull { it.isFile }
+    val version = providers.gradleProperty("openapiSpecsVersion").orNull ?: pin?.let { file ->
+        Properties().apply { file.inputStream().use { load(it) } }.getProperty("openapiSpecsVersion")
+    } ?: throw GradleException("OpenAPI Maven input is not pinned; provide openapi-input.properties or -PopenapiSpecsVersion")
+    if (!version.matches(Regex("[0-9a-f]{32}"))) throw GradleException("Invalid pinned OpenAPI specs version: $version")
+    val dependency = root.dependencies.create("com.sphereon.openapi:openapi-specs:$version@jar")
+    val configuration = root.configurations.detachedConfiguration(dependency).apply { isTransitive = false }
+    val archive = configuration.singleFile
+    val result = extractOpenApiArchive(archive, root.layout.buildDirectory.dir("openapi-inputs").get().asFile, version)
+    cached.set(cacheKey, result)
+    return result
 }
 
-/** The commit checked out in an openapi submodule dir, or null if it cannot be determined. */
-private fun headSha(checkout: File): String? {
-    val dotGit = File(checkout, ".git")
-    val gitDir: File? = when {
-        dotGit.isDirectory -> dotGit
-        dotGit.isFile ->
-            dotGit.readText().lineSequence()
-                .firstOrNull { it.startsWith("gitdir:") }
-                ?.substringAfter("gitdir:")?.trim()
-                ?.let { checkout.resolve(it).normalize() }
-        else -> null
-    }
-    if (gitDir == null) return null
-    val head = File(gitDir, "HEAD").takeIf { it.isFile }?.readText()?.trim() ?: return null
-    return if (head.startsWith("ref:")) {
-        File(gitDir, head.substringAfter("ref:").trim()).takeIf { it.isFile }?.readText()?.trim()
-    } else {
-        head
-    }
-}
-
-/**
- * Resolves a repo-relative spec path (a bare filename in the flat repo, e.g. `"kms-openapi.yml"`,
- * `"party-manager-openapi.yml"`) to its file in the openapi submodule. Throws if the spec is missing.
- */
+/** Resolve a spec without changing its sibling-reference layout. */
 fun Project.openapiSpec(repoRelativePath: String): File {
+    validateOpenApiPath(repoRelativePath)
     val checkout = openapiCheckout()
-    val spec = checkout.resolve(repoRelativePath)
-    if (!spec.isFile) {
-        throw GradleException("openapi spec not found: $repoRelativePath under $checkout")
-    }
+    val spec = File(checkout, repoRelativePath)
+    if (!spec.isFile) throw GradleException("OpenAPI spec not found: $repoRelativePath under $checkout")
     return spec
 }
