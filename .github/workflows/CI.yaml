@@ -22,7 +22,9 @@ jobs:
       # Root publish does not publish plugins included through pluginManagement.
       # Product BOM generation needs this implementation and plugin marker in Maven.
       - name: Build and publish catalog plugin
-        run: ./gradlew -p plugins/toml-catalog build publish
+        run: |
+          ./gradlew -p plugins/toml-catalog build
+          ./gradlew -p plugins/toml-catalog publish
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
