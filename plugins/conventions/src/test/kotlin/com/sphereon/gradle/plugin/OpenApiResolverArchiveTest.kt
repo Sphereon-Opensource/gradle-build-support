@@ -43,6 +43,15 @@ class OpenApiResolverArchiveTest {
     }
 
     @Test
+    fun snapshotCoordinatePreservesExactContentIdentity() {
+        val (jar, version) = bundle(mapOf("common-components.yml" to "components: {}\n",
+            "manifest-catalog.json" to "{}\n"))
+        val directory = extractOpenApiArchive(jar, File(temporary, "snapshot-cache"), "$version-SNAPSHOT")
+        assertEquals("components: {}\n", File(directory, "common-components.yml").readText())
+        assertFails { extractOpenApiArchive(jar, File(temporary, "wrong-cache"), "${"a".repeat(32)}-SNAPSHOT") }
+    }
+
+    @Test
     fun archiveKeepsSiblingRefsAndReusesVerifiedExtractedBytes() {
         val (jar, version) = bundle(mapOf("common-components.yml" to "components: {}\n",
             "manifest-catalog.json" to "{}\n", "example-openapi.yml" to "components:\n  ref: ./common-components.yml\n"))

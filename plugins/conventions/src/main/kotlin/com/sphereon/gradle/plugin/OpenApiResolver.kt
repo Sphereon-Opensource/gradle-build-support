@@ -28,7 +28,7 @@ fun Project.openapiCheckout(): File {
     val version = providers.gradleProperty("openapiSpecsVersion").orNull ?: pin?.let { file ->
         Properties().apply { file.inputStream().use { load(it) } }.getProperty("openapiSpecsVersion")
     } ?: throw GradleException("OpenAPI Maven input is not pinned; provide openapi-input.properties or -PopenapiSpecsVersion")
-    if (!version.matches(Regex("[0-9a-f]{32}"))) throw GradleException("Invalid pinned OpenAPI specs version: $version")
+    if (!version.matches(Regex("[0-9a-f]{32}(-SNAPSHOT)?"))) throw GradleException("Invalid pinned OpenAPI specs version: $version")
     val dependency = dependencies.create("com.sphereon.openapi:openapi-specs:$version@jar")
     val configuration = configurations.detachedConfiguration(dependency).apply { isTransitive = false }
     val archive = configuration.singleFile

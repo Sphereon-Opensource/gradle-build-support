@@ -44,7 +44,8 @@ private fun requirePlainAncestors(file: File) {
 
 /** Extracts one immutable spec coordinate, preserving relative references and verifying reuse. */
 internal fun extractOpenApiArchive(jar: File, cache: File, expectedVersion: String): File {
-    if (!expectedVersion.matches(Regex("[0-9a-f]{32}"))) throw GradleException("Invalid OpenAPI specs version")
+    if (!expectedVersion.matches(Regex("[0-9a-f]{32}(-SNAPSHOT)?"))) throw GradleException("Invalid OpenAPI specs version")
+    val contentVersion = expectedVersion.removeSuffix("-SNAPSHOT")
     val archiveDigest = MessageDigest.getInstance("SHA-256")
     jar.inputStream().use { input ->
         val buffer = ByteArray(65536)
@@ -75,7 +76,7 @@ internal fun extractOpenApiArchive(jar: File, cache: File, expectedVersion: Stri
     val metadata = contents[MANIFEST] ?: throw GradleException("OpenAPI archive manifest is missing")
     val manifest = JsonSlurper().parseText(metadata.toString(Charsets.UTF_8)) as? Map<*, *>
         ?: throw GradleException("Invalid OpenAPI archive manifest")
-    if (manifest["schemaVersion"] != 1 || manifest["recipe"] != RECIPE || manifest["version"] != expectedVersion) {
+    if (manifest["schemaVersion"] != 1 || manifest["recipe"] != RECIPE || manifest["version"] != contentVersion) {
         throw GradleException("OpenAPI archive does not match the pinned coordinate")
     }
     val records = manifest["files"] as? List<*> ?: throw GradleException("OpenAPI file receipts are missing")
@@ -95,7 +96,7 @@ internal fun extractOpenApiArchive(jar: File, cache: File, expectedVersion: Stri
         input.append(path).append('\u0000').append(sha).append('\u0000').append(size.toLong()).append('\n')
     }
     val sourceId = digest(input.toString().toByteArray(Charsets.UTF_8))
-    if (manifest["sourceInputId"] != sourceId || sourceId.take(32) != expectedVersion ||
+    if (manifest["sourceInputId"] != sourceId || sourceId.take(32) != contentVersion ||
         contents.keys != paths + MANIFEST || !paths.containsAll(listOf("common-components.yml", "manifest-catalog.json"))) {
         throw GradleException("OpenAPI archive identity or inventory mismatch")
     }
