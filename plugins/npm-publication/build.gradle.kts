@@ -32,7 +32,11 @@ dependencies {
     gradleApi()
     implementation(libs.kotlin.gradlePlugin)
     implementation("org.jetbrains.kotlin:npm-publish-gradle-plugin:3.6.0")
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
 }
+
+tasks.test { useJUnitPlatform() }
 
 gradlePlugin {
     plugins {

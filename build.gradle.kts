@@ -13,8 +13,7 @@ dependencies {
 
 allprojects {
     group = "$group"
-    // This build publishes JVM plugins and BOMs, not npm packages. Consuming
-    // builds supply their own npmVersion when applying NpmPublicationPlugin.
+    // The npm plugin derives each consuming module's version from its JS build.
 
     plugins.withType<MavenPublishPlugin> {
         configure<PublishingExtension> {
