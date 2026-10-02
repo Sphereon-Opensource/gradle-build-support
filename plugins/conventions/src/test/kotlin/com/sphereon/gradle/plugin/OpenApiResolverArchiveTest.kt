@@ -12,6 +12,7 @@ import java.util.zip.ZipOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 
 class OpenApiResolverArchiveTest {
     @TempDir
@@ -109,6 +110,47 @@ class OpenApiResolverArchiveTest {
             assertFails { project.openapiCheckout() }
         } finally {
             ProjectBuilderImpl.stop(project)
+        }
+    }
+
+    @Test
+    fun subprojectsResolveAndCachePinnedBundleInTheirOwnProject() {
+        val (jar, version) = bundle(mapOf("common-components.yml" to "components: {}\n",
+            "manifest-catalog.json" to "{}\n", "example-openapi.yml" to "ref: ./common-components.yml\n"))
+        val repository = File(temporary, "child-maven")
+        val artifact = File(repository, "com/sphereon/openapi/openapi-specs/$version/openapi-specs-$version.jar")
+        artifact.parentFile.mkdirs()
+        jar.copyTo(artifact)
+        File(artifact.parentFile, "openapi-specs-$version.pom").writeText(
+            """<project><modelVersion>4.0.0</modelVersion><groupId>com.sphereon.openapi</groupId><artifactId>openapi-specs</artifactId><version>$version</version><packaging>jar</packaging></project>""",
+        )
+        val product = File(temporary, "multi-project").apply { mkdirs() }
+        File(product, "openapi-input.properties").writeText("openapiSpecsVersion=$version\n")
+        val root = ProjectBuilder.builder().withProjectDir(product).build()
+        try {
+            // Only the configuring child owns the repository and resolution lock.
+            // Resolving through rootProject instead must fail rather than borrowing it.
+            val children = listOf("first", "second").map { name ->
+                ProjectBuilder.builder().withName(name).withParent(root)
+                    .withProjectDir(File(product, name).apply { mkdirs() }).build().also { child ->
+                        child.repositories.maven(org.gradle.api.Action<org.gradle.api.artifacts.repositories.MavenArtifactRepository> {
+                            setUrl(repository.toURI())
+                        })
+                    }
+            }
+            val directories = children.map { child ->
+                val resolved = child.openapiCheckout()
+                assertEquals(resolved, child.openapiCheckout())
+                assertEquals(child.layout.buildDirectory.dir("openapi-inputs").get().asFile, resolved.parentFile)
+                assertEquals("ref: ./common-components.yml\n", child.openapiSpec("example-openapi.yml").readText())
+                resolved
+            }
+            assertNotEquals(directories[0], directories[1])
+            assertEquals(0, root.repositories.size)
+            assertFalse(root.extensions.extraProperties.has("sphereonResolvedOpenApiInput"))
+            assertFalse(root.layout.buildDirectory.dir("openapi-inputs").get().asFile.exists())
+        } finally {
+            ProjectBuilderImpl.stop(root)
         }
     }
 }

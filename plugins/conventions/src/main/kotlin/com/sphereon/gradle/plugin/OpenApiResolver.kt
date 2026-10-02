@@ -17,7 +17,9 @@ fun Project.openapiCheckout(): File {
         }
         return directory
     }
-    val cached = root.extensions.extraProperties
+    // Gradle holds this project's configuration lock. Resolving a root-owned
+    // configuration here is unsafe when a subproject requests the bundle.
+    val cached = extensions.extraProperties
     val cacheKey = "sphereonResolvedOpenApiInput"
     if (cached.has(cacheKey)) return cached.get(cacheKey) as File
     val pinFiles = listOf(File(root.rootDir, "openapi-input.properties"),
@@ -27,10 +29,10 @@ fun Project.openapiCheckout(): File {
         Properties().apply { file.inputStream().use { load(it) } }.getProperty("openapiSpecsVersion")
     } ?: throw GradleException("OpenAPI Maven input is not pinned; provide openapi-input.properties or -PopenapiSpecsVersion")
     if (!version.matches(Regex("[0-9a-f]{32}"))) throw GradleException("Invalid pinned OpenAPI specs version: $version")
-    val dependency = root.dependencies.create("com.sphereon.openapi:openapi-specs:$version@jar")
-    val configuration = root.configurations.detachedConfiguration(dependency).apply { isTransitive = false }
+    val dependency = dependencies.create("com.sphereon.openapi:openapi-specs:$version@jar")
+    val configuration = configurations.detachedConfiguration(dependency).apply { isTransitive = false }
     val archive = configuration.singleFile
-    val result = extractOpenApiArchive(archive, root.layout.buildDirectory.dir("openapi-inputs").get().asFile, version)
+    val result = extractOpenApiArchive(archive, layout.buildDirectory.dir("openapi-inputs").get().asFile, version)
     cached.set(cacheKey, result)
     return result
 }
