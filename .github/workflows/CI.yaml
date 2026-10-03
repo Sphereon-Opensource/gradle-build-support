@@ -31,6 +31,13 @@ jobs:
 
       - name: Verify OpenAPI archive compatibility freshly
         run: ./gradlew :plugins:conventions:test --tests '*OpenApiResolverArchiveTest' --rerun
+      - name: Archive focused OpenAPI regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-regression-junit
+          path: plugins/conventions/build/test-results/test/*.xml
+          if-no-files-found: warn
       - name: Build and publish
         run: ./gradlew build publish
         env:
