@@ -330,13 +330,6 @@ class EnterpriseArchitecturePlugin : Plugin<Project> {
         extension.capabilities.convention(emptySet())
         extension.enforce.convention(project.provider { extension.runtimeRole.get() != "unspecified" })
 
-        // Publish role authority on every selected outgoing variant, including KMP root/JVM
-        // metadata. Consumers without this metadata retain the legacy fail-closed name check.
-        project.configurations.configureEach {
-            if (isCanBeConsumed) {
-                attributes.attributeProvider(enterpriseModuleRoleAttribute, extension.moduleRole)
-            }
-        }
         project.pluginManager.withPlugin("application") { declareDeployableModule(project) }
 
         val report = project.tasks.register<EnterpriseArchitectureReportTask>("enterpriseArchitectureReport") {
@@ -363,6 +356,13 @@ class EnterpriseArchitecturePlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
+            // Annotate finalized attributed variants, not legacy auxiliary configurations such
+            // as archives/signatures. Giving those empty configurations the same sole role
+            // attribute makes them ambiguous capabilities during project dependency resolution.
+            project.configurations.filter { it.isCanBeConsumed && it.attributes.keySet().isNotEmpty() }
+                .forEach { configuration ->
+                    configuration.attributes.attributeProvider(enterpriseModuleRoleAttribute, extension.moduleRole)
+                }
             val runtime = project.configurations.findByName("jvmRuntimeClasspath")
                 ?: project.configurations.findByName("runtimeClasspath")
             val resolvedComponents = project.provider {

@@ -218,6 +218,35 @@ class EnterpriseArchitecturePluginFunctionalTest {
     }
 
     @Test
+    fun signingAuxiliaryConfigurationsRemainEmptyWhilePublishedVariantsCarryRole() {
+        writeRoleProducer("services-kms-rest", "library")
+        val producer = projectDirectory.resolve("services-kms-rest/build.gradle.kts")
+        producer.writeText(producer.readText() + """
+
+            apply(plugin = "signing")
+            extensions.configure<org.gradle.plugins.signing.SigningExtension> {
+                sign(publishing.publications["library"])
+            }
+            afterEvaluate {
+                check(configurations["archives"].attributes.keySet().isEmpty())
+                check(configurations["signatures"].attributes.keySet().isEmpty())
+                val role = org.gradle.api.attributes.Attribute.of("com.sphereon.module-role", String::class.java)
+                check(configurations["apiElements"].attributes.getAttribute(role) == "library")
+                check(configurations["runtimeElements"].attributes.getAttribute(role) == "library")
+            }
+        """.trimIndent())
+        projectDirectory.resolve("build.gradle.kts").writeText(
+            libraryConsumer() + "\ndependencies { implementation(project(\":services-kms-rest\")) }\n",
+        )
+        runner("enterpriseArchitectureCheck", ":services-kms-rest:generateMetadataFileForLibraryPublication", "--configuration-cache").build()
+        val metadata = projectDirectory.resolve("services-kms-rest/build/publications/library/module.json").readText()
+        assertContains(metadata, "com.sphereon.module-role")
+        assertContains(metadata, "library")
+        val reused = runner("enterpriseArchitectureCheck", ":services-kms-rest:generateMetadataFileForLibraryPublication", "--configuration-cache").build()
+        assertContains(reused.output, "Reusing configuration cache")
+    }
+
+    @Test
     fun explicitDeployableRoleIsRejectedWithoutHistoricalServiceName() {
         writeRoleProducer("ordinary-name", "deployable")
         projectDirectory.resolve("build.gradle.kts").writeText(
