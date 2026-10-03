@@ -3,6 +3,7 @@ package com.sphereon.gradle.plugin
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
+import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertFailsWith
@@ -187,6 +188,139 @@ class EnterpriseArchitecturePluginFunctionalTest {
         .withArguments("enterpriseArchitectureCheck", "--stacktrace")
         .forwardOutput()
         .build()
+
+    @Test
+    fun libraryRootWithHistoricalServiceNameIsNotItsOwnDependency() {
+        writeFixture(libraryConsumer())
+        projectDirectory.resolve("settings.gradle.kts").writeText("rootProject.name = \"services-kms-rest\"\n")
+        runGate()
+    }
+
+    @Test
+    fun publishedLibraryRoleSurvivesModuleMetadataAndPermitsHistoricalServiceName() {
+        writeRoleProducer("services-kms-rest", "library")
+        runner(":services-kms-rest:publish").build()
+        val metadata = projectDirectory.resolve("repo/fixture/services-kms-rest/1.0/services-kms-rest-1.0.module").readText()
+        assertContains(metadata, "com.sphereon.module-role")
+        assertContains(metadata, "library")
+        projectDirectory.resolve("build.gradle.kts").writeText(
+            libraryConsumer() + """
+
+            repositories { maven { url = uri("repo") } }
+            dependencies { implementation("fixture:services-kms-rest:1.0") }
+            """.trimIndent(),
+        )
+        runGate()
+        // Same task inputs and resolved metadata must be reusable with configuration cache.
+        runner("enterpriseArchitectureCheck", "--configuration-cache").build()
+        val reused = runner("enterpriseArchitectureCheck", "--configuration-cache").build()
+        assertContains(reused.output, "Reusing configuration cache")
+    }
+
+    @Test
+    fun explicitDeployableRoleIsRejectedWithoutHistoricalServiceName() {
+        writeRoleProducer("ordinary-name", "deployable")
+        projectDirectory.resolve("build.gradle.kts").writeText(
+            libraryConsumer() + "\ndependencies { implementation(project(\":ordinary-name\")) }\n",
+        )
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runGate() }
+        assertContains(failure.buildResult.output, "library module must not resolve deployable component")
+    }
+
+    @Test
+    fun serviceAssemblyRoleIsRejectedForLibraryConsumer() {
+        writeRoleProducer("ordinary-name", "service-assembly")
+        projectDirectory.resolve("build.gradle.kts").writeText(
+            libraryConsumer() + "\ndependencies { implementation(project(\":ordinary-name\")) }\n",
+        )
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runGate() }
+        assertContains(failure.buildResult.output, "library module must not resolve deployable component")
+    }
+
+    @Test
+    fun legacyServiceWithoutRoleMetadataRemainsRejected() {
+        writeFixture(
+            libraryConsumer() + "\ndependencies { implementation(project(\":services-kms-rest\")) }\n",
+            subproject = "services-kms-rest",
+        )
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runGate() }
+        assertContains(failure.buildResult.output, "library module must not resolve deployable component")
+    }
+
+    @Test
+    fun unknownRoleCannotBypassLegacyServiceBoundary() {
+        writeRoleProducer("services-kms-rest", "unknown-role")
+        projectDirectory.resolve("build.gradle.kts").writeText(
+            libraryConsumer() + "\ndependencies { implementation(project(\":services-kms-rest\")) }\n",
+        )
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runGate() }
+        assertContains(failure.buildResult.output, "library module must not resolve deployable component")
+    }
+
+    @Test
+    fun applicationCannotDeclareLibraryRole() {
+        writeFixture("""
+            plugins {
+                application
+                id("com.sphereon.gradle.plugin.enterprise-architecture")
+            }
+            enterpriseArchitecture { moduleRole.set("library") }
+        """.trimIndent())
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runGate() }
+        assertContains(failure.buildResult.output, "Executable module must declare deployable or service-assembly role")
+    }
+
+    @Test
+    fun serviceDeployableCannotDeclareLibraryRole() {
+        writeFixture("""
+            plugins {
+                `java-library`
+                id("com.sphereon.gradle.plugin.service-deployable")
+            }
+            enterpriseArchitecture { moduleRole.set("library") }
+        """.trimIndent())
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runGate() }
+        assertContains(failure.buildResult.output, "Executable module must declare deployable or service-assembly role")
+    }
+
+    private fun runner(vararg tasks: String) = GradleRunner.create()
+        .withProjectDir(projectDirectory.toFile())
+        .withPluginClasspath()
+        .withArguments(*tasks, "--stacktrace")
+        .forwardOutput()
+
+    private fun writeRoleProducer(name: String, role: String) {
+        writeFixture("", subproject = name)
+        projectDirectory.resolve(name).resolve("build.gradle.kts").writeText("""
+            plugins {
+                `java-library`
+                `maven-publish`
+                id("com.sphereon.gradle.plugin.enterprise-architecture")
+            }
+            group = "fixture"
+            version = "1.0"
+            enterpriseArchitecture { moduleRole.set("$role") }
+            publishing {
+                publications { create<MavenPublication>("library") { from(components["java"]) } }
+                repositories { maven { url = rootProject.uri("repo") } }
+            }
+        """.trimIndent())
+    }
+
+    private fun libraryConsumer() = """
+        plugins {
+            `java-library`
+            id("com.sphereon.gradle.plugin.enterprise-architecture")
+        }
+        enterpriseArchitecture {
+            moduleRole.set("library")
+            runtimeRole.set("satellite-workload")
+            capabilities.set(setOf(
+                "workload-execution", "remote-authority-adapter",
+                "runtime-persistence-postgresql", "tenant-database-route"
+            ))
+        }
+    """.trimIndent()
 
     private fun writeFixture(buildScript: String, subproject: String? = null, source: String? = null) {
         projectDirectory.resolve("settings.gradle.kts").writeText(

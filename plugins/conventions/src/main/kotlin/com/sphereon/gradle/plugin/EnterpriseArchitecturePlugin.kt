@@ -5,9 +5,11 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
@@ -38,6 +40,17 @@ abstract class EnterpriseArchitectureExtension {
 }
 
 private val knownModuleRoles = setOf("library", "deployable", "service-assembly")
+internal val enterpriseModuleRoleAttribute = Attribute.of("com.sphereon.module-role", String::class.java)
+
+internal fun declareDeployableModule(project: Project) {
+    val extension = project.extensions.getByType(EnterpriseArchitectureExtension::class.java)
+    extension.moduleRole.convention("deployable")
+    project.afterEvaluate {
+        check(extension.moduleRole.get() in setOf("deployable", "service-assembly")) {
+            "Executable module must declare deployable or service-assembly role, not '${extension.moduleRole.get()}'"
+        }
+    }
+}
 private val knownRuntimeRoles = setOf(
     "central-platform",
     "tenant-kms",
@@ -88,6 +101,9 @@ abstract class EnterpriseArchitectureReportTask : DefaultTask() {
 
     @get:Input
     abstract val resolvedRuntimeComponents: ListProperty<String>
+
+    @get:Input
+    abstract val resolvedRuntimeModuleRoles: MapProperty<String, String>
 
     @get:Input
     abstract val productionGradleExclusions: ListProperty<String>
@@ -204,7 +220,12 @@ abstract class EnterpriseArchitectureReportTask : DefaultTask() {
             "services-oid4vp-verifier-rest",
         )
         if (module == "library") {
-            resolved.filter { component -> deployableDependencyPatterns.any(component::contains) }.forEach {
+            val roles = resolvedRuntimeModuleRoles.get()
+            resolved.filter { component ->
+                val selectedRoles = roles[component]?.split(',')?.toSet().orEmpty()
+                selectedRoles.any { it == "deployable" || it == "service-assembly" } ||
+                    (selectedRoles != setOf("library") && deployableDependencyPatterns.any(component::contains))
+            }.forEach {
                 violations += "library module must not resolve deployable component '$it'"
             }
         }
@@ -265,6 +286,7 @@ abstract class EnterpriseArchitectureReportTask : DefaultTask() {
             "runtimeRole" to role,
             "capabilities" to declaredCapabilities.sorted(),
             "resolvedRuntimeComponents" to resolved,
+            "resolvedRuntimeModuleRoles" to resolvedRuntimeModuleRoles.get().toSortedMap(),
             "productionGradleExclusions" to exclusions,
             "violations" to violations.distinct().sorted(),
         )
@@ -308,6 +330,15 @@ class EnterpriseArchitecturePlugin : Plugin<Project> {
         extension.capabilities.convention(emptySet())
         extension.enforce.convention(project.provider { extension.runtimeRole.get() != "unspecified" })
 
+        // Publish role authority on every selected outgoing variant, including KMP root/JVM
+        // metadata. Consumers without this metadata retain the legacy fail-closed name check.
+        project.configurations.configureEach {
+            if (isCanBeConsumed) {
+                attributes.attributeProvider(enterpriseModuleRoleAttribute, extension.moduleRole)
+            }
+        }
+        project.pluginManager.withPlugin("application") { declareDeployableModule(project) }
+
         val report = project.tasks.register<EnterpriseArchitectureReportTask>("enterpriseArchitectureReport") {
             group = "verification"
             description = "Write the role and capability dependency-boundary report"
@@ -316,6 +347,7 @@ class EnterpriseArchitecturePlugin : Plugin<Project> {
             runtimeRole.set(extension.runtimeRole)
             capabilities.set(extension.capabilities)
             enforce.set(extension.enforce)
+            resolvedRuntimeModuleRoles.convention(emptyMap())
             reportFile.set(project.layout.buildDirectory.file("reports/enterprise-architecture/${project.name}.json"))
             productionSourceFiles.from(project.fileTree("src") {
                 include("**/*.kt")
@@ -331,22 +363,33 @@ class EnterpriseArchitecturePlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
+            val runtime = project.configurations.findByName("jvmRuntimeClasspath")
+                ?: project.configurations.findByName("runtimeClasspath")
+            val resolvedComponents = project.provider {
+                runtime?.incoming?.resolutionResult?.let { resolution ->
+                    val rootId = resolution.rootComponent.get().id
+                    resolution.allComponents.filter { it.id != rootId }
+                }.orEmpty()
+            }
             report.configure {
                 resolvedRuntimeComponents.set(
-                    (project.configurations.findByName("jvmRuntimeClasspath")
-                        ?: project.configurations.findByName("runtimeClasspath"))?.let { runtime ->
-                        project.provider {
-                            runtime.incoming.resolutionResult.allComponents
-                                .map { component ->
-                                    component.moduleVersion?.let { module ->
-                                        "${module.group}:${module.name}:${module.version}"
-                                    } ?: component.id.displayName
-                                }
-                                .distinct()
-                                .sorted()
-                        }
-                    } ?: project.provider { emptyList() },
+                    resolvedComponents.map { components ->
+                        components.map { component ->
+                            component.moduleVersion?.let { module ->
+                                "${module.group}:${module.name}:${module.version}"
+                            } ?: component.id.displayName
+                        }.distinct().sorted()
+                    },
                 )
+                resolvedRuntimeModuleRoles.set(resolvedComponents.map { components ->
+                    components.associate { component ->
+                        val id = component.moduleVersion?.let { "${it.group}:${it.name}:${it.version}" }
+                            ?: component.id.displayName
+                        id to component.variants.map {
+                            it.attributes.getAttribute(enterpriseModuleRoleAttribute) ?: "unspecified"
+                        }.distinct().sorted().joinToString(",")
+                    }
+                })
                 productionGradleExclusions.set(
                     project.configurations
                         .filter {
