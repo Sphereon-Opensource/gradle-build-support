@@ -19,6 +19,25 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Root publish does not publish plugins included through pluginManagement.
+      # Product BOM generation needs this implementation and plugin marker in Maven.
+      - name: Build and publish catalog plugin
+        run: |
+          ./gradlew -p plugins/toml-catalog build
+          ./gradlew -p plugins/toml-catalog publish
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Verify OpenAPI archive compatibility freshly
+        run: ./gradlew :plugins:conventions:test --tests '*OpenApiResolverArchiveTest' --rerun
+      - name: Archive focused OpenAPI regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-regression-junit
+          path: plugins/conventions/build/test-results/test/*.xml
+          if-no-files-found: warn
       - name: Build and publish
         run: ./gradlew build publish
         env:
@@ -26,3 +45,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Archive JUnit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbs-junit-results
+          path: '**/build/test-results/**/*.xml'
+          if-no-files-found: warn

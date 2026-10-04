@@ -3,13 +3,18 @@ package com.sphereon.gradle.plugin
 import dev.petuska.npm.publish.extension.NpmPublishExtension
 import dev.petuska.npm.publish.extension.domain.json.PackageJson
 import dev.petuska.npm.publish.task.NpmPublishTask
+import java.io.File
 import java.net.URI
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBinaryMode
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
+import org.jetbrains.kotlin.gradle.targets.js.npm.PublicPackageJsonTask
+import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 
 /**
  * Centralizes npm package publication for Sphereon IDK modules.
@@ -38,6 +43,7 @@ class NpmPublicationPlugin : Plugin<Project> {
             packageName.convention("idk-${project.name}")
             scope.convention("@sphereon")
             enabled.convention(true)
+            buildVersion.convention(project.providers.gradleProperty("buildVersion.${project.name}"))
             repositoryUrl.convention("https://github.com/sphereon-opensource/idk")
             license.convention("Apache-2.0")
         }
@@ -93,14 +99,14 @@ class NpmPublicationPlugin : Plugin<Project> {
             val npmScope = ext.scope.get()
             val npmPkgName = ext.packageName.get()
             val fullName = "$npmScope/$npmPkgName"
-            val npmVersion = project.rootProject.extensions.extraProperties["npmVersion"] as String
+            val baseVersion = project.version.toString()
 
             // The .mjs filename: Kotlin strips the scope prefix from outputModuleName
             // @sphereon/idk-lib-cbor-public -> idk-lib-cbor-public.mjs
             val entryFile = "./$npmPkgName.mjs"
             val typesFile = "./$npmPkgName.d.mts"
 
-            log.info("Configuring npm publication: $fullName@$npmVersion")
+            log.info("Configuring npm publication: $fullName from component build version ($baseVersion)")
 
             // Configure the npm-publish extension
             val npmPublish = project.extensions.getByType(NpmPublishExtension::class.java)
@@ -121,7 +127,8 @@ class NpmPublicationPlugin : Plugin<Project> {
                 }
             })
 
-            fun configurePackageJson(pkgJson: PackageJson, entryMjs: String, typesMts: String) {
+            fun configurePackageJson(pkgJson: PackageJson, entryMjs: String, typesMts: String,
+                                     npmVersion: Provider<String>) {
                 pkgJson.apply {
                     name.set(fullName)
                     version.set(npmVersion)
@@ -155,13 +162,43 @@ class NpmPublicationPlugin : Plugin<Project> {
 
             // Package configuration (only when JS target is present)
             npmPublish.packages(Action {
-                try {
+                if (names.contains("js")) {
                     named("js").configure {
+                        val pkg = this
+                        val target = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
+                            .targets.getByName("js") as KotlinJsIrTarget
+                        val compilation = target.compilations.getByName("main")
+                        val publicJson = project.tasks.named(compilation.npmProject.publicPackageJsonTaskName,
+                            PublicPackageJsonTask::class.java)
+                        val versionTask = project.tasks.register("generateNpmBuildVersion", GenerateNpmBuildVersion::class.java) {
+                            this.baseVersion.set(baseVersion)
+                            this.packageName.set(fullName)
+                            buildVersion.set(ext.buildVersion)
+                            versionFile.set(project.layout.buildDirectory.file("npm-build-version/version.txt"))
+                            buildLogicInputs.from(File(NpmPublicationPlugin::class.java.protectionDomain.codeSource.location.toURI()))
+                            // Hash the JS production build, including bundled dependencies and npm metadata.
+                            // No source inventory, Git, CI counter or workspace launcher is required.
+                            productionInputs.from(pkg.files,
+                                pkg.readme.map { listOf(it.asFile) }.orElse(emptyList()),
+                                pkg.npmIgnore.map { listOf(it.asFile) }.orElse(emptyList()),
+                                pkg.packageJsonTemplateFile.map { listOf(it.asFile) }.orElse(emptyList()),
+                                publicJson.map { it.packageJsonFile })
+                            productionInputs.from(project.buildFile, project.rootProject.buildFile,
+                                project.rootProject.fileTree("gradle") { exclude("**/build/**") })
+                            productionInputs.from(project.rootProject.files("gradle.properties",
+                                "platform-version.properties", "settings.gradle.kts", "settings.gradle")
+                                .filter { it.isFile })
+                            dependsOn(publicJson, project.tasks.named(compilation.processResourcesTaskName),
+                                target.binaries.filter { it.mode == KotlinJsBinaryMode.PRODUCTION }.map { it.linkTask })
+                        }
+                        val npmVersion = versionTask.flatMap { it.versionFile }.map { it.asFile.readText().trim() }
                         scope.set(npmScope)
                         packageName.set(npmPkgName)
-                        packageJson(Action<PackageJson> { configurePackageJson(this, entryFile, typesFile) })
+                        version.set(npmVersion)
+                        packageJson(Action<PackageJson> { configurePackageJson(this, entryFile, typesFile, npmVersion) })
+                        project.tasks.named("assembleJsPackage").configure { dependsOn(versionTask) }
                     }
-                } catch (_: Exception) {
+                } else {
                     log.info("Skipping npm package configuration for ${project.name}: no JS target")
                 }
             })
@@ -170,9 +207,10 @@ class NpmPublicationPlugin : Plugin<Project> {
             // `npm install @sphereon/idk-foo` (no version) keeps resolving to the last
             // released version rather than getting bumped to a snapshot on every CI run.
             // Released versions still publish to `latest` (the npm-publish default).
-            if (npmVersion.contains("-SNAPSHOT")) {
+            if (baseVersion.endsWith("-SNAPSHOT")) {
                 project.tasks.withType(NpmPublishTask::class.java).configureEach {
                     tag.set("snapshot")
+                    onlyIf("This component build version is not already published", UnpublishedNpmBuild())
                 }
             }
         }

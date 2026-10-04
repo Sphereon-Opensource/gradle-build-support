@@ -41,6 +41,8 @@ import java.util.jar.JarFile
 class ServiceDeployablePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
+        project.pluginManager.apply(EnterpriseArchitecturePlugin::class.java)
+        declareDeployableModule(project)
         val extension = project.extensions.create(
             "serviceDeployable",
             ServiceDeployableExtension::class.java

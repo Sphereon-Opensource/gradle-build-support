@@ -13,6 +13,34 @@ re-(use) part of our build support.
 - **IntegrationTestPlugin** (`com.sphereon.gradle.plugin.integration-tests`): Adds support for integration tests.
 - **ProjectPublicationPlugin** (`com.sphereon.gradle.plugin.project-publication`): Configures Maven publication with consistent POM metadata and signing.
 - **TomlCatalogPlugin** (`com.sphereon.gradle.toml-catalog`): Generates TOML version catalogs from BOMs.
+- **NpmPublicationPlugin** (`com.sphereon.gradle.plugin.npm-publication`): Derives each npm package version from its component build and assembles JS packages for publication.
+
+### Npm component build versions
+
+The npm plugin uses the consuming module's Gradle `version` as its compatibility
+version. Releases keep that value. For a snapshot, `generateNpmBuildVersion`
+derives a SHA-256 component build identity from the JS production output, bundled
+dependencies, declarations, resources, npm dependency metadata, build files and
+the publication plugin implementation. Plugin archive timestamps and checkout
+paths do not change its build identity.
+The package version is `<base>-SNAPSHOT.build.b<identity>`. Git HEAD, branch names,
+timestamps and CI run counters do not determine the version. Unchanged component
+builds retain the same version; changed code or dependency bytes change it.
+Snapshot publication checks the registry for that exact component version and
+reuses it when already published. Missing versions are published with the
+`snapshot` tag; authentication or registry errors fail the check. Release and
+explicit dry-run publication behavior is unchanged.
+
+This task runs in the product repository through ordinary Gradle, using the
+published plugin. CI requires no parent repository, workspace launcher or local
+Maven-overlay receipt. The version is written to
+`<module>/build/npm-build-version/version.txt` before package assembly. JVM-only
+builds do not register npm preparation tasks.
+
+A build system that already has a target-specific SHA-256 component build version
+can supply it using `npmPublication { buildVersion.set("<64-character identity>") }`
+or `-PbuildVersion.<module-name>=<identity>`. Supply the JS component identity;
+a JVM producer receipt does not establish the identity of a JS build.
 
 ### BOMs (Bill of Materials)
 

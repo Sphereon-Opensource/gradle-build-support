@@ -24,6 +24,9 @@ interface NpmPublicationExtension {
     /** Set to false to disable npm publishing for this module. Default: true */
     val enabled: Property<Boolean>
 
+    /** Optional SHA-256 component build identity; otherwise derived from the JS build. */
+    val buildVersion: Property<String>
+
     /** Repository URL for package.json metadata. Default: `https://github.com/nicolo-ribeiro/npm-publish` is overridden */
     val repositoryUrl: Property<String>
 
