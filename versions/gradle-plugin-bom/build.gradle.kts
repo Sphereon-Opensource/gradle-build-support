@@ -59,7 +59,7 @@ dependencies {
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
 
         // Code Coverage
-        api("org.jetbrains.kotlinx.kover:0.9.4")
+        api("org.jetbrains.kotlinx.kover:0.9.9")
 
         // NPM Publish (JetBrains fork, supports wasmJs)
         api("org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin:3.6.0")
