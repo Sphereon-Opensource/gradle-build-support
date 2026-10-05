@@ -180,7 +180,7 @@ dependencies {
         api("androidx.test.espresso:espresso-core:3.6.1")
         api("androidx.appcompat:appcompat:1.7.1")
         api("androidx.constraintlayout:constraintlayout:2.2.1")
-        api("androidx.activity:activity-compose:1.10.3")
+        api("androidx.activity:activity-compose:1.10.1")
         api("androidx.navigation3:navigation3-runtime:1.1.4")
         api("org.jetbrains.androidx.navigation3:navigation3-ui:1.1.1")
         api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.9.1")
