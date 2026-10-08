@@ -21,13 +21,13 @@ dependencies {
         api("com.sphereon.gradle.plugin.npm-publication:${version}")
 
         // Kotlin
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20-RC")
-        api("org.jetbrains.kotlin.jvm:2.4.20-RC")
-        api("org.jetbrains.kotlin.multiplatform:2.4.20-RC")
-        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20-RC")
-        api("org.jetbrains.kotlin.plugin.serialization:2.4.20-RC")
-        api("org.jetbrains.kotlin.android:2.4.20-RC")
-        api("org.jetbrains.kotlin.plugin.compose:2.4.20-RC")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20")
+        api("org.jetbrains.kotlin.jvm:2.4.20")
+        api("org.jetbrains.kotlin.multiplatform:2.4.20")
+        api("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20")
+        api("org.jetbrains.kotlin.plugin.serialization:2.4.20")
+        api("org.jetbrains.kotlin.android:2.4.20")
+        api("org.jetbrains.kotlin.plugin.compose:2.4.20")
 
         // Dependency analysis
         api("com.autonomousapps.dependency-analysis:3.18.0")
@@ -52,14 +52,14 @@ dependencies {
         api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
-        api("software.amazon.app.platform:0.0.15SPH-SNAPSHOT")
-        api("dev.zacsweers.metro:1.4.2")
+        api("software.amazon.app.platform:0.0.16SPH-SNAPSHOT")
+        api("dev.zacsweers.metro:1.4.4")
 
 
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
 
         // Code Coverage
-        api("org.jetbrains.kotlinx.kover:0.9.4")
+        api("org.jetbrains.kotlinx.kover:0.9.9")
 
         // NPM Publish (JetBrains fork, supports wasmJs)
         api("org.jetbrains.kotlin.npm-publish:org.jetbrains.kotlin.npm-publish.gradle.plugin:3.6.0")
