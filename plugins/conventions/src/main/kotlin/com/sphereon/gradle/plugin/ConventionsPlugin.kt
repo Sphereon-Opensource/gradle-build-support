@@ -115,6 +115,14 @@ class ConventionsPlugin : Plugin<Project> {
                                 setupNodeJsEnvironment()
                                 val jsTarget = this as KotlinJsTargetDsl
                                 jsTarget.useEsModules()
+                                if (name == "js") {
+                                    // -Xes-generators (added to every JS compile above) is only correct on es2015:
+                                    // on the ES5 default, suspension callbacks become `function () {}` and lose the
+                                    // enclosing `this` (TypeError reading a member of undefined, e.g. Ktor's
+                                    // ByteChannel or the stdlib sequence builder). Modules declaring their own js {}
+                                    // block without a target would otherwise link at ES5.
+                                    jsTarget.compilerOptions { target.set("es2015") }
+                                }
                                 configureBrowserWebpackConfigDir(jsTarget)
                             }
                         }
