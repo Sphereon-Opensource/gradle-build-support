@@ -18,7 +18,7 @@ private const val KMP_TARGETS_PROPERTY = "kmp.targets"
 private const val IOS_SKIP_LOGGED_KEY = "sphereonIosSkipLogged"
 
 /** Android compile SDK used by [configureAndroidLibraryTargetIfEnabled] unless a module overrides it. */
-const val ANDROID_COMPILE_SDK = 36
+internal const val ANDROID_COMPILE_SDK = 36
 
 /**
  * The one parse of the `kmp.targets` system property: lowercase, trimmed tokens, default `jvm`.
