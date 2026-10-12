@@ -49,8 +49,8 @@ class NpmPublicationPlugin : Plugin<Project> {
         }
 
         // Skip npm-publish plugin entirely when no JS/wasmJs targets are configured
-        val kmpTargets = (System.getProperty("kmp.targets") ?: "jvm").split(",").map { it.trim().lowercase() }
-        val hasJsTargets = "all" in kmpTargets || "js" in kmpTargets || "wasmjs" in kmpTargets || "wasm" in kmpTargets
+        val kmpTargets = requestedKmpTargets()
+        val hasJsTargets = kmpTargetEnabled("js") || kmpTargetEnabled("wasmjs")
         if (!hasJsTargets) {
             log.info("Skipping npm-publish for ${project.name}: no JS/wasmJs targets (kmp.targets=${kmpTargets.joinToString(",")})")
             return
