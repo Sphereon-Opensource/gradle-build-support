@@ -97,6 +97,33 @@ class KmpTargetSelectionFunctionalTest {
         }
     }
 
+    @Test
+    fun kmpTargetEnabledCanonicalisesItsArgument() {
+        withSystemProperty("kmp.targets", "wasm,linuxx64") {
+            assertTrue(kmpTargetEnabled("wasmJs"))
+            assertTrue(kmpTargetEnabled(" WASM "))
+            assertTrue(kmpTargetEnabled("linuxX64"))
+            assertFalse(kmpTargetEnabled("js"))
+        }
+    }
+
+    @Test
+    fun macOsHostIsAnOsNameStartingWithMac() {
+        withSystemProperty("os.name", "Mac OS X") { assertTrue(isMacOsHost()) }
+        withSystemProperty("os.name", "Linux") { assertFalse(isMacOsHost()) }
+        withSystemProperty("os.name", "Linux-mac80211") { assertFalse(isMacOsHost()) }
+    }
+
+    private fun withSystemProperty(name: String, value: String, block: () -> Unit) {
+        val previous = System.getProperty(name)
+        try {
+            System.setProperty(name, value)
+            block()
+        } finally {
+            if (previous == null) System.clearProperty(name) else System.setProperty(name, previous)
+        }
+    }
+
     private fun environmentWithoutAndroidSdk(): Map<String, String> =
         System.getenv().filterKeys { key -> key != "ANDROID_HOME" && key != "ANDROID_SDK_ROOT" }
 
