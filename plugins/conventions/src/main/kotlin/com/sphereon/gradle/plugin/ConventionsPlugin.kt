@@ -463,8 +463,9 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
 /**
  * Standard KMP target set, gated by the `kmp.targets` system property.
  *
- * Supported values (comma-separated, parsed once by [requestedKmpTargets]): jvm, js, wasmJs (alias wasm),
- * ios (macOS hosts only), android, native (alias linuxX64), all.
+ * Supported values (comma-separated, case-insensitive, parsed once per build by [KmpTargetSelection]): jvm, js,
+ * wasmJs (alias wasm), ios (macOS hosts only), android, native (alias linuxX64), all. Unknown values fail the build;
+ * `all` is every target this host can build except android.
  * `android` is not declared here: modules call [configureAndroidLibraryTargetIfEnabled] inside `kotlin { }`.
  * Default: "jvm" (fast local builds). Set via gradle.properties: `systemProp.kmp.targets=jvm`
  * Override: `./gradlew build -Dkmp.targets=all` or `./gradlew build -Dkmp.targets=jvm,js`
@@ -480,7 +481,7 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
 fun KotlinMultiplatformExtension.configureStandardTargets() {
     jvm()
 
-    if (kmpTargetEnabled("js")) {
+    if (project.kmpTargetEnabled("js")) {
         js {
             compilerOptions {
                 moduleKind.set(JsModuleKind.MODULE_ES)
@@ -505,7 +506,7 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
         }
     }
 
-    if (kmpTargetEnabled("wasmjs")) {
+    if (project.kmpTargetEnabled("wasmjs")) {
         wasmJs {
             browser {
                 testTask {
@@ -531,8 +532,9 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
         iosSimulatorArm64()
     }
 
-    if (linuxX64TargetEnabled()) {
+    if (project.linuxX64TargetEnabled()) {
         linuxX64()
+        project.gateLinuxX64TestExecution()
     }
 }
 
@@ -558,8 +560,9 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
 fun KotlinMultiplatformExtension.configureBackendTargets() {
     jvm()
 
-    if (linuxX64TargetEnabled()) {
+    if (project.linuxX64TargetEnabled()) {
         linuxX64()
+        project.gateLinuxX64TestExecution()
     }
 }
 
@@ -579,22 +582,17 @@ fun KotlinMultiplatformExtension.configureIosTargetsIfEnabled() {
 /**
  * Configures the linuxX64 native target only when `kmp.targets` includes "native", "linuxx64", or "all".
  *
- * Skipped on Windows hosts: Kotlin/Native's MinGW toolchain ships no Linux system libraries, so
- * modules with C-interop deps (e.g. libunistring via com.doist.x.normalize) fail at link time.
- * Override with `-Dkmp.linuxOnWindows=true` if you have a Linux toolchain available.
+ * The target compiles and links on every host; `linuxX64Test` runs only on Linux x86_64 (see
+ * [gateLinuxX64TestExecution]). A module whose C-interop dependencies need Linux system libraries at link
+ * time links only on Linux.
  */
 fun KotlinMultiplatformExtension.configureLinuxTargetIfEnabled() {
-    if (linuxX64TargetEnabled()) {
+    if (project.linuxX64TargetEnabled()) {
         linuxX64()
+        project.gateLinuxX64TestExecution()
     }
 }
 
-private fun linuxX64TargetEnabled(): Boolean {
-    if (!kmpTargetEnabled("native")) return false
-    val isWindows = System.getProperty("os.name").orEmpty().lowercase().contains("windows")
-    val override = System.getProperty("kmp.linuxOnWindows")?.toBoolean() == true
-    return !isWindows || override
-}
 
 /**
  * Configures the JS target only when `kmp.targets` includes "js" or "all".
@@ -605,7 +603,7 @@ private fun linuxX64TargetEnabled(): Boolean {
 fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
     configure: (org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl.() -> Unit)? = null
 ) {
-    if (kmpTargetEnabled("js")) {
+    if (project.kmpTargetEnabled("js")) {
         js { configure?.invoke(this) }
     }
 }
@@ -630,7 +628,7 @@ fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
 fun KotlinMultiplatformExtension.configureWasmJsTargetIfEnabled(
     configure: (org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinWasmJsTargetDsl.() -> Unit)? = null
 ) {
-    if (kmpTargetEnabled("wasmjs")) {
+    if (project.kmpTargetEnabled("wasmjs")) {
         wasmJs { configure?.invoke(this) }
     }
 }

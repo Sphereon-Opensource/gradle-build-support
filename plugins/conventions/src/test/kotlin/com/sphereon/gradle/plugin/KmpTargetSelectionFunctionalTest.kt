@@ -17,9 +17,9 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -29,38 +29,118 @@ class KmpTargetSelectionFunctionalTest {
     @TempDir
     lateinit var projectDirectory: Path
 
+    /** The host the TestKit builds run on, read without touching the shared test JVM's properties. */
+    private val host = KmpHost(System.getProperty("os.name").orEmpty(), System.getProperty("os.arch").orEmpty())
+
     @Test
-    fun jvmOnlyConfiguresNoJsWasmOrAndroidTasks() {
+    fun noPropertyStaysJvmOnly() {
+        writeFixture()
+
+        // A separate TestKit directory gives this build a fresh daemon, so no earlier -Dkmp.targets can linger.
+        // It lives under the build directory: its daemon keeps files open after the test's temp folder is removed.
+        val output = runner("lib", kmpTargets = null, environmentWithoutAndroidSdk())
+            .withTestKitDir(File("build/tmp/testkit-no-property").absoluteFile)
+            .build().output
+
+        assertContains(output, "compileKotlinJvm")
+        assertJvmOnly(output)
+    }
+
+    @Test
+    fun jvmOnlyConfiguresNoJsWasmNativeOrAndroidTasks() {
         writeFixture()
 
         val output = listTasks("lib", "jvm", environmentWithoutAndroidSdk())
 
         assertContains(output, "compileKotlinJvm")
-        assertFalse(output.contains("compileKotlinJs"), "JS compile task present for kmp.targets=jvm:\n$output")
-        assertFalse(output.contains("compileKotlinWasmJs"), "wasmJs compile task present for kmp.targets=jvm:\n$output")
-        assertTrue(androidTaskNames(output).isEmpty(), "Android tasks present for kmp.targets=jvm:\n$output")
+        assertJvmOnly(output)
     }
 
     @Test
-    fun wasmJsRequestAddsTheWasmJsCompileTask() {
+    fun commandLineBeatsGradlePropertiesSystemProperty() {
         writeFixture()
+        projectDirectory.resolve("gradle.properties").writeText("systemProp.kmp.targets=jvm\n")
 
         val output = listTasks("lib", "jvm,wasmJs", environmentWithoutAndroidSdk())
 
         assertContains(output, "compileKotlinWasmJs")
-        assertContains(output, "compileKotlinJvm")
     }
 
     @Test
-    fun iosRequestOnNonMacHostIsSkippedWithOneLifecycleLine() {
-        assumeFalse(isMacOsHost(), "iOS is enabled on macOS hosts")
+    fun jsTargetCompilesEs2015WithGenerators() {
         writeFixture()
 
-        val output = listTasks("lib", "jvm,ios", environmentWithoutAndroidSdk())
+        val output = listTasks("lib", "js", environmentWithoutAndroidSdk())
 
-        val skipLine = "iOS targets skipped: they need a macOS host"
-        assertEquals(1, output.lines().count { line -> line.contains(skipLine) }, "Skip line count in:\n$output")
-        assertFalse(output.contains("Ios", ignoreCase = false), "iOS tasks present on a non-macOS host:\n$output")
+        assertContains(output, "compileKotlinJs")
+        assertContains(output, "JS_TARGET=es2015")
+        assertContains(output, "JS_GENERATORS=true")
+    }
+
+    @Test
+    fun nativeDeclaresLinuxX64OnEveryHost() {
+        writeFixture()
+
+        val output = listTasks("lib", "jvm,native", environmentWithoutAndroidSdk())
+
+        assertContains(output, "compileKotlinLinuxX64")
+        assertContains(output, "linuxX64Test")
+    }
+
+    @Test
+    fun namedNativeFailsLinuxX64TestOffLinuxX64() {
+        assumeFalse(host.isLinuxX64, "linuxX64Test runs on this host")
+        writeFixture()
+
+        val output = runner("lib", "jvm,native", environmentWithoutAndroidSdk(), ":lib:linuxX64Test", "-x", ":lib:linkDebugTestLinuxX64")
+            .buildAndFail().output
+
+        assertContains(output, "linuxX64Test needs a Linux x86_64 host; this host is ${host.description}")
+    }
+
+    @Test
+    fun allBuildsEveryHostTargetButAndroid() {
+        writeFixture()
+
+        val output = listTasks("lib", "all", environmentWithoutAndroidSdk())
+
+        assertContains(output, "compileKotlinJs")
+        assertContains(output, "compileKotlinWasmJs")
+        assertContains(output, "compileKotlinLinuxX64")
+        assertTrue(androidTaskNames(output).isEmpty(), "Android tasks present for kmp.targets=all:\n$output")
+        if (!host.isMacOs) {
+            assertContains(output, "iOS targets skipped for kmp.targets=all")
+            assertFalse(output.contains("compileKotlinIos"), "iOS tasks present on a non-macOS host:\n$output")
+        }
+        if (!host.isLinuxX64) assertContains(output, "Skipped for kmp.targets=all.")
+    }
+
+    @Test
+    fun unknownTokenFailsTheBuild() {
+        writeFixture()
+
+        val output = runner("lib", "jvm,andriod", environmentWithoutAndroidSdk(), ":lib:tasks").buildAndFail().output
+
+        assertContains(output, "Unknown kmp.targets value 'andriod'")
+    }
+
+    @Test
+    fun namedIosFailsOffMacOs() {
+        assumeFalse(host.isMacOs, "iOS is enabled on macOS hosts")
+        writeFixture()
+
+        val output = runner("lib", "jvm,ios", environmentWithoutAndroidSdk(), ":lib:tasks").buildAndFail().output
+
+        assertContains(output, "iOS targets need a macOS host with Xcode; this host is ${host.description}")
+    }
+
+    @Test
+    fun settingsPluginExposesTheSelection() {
+        writeFixture(settingsPlugin = true)
+
+        val output = listTasks("lib", "jvm,wasmJs", environmentWithoutAndroidSdk())
+
+        assertContains(output, "SETTINGS_WASM=true SETTINGS_ANDROID=false")
     }
 
     @Test
@@ -75,8 +155,11 @@ class KmpTargetSelectionFunctionalTest {
 
     @Test
     fun androidRequestDeclaresTheConfiguredAndroidTarget() {
-        val androidHome = System.getenv("ANDROID_HOME")
-        assumeTrue(androidHome != null && Path.of(androidHome).toFile().isDirectory, "ANDROID_HOME is not set to an SDK directory on this host")
+        val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+        val hasSdk = androidHome != null && Path.of(androidHome).toFile().isDirectory
+        // CI runners carry an SDK, so there a missing SDK is a broken runner rather than a reason to skip.
+        if (!hasSdk && System.getenv("CI") == "true") fail("ANDROID_HOME is not set to an SDK directory on this CI runner")
+        assumeTrue(hasSdk, "ANDROID_HOME is not set to an SDK directory on this host")
         writeFixture(withAndroidReport = true)
 
         val output = listTasks("androidlib", "jvm,android", System.getenv(), extraClasspath = agpClasspath())
@@ -84,63 +167,43 @@ class KmpTargetSelectionFunctionalTest {
         assertContains(output, "ANDROID_PLUGIN_APPLIED=true")
         assertContains(output, "ANDROID_TARGET_COUNT=1")
         assertContains(output, "ANDROID_TARGET namespace=com.sphereon.fixture.androidlib compileSdk=36 minSdk=$ANDROID_MIN_SDK")
+        // The build coordinator allowlists this name for KMP Android libraries made by the AGP KMP library plugin.
+        assertContains(output, "compileAndroidMain")
     }
 
-    @Test
-    fun requestedKmpTargetsMapsAliasesToCanonicalTokens() {
-        val previous = System.getProperty("kmp.targets")
-        try {
-            System.setProperty("kmp.targets", "WASM, LinuxX64")
-            assertEquals(setOf("wasmjs", "native"), requestedKmpTargets())
-        } finally {
-            if (previous == null) System.clearProperty("kmp.targets") else System.setProperty("kmp.targets", previous)
-        }
-    }
-
-    @Test
-    fun kmpTargetEnabledCanonicalisesItsArgument() {
-        withSystemProperty("kmp.targets", "wasm,linuxx64") {
-            assertTrue(kmpTargetEnabled("wasmJs"))
-            assertTrue(kmpTargetEnabled(" WASM "))
-            assertTrue(kmpTargetEnabled("linuxX64"))
-            assertFalse(kmpTargetEnabled("js"))
-        }
-    }
-
-    @Test
-    fun macOsHostIsAnOsNameStartingWithMac() {
-        withSystemProperty("os.name", "Mac OS X") { assertTrue(isMacOsHost()) }
-        withSystemProperty("os.name", "Linux") { assertFalse(isMacOsHost()) }
-        withSystemProperty("os.name", "Linux-mac80211") { assertFalse(isMacOsHost()) }
-    }
-
-    private fun withSystemProperty(name: String, value: String, block: () -> Unit) {
-        val previous = System.getProperty(name)
-        try {
-            System.setProperty(name, value)
-            block()
-        } finally {
-            if (previous == null) System.clearProperty(name) else System.setProperty(name, previous)
-        }
+    private fun assertJvmOnly(output: String) {
+        assertFalse(output.contains("compileKotlinJs"), "JS compile task present:\n$output")
+        assertFalse(output.contains("compileKotlinWasmJs"), "wasmJs compile task present:\n$output")
+        assertFalse(output.contains("compileKotlinLinuxX64"), "linuxX64 compile task present:\n$output")
+        assertTrue(androidTaskNames(output).isEmpty(), "Android tasks present:\n$output")
     }
 
     private fun environmentWithoutAndroidSdk(): Map<String, String> =
         System.getenv().filterKeys { key -> key != "ANDROID_HOME" && key != "ANDROID_SDK_ROOT" }
+
+    private fun runner(
+        module: String,
+        kmpTargets: String?,
+        environment: Map<String, String>,
+        vararg tasks: String,
+        extraClasspath: List<File> = emptyList(),
+    ): GradleRunner {
+        val taskArguments = if (tasks.isEmpty()) listOf(":$module:tasks", "--all") else tasks.toList()
+        val propertyArguments = if (kmpTargets == null) emptyList() else listOf("-Dkmp.targets=$kmpTargets")
+        return GradleRunner.create()
+            .withProjectDir(projectDirectory.toFile())
+            .withPluginClasspath(pluginUnderTestClasspath() + extraClasspath)
+            .withEnvironment(environment)
+            .withArguments(taskArguments + propertyArguments + "--stacktrace")
+            .forwardOutput()
+    }
 
     private fun listTasks(
         module: String,
         kmpTargets: String,
         environment: Map<String, String>,
         extraClasspath: List<File> = emptyList(),
-    ): String =
-        GradleRunner.create()
-            .withProjectDir(projectDirectory.toFile())
-            .withPluginClasspath(pluginUnderTestClasspath() + extraClasspath)
-            .withEnvironment(environment)
-            .withArguments(":$module:tasks", "--all", "-Dkmp.targets=$kmpTargets", "--stacktrace")
-            .forwardOutput()
-            .build()
-            .output
+    ): String = runner(module, kmpTargets, environment, extraClasspath = extraClasspath).build().output
 
     /** Names of listed tasks that belong to the Android target, from the `name - description` rows of `tasks --all`. */
     private fun androidTaskNames(output: String): List<String> =
@@ -149,9 +212,24 @@ class KmpTargetSelectionFunctionalTest {
             .map { line -> line.substringBefore(" - ").trim() }
             .filter { name -> name.contains("android", ignoreCase = true) }
 
-    private fun writeFixture(withAndroidReport: Boolean = false) {
-        projectDirectory.resolve("settings.gradle.kts").writeText(
+    private fun writeFixture(withAndroidReport: Boolean = false, settingsPlugin: Boolean = false) {
+        val settingsPlugins = if (settingsPlugin) {
             """
+            plugins {
+                id("com.sphereon.gradle.plugin.kmp-targets")
+            }
+            """.trimIndent() + "\n"
+        } else {
+            ""
+        }
+        val settingsReport = if (settingsPlugin) {
+            "println(\"SETTINGS_WASM=\" + kmpTargetEnabled(\"wasmJs\") + \" SETTINGS_ANDROID=\" + kmpTargetEnabled(\"android\"))\n"
+        } else {
+            ""
+        }
+        val settingsImports = if (settingsPlugin) "import com.sphereon.gradle.plugin.kmpTargetEnabled\n\n" else ""
+        projectDirectory.resolve("settings.gradle.kts").writeText(
+            settingsImports + """
             pluginManagement {
                 repositories {
                     google()
@@ -159,6 +237,8 @@ class KmpTargetSelectionFunctionalTest {
                     gradlePluginPortal()
                 }
             }
+            """.trimIndent() + "\n" + settingsPlugins +
+                """
             dependencyResolutionManagement {
                 repositories {
                     google()
@@ -175,7 +255,7 @@ class KmpTargetSelectionFunctionalTest {
             }
             rootProject.name = "kmp-target-fixture"
             include(":lib", ":androidlib")
-            """.trimIndent() + "\n",
+            """.trimIndent() + "\n" + settingsReport,
         )
         // Conventions are applied to the subprojects only, so the root needs no license file. AGP is
         // compileOnly in the plugin under test and is not applied here: the module under test applies it
@@ -195,12 +275,19 @@ class KmpTargetSelectionFunctionalTest {
             "lib",
             """
             import com.sphereon.gradle.plugin.configureStandardTargets
+            import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 
             plugins {
                 id("org.jetbrains.kotlin.multiplatform")
             }
             kotlin {
                 configureStandardTargets()
+            }
+            afterEvaluate {
+                tasks.withType(Kotlin2JsCompile::class.java).matching { task -> task.name == "compileKotlinJs" }.forEach { task ->
+                    println("JS_TARGET=" + task.compilerOptions.target.get())
+                    println("JS_GENERATORS=" + task.compilerOptions.freeCompilerArgs.get().contains("-Xes-generators"))
+                }
             }
             """.trimIndent(),
         )
@@ -248,11 +335,14 @@ class KmpTargetSelectionFunctionalTest {
     }
 
     /**
-     * The Android Gradle Plugin and its dependencies, resolved by a helper build. TestKit injects the plugin
-     * under test through its own class loader, so AGP must sit in that same loader to see the Kotlin classes.
-     * Kotlin artifacts are excluded: the plugin classpath already carries them.
+     * The Android Gradle Plugin and its dependencies, resolved by a helper build at the catalog's AGP version.
+     * TestKit injects the plugin under test through its own class loader, so AGP must sit in that same loader
+     * to see the Kotlin classes. Kotlin artifacts are excluded: the plugin classpath already carries them.
      */
     private fun agpClasspath(): List<File> {
+        val agpVersion = checkNotNull(System.getProperty("sphereon.test.agpVersion")) {
+            "sphereon.test.agpVersion is not set; the conventions build passes the catalog's agp version"
+        }
         val helperDirectory = projectDirectory.resolve("agp-resolver").createDirectories()
         helperDirectory.resolve("settings.gradle.kts").writeText("rootProject.name = \"agp-resolver\"\n")
         helperDirectory.resolve("build.gradle.kts").writeText(
@@ -276,7 +366,7 @@ class KmpTargetSelectionFunctionalTest {
                 exclude(group = "org.jetbrains.kotlin")
             }
             dependencies {
-                add("agp", "com.android.tools.build:gradle:9.2.1")
+                add("agp", "com.android.tools.build:gradle:$agpVersion")
             }
             tasks.register("printAgpClasspath") {
                 doLast {

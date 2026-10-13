@@ -22,7 +22,7 @@ internal fun KotlinMultiplatformExtension.applyAndroidLibraryTarget(
     project: Project,
     namespace: String,
     compileSdk: Int,
-    configure: KotlinMultiplatformAndroidLibraryTarget.() -> Unit,
+    configure: (KotlinMultiplatformAndroidLibraryTarget.() -> Unit)?,
 ) {
     project.pluginManager.apply(ANDROID_LIBRARY_PLUGIN_ID)
     val androidTarget = (this as ExtensionAware).extensions
@@ -32,5 +32,5 @@ internal fun KotlinMultiplatformExtension.applyAndroidLibraryTarget(
     androidTarget.compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
-    androidTarget.configure()
+    configure?.invoke(androidTarget)
 }

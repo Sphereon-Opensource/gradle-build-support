@@ -48,14 +48,23 @@ class NpmPublicationPlugin : Plugin<Project> {
             license.convention("Apache-2.0")
         }
 
-        // Skip npm-publish plugin entirely when no JS/wasmJs targets are configured
-        val kmpTargets = requestedKmpTargets()
-        val hasJsTargets = kmpTargetEnabled("js") || kmpTargetEnabled("wasmjs")
-        if (!hasJsTargets) {
-            log.info("Skipping npm-publish for ${project.name}: no JS/wasmJs targets (kmp.targets=${kmpTargets.joinToString(",")})")
-            return
+        // npm publication follows the targets the module really declares, not the requested kmp.targets:
+        // a module without js or wasmJs gets no npm-publish plugin even when the build asks for those targets.
+        var configured = false
+        project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
+            project.extensions.getByType(KotlinMultiplatformExtension::class.java).targets.configureEach(Action {
+                if (this is KotlinJsIrTarget && !configured) {
+                    configured = true
+                    configureNpmPublication(project, ext)
+                }
+            })
         }
+        project.afterEvaluate {
+            if (!configured) log.info("Skipping npm-publish for ${project.name}: the module declares no js or wasmJs target")
+        }
+    }
 
+    private fun configureNpmPublication(project: Project, ext: NpmPublicationExtension) {
         // Apply the JetBrains npm-publish plugin
         project.pluginManager.apply("org.jetbrains.kotlin.npm-publish")
 
@@ -64,13 +73,10 @@ class NpmPublicationPlugin : Plugin<Project> {
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
             try {
                 val npmPublishExt = project.extensions.getByType(NpmPublishExtension::class.java)
-                npmPublishExt.packages(Action {
-                    try {
-                        named("wasmJs").configure {
-                            main.set("${project.name}.uninstantiated.mjs")
-                        }
-                    } catch (_: Exception) { }
-                })
+                // Lazy: the wasmJs package appears only once the wasmJs target is declared.
+                npmPublishExt.packages.configureEach {
+                    if (name == "wasmJs") main.set("${project.name}.uninstantiated.mjs")
+                }
             } catch (_: Exception) { }
         }
 

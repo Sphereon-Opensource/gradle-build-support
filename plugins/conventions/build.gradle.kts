@@ -30,6 +30,8 @@ repositories {
 dependencies {
     gradleApi()
     implementation(libs.kotlin.gradlePlugin)
+    // kmp.targets parsing; api so module build scripts can call kmpTargetEnabled and androidTargetEnabled.
+    api(project(":plugins:kmp-targets"))
     // Android DSL types for the shared minSdk convention. compileOnly: AGP is on the buildscript
     // classpath of the modules that apply it, and must not be forced onto those that do not.
     compileOnly(libs.android.gradleApi)
@@ -43,6 +45,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // The Android functional test resolves the catalog's AGP, not a copy of its version.
+    systemProperty("sphereon.test.agpVersion", libs.versions.agp.get())
 }
 
 gradlePlugin {

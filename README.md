@@ -14,6 +14,45 @@ re-(use) part of our build support.
 - **ProjectPublicationPlugin** (`com.sphereon.gradle.plugin.project-publication`): Configures Maven publication with consistent POM metadata and signing.
 - **TomlCatalogPlugin** (`com.sphereon.gradle.toml-catalog`): Generates TOML version catalogs from BOMs.
 - **NpmPublicationPlugin** (`com.sphereon.gradle.plugin.npm-publication`): Derives each npm package version from its component build and assembles JS packages for publication.
+- **KmpTargetsSettingsPlugin** (`com.sphereon.gradle.plugin.kmp-targets`): A settings plugin that validates `kmp.targets` before any project is configured and gives settings scripts `kmpTargetEnabled(...)` and `kmpTargetSelection()`.
+
+### Kotlin targets (`kmp.targets`)
+
+The conventions declare Kotlin targets from the `kmp.targets` system property: a
+comma-separated, case-insensitive list of `jvm`, `js`, `wasmJs` (alias `wasm`),
+`native` (alias `linuxX64`), `android`, `ios` and `all`.
+
+- No property means `jvm`. A property that is set but empty fails the build.
+- An unknown value fails the build with the allowed values, so a typo such as
+  `andriod` never produces a green JVM-only build.
+- The JVM target is always declared; the other values add targets next to it.
+- A named target the host cannot build fails the build and names the host:
+  `ios` off macOS, and running `linuxX64Test` off Linux x86_64. `linuxX64`
+  compiles and links on every host.
+- `all` means every target this host can build. It logs each target it drops
+  (iOS off macOS, `linuxX64Test` off Linux x86_64) and never includes `android`,
+  which needs an SDK: name `android` to get it.
+- The command line wins over `systemProp.kmp.targets` in `gradle.properties`:
+  `./gradlew build -Dkmp.targets=jvm,wasmJs`.
+
+The value is read once per build through Gradle's providers, so the
+configuration cache tracks it. Build scripts call `kmpTargetEnabled("js")`,
+`androidTargetEnabled()` and `configureAndroidLibraryTargetIfEnabled(...)`;
+settings scripts apply the settings plugin and call the same names, for example
+to include an Android application only when `android` is named:
+
+```kotlin
+import com.sphereon.gradle.plugin.kmpTargetEnabled
+
+plugins {
+    id("com.sphereon.gradle.plugin.kmp-targets") version "<gbs version>"
+}
+
+if (kmpTargetEnabled("android")) include(":app-android")
+```
+
+The npm publication plugin follows the targets a module really declares, not the
+requested ones: a module without `js` or `wasmJs` gets no npm tasks.
 
 ### Npm component build versions
 
