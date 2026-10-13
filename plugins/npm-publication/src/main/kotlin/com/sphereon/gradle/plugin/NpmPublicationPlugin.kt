@@ -52,7 +52,9 @@ class NpmPublicationPlugin : Plugin<Project> {
         // a module without js or wasmJs gets no npm-publish plugin even when the build asks for those targets.
         var configured = false
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
-            project.extensions.getByType(KotlinMultiplatformExtension::class.java).targets.configureEach(Action {
+            // `all`, not `configureEach`: applying npm-publish registers listeners on this target container,
+            // which Gradle refuses inside a lazy configureEach action of the same container.
+            project.extensions.getByType(KotlinMultiplatformExtension::class.java).targets.all(Action {
                 if (this is KotlinJsIrTarget && !configured) {
                     configured = true
                     configureNpmPublication(project, ext)
