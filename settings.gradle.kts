@@ -93,6 +93,7 @@ include(":versions:library-bom")
 
 
 
+include(":plugins:kmp-targets")
 include(":plugins:conventions")
 include(":plugins:project-publication")
 include(":plugins:npm-publication")

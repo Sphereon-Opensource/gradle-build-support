@@ -463,7 +463,10 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
 /**
  * Standard KMP target set, gated by the `kmp.targets` system property.
  *
- * Supported values (comma-separated): jvm, js, wasmJs, ios, native, linuxX64, all.
+ * Supported values (comma-separated, case-insensitive, parsed once per build by [KmpTargetSelection]): jvm, js,
+ * wasmJs (alias wasm), ios (macOS hosts only), android, native (alias linuxX64), all. Unknown values fail the build;
+ * `all` is every target this host can build except android.
+ * `android` is not declared here: modules call [configureAndroidLibraryTargetIfEnabled] inside `kotlin { }`.
  * Default: "jvm" (fast local builds). Set via gradle.properties: `systemProp.kmp.targets=jvm`
  * Override: `./gradlew build -Dkmp.targets=all` or `./gradlew build -Dkmp.targets=jvm,js`
  *
@@ -476,13 +479,9 @@ private fun KotlinMultiplatformExtension.configureKspSourceSets() {
  */
 @OptIn(ExperimentalWasmDsl::class)
 fun KotlinMultiplatformExtension.configureStandardTargets() {
-    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
-        .split(",").map { it.trim().lowercase() }
-    val all = "all" in enabledTargets
-
     jvm()
 
-    if (all || "js" in enabledTargets) {
+    if (project.kmpTargetEnabled("js")) {
         js {
             compilerOptions {
                 moduleKind.set(JsModuleKind.MODULE_ES)
@@ -507,7 +506,7 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
         }
     }
 
-    if (all || "wasmjs" in enabledTargets || "wasm" in enabledTargets) {
+    if (project.kmpTargetEnabled("wasmjs")) {
         wasmJs {
             browser {
                 testTask {
@@ -528,13 +527,14 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
         }
     }
 
-    if (all || "ios" in enabledTargets) {
+    if (project.iosTargetsEnabled()) {
         iosArm64()
         iosSimulatorArm64()
     }
 
-    if (linuxX64TargetEnabled(enabledTargets)) {
+    if (project.linuxX64TargetEnabled()) {
         linuxX64()
+        project.gateLinuxX64TestExecution()
     }
 }
 
@@ -558,13 +558,11 @@ fun KotlinMultiplatformExtension.configureStandardTargets() {
  * `commonMain` reaches a server-only API cannot honour that promise anyway.
  */
 fun KotlinMultiplatformExtension.configureBackendTargets() {
-    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
-        .split(",").map { it.trim().lowercase() }
-
     jvm()
 
-    if (linuxX64TargetEnabled(enabledTargets)) {
+    if (project.linuxX64TargetEnabled()) {
         linuxX64()
+        project.gateLinuxX64TestExecution()
     }
 }
 
@@ -575,9 +573,7 @@ fun KotlinMultiplatformExtension.configureBackendTargets() {
  * Eliminates iOS dependency resolution overhead when building JVM-only (`kmp.targets=jvm`).
  */
 fun KotlinMultiplatformExtension.configureIosTargetsIfEnabled() {
-    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
-        .split(",").map { it.trim().lowercase() }
-    if ("all" in enabledTargets || "ios" in enabledTargets) {
+    if (project.iosTargetsEnabled()) {
         iosArm64()
         iosSimulatorArm64()
     }
@@ -586,25 +582,17 @@ fun KotlinMultiplatformExtension.configureIosTargetsIfEnabled() {
 /**
  * Configures the linuxX64 native target only when `kmp.targets` includes "native", "linuxx64", or "all".
  *
- * Skipped on Windows hosts: Kotlin/Native's MinGW toolchain ships no Linux system libraries, so
- * modules with C-interop deps (e.g. libunistring via com.doist.x.normalize) fail at link time.
- * Override with `-Dkmp.linuxOnWindows=true` if you have a Linux toolchain available.
+ * The target compiles and links on every host; `linuxX64Test` runs only on Linux x86_64 (see
+ * [gateLinuxX64TestExecution]). A module whose C-interop dependencies need Linux system libraries at link
+ * time links only on Linux.
  */
 fun KotlinMultiplatformExtension.configureLinuxTargetIfEnabled() {
-    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
-        .split(",").map { it.trim().lowercase() }
-    if (linuxX64TargetEnabled(enabledTargets)) {
+    if (project.linuxX64TargetEnabled()) {
         linuxX64()
+        project.gateLinuxX64TestExecution()
     }
 }
 
-private fun linuxX64TargetEnabled(enabledTargets: List<String>): Boolean {
-    val requested = "all" in enabledTargets || "native" in enabledTargets || "linuxx64" in enabledTargets
-    if (!requested) return false
-    val isWindows = System.getProperty("os.name").orEmpty().lowercase().contains("windows")
-    val override = System.getProperty("kmp.linuxOnWindows")?.toBoolean() == true
-    return !isWindows || override
-}
 
 /**
  * Configures the JS target only when `kmp.targets` includes "js" or "all".
@@ -615,9 +603,7 @@ private fun linuxX64TargetEnabled(enabledTargets: List<String>): Boolean {
 fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
     configure: (org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl.() -> Unit)? = null
 ) {
-    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
-        .split(",").map { it.trim().lowercase() }
-    if ("all" in enabledTargets || "js" in enabledTargets) {
+    if (project.kmpTargetEnabled("js")) {
         js { configure?.invoke(this) }
     }
 }
@@ -642,9 +628,7 @@ fun KotlinMultiplatformExtension.configureJsTargetIfEnabled(
 fun KotlinMultiplatformExtension.configureWasmJsTargetIfEnabled(
     configure: (org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinWasmJsTargetDsl.() -> Unit)? = null
 ) {
-    val enabledTargets = (System.getProperty("kmp.targets") ?: "jvm")
-        .split(",").map { it.trim().lowercase() }
-    if ("all" in enabledTargets || "wasmjs" in enabledTargets || "wasm" in enabledTargets) {
+    if (project.kmpTargetEnabled("wasmjs")) {
         wasmJs { configure?.invoke(this) }
     }
 }
