@@ -45,6 +45,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // Archive fixtures own their source selection and pinned Maven repository.
+    setEnvironment(environment.filterKeys { it != "VDX_OPENAPI_REPO" })
     // The Android functional test resolves the catalog's AGP, not a copy of its version.
     systemProperty("sphereon.test.agpVersion", libs.versions.agp.get())
 }

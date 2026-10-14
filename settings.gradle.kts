@@ -87,15 +87,23 @@ dependencyResolutionManagement {
     }
 }
 
-include(":versions:common-bom")
-include(":versions:gradle-plugin-bom")
-include(":versions:library-bom")
-
-
-
-include(":plugins:kmp-targets")
-include(":plugins:conventions")
-include(":plugins:project-publication")
-include(":plugins:npm-publication")
-include(":plugins:integration-tests")
+val selectedModules = System.getenv("WORKSPACE_SOURCE_MODULES")
+    ?.split(',')?.filter { it.isNotBlank() }?.toSet()
+val modulePaths = listOf(
+    ":versions:common-bom",
+    ":versions:gradle-plugin-bom",
+    ":versions:library-bom",
+    ":plugins:kmp-targets",
+    ":plugins:conventions",
+    ":plugins:project-publication",
+    ":plugins:npm-publication",
+    ":plugins:integration-tests",
+)
+if (selectedModules != null) {
+    require(selectedModules.isNotEmpty() && modulePaths.map { it.substringAfterLast(':') }.containsAll(selectedModules)) {
+        "WORKSPACE_SOURCE_MODULES must select existing build-support modules"
+    }
+}
+modulePaths.filter { selectedModules == null || it.substringAfterLast(':') in selectedModules }
+    .forEach { include(it) }
 
