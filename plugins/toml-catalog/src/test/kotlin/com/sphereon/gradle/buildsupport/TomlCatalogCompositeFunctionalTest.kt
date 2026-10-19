@@ -55,6 +55,7 @@ class TomlCatalogCompositeFunctionalTest {
         assertTrue(Files.isRegularFile(producer.resolve("build/tomlCatalog/sphereonLibraryBom.versioned.toml")))
         assertTrue(Files.isRegularFile(producer.resolve("build/tomlCatalog/sphereonLibraryBom.toml")))
 
+        // Settings-time catalog GAV substitution is unsupported: https://github.com/gradle/gradle/issues/18847
         write(consumer, "settings.gradle.kts", """
             rootProject.name = "catalog-consumer"
             includeBuild("../library-bom") {
@@ -64,7 +65,9 @@ class TomlCatalogCompositeFunctionalTest {
             }
             dependencyResolutionManagement {
                 versionCatalogs {
-                    create("libs") { from("com.sphereon.gradle:library-bom:1.0@toml") }
+                    create("libs") {
+                        from(files("../library-bom/build/tomlCatalog/sphereonLibraryBom.versioned.toml"))
+                    }
                 }
             }
         """.trimIndent())
@@ -73,6 +76,16 @@ class TomlCatalogCompositeFunctionalTest {
             import org.gradle.api.attributes.Category
             import org.gradle.api.attributes.Usage
 
+            // Check both GAV selectors independently of the generated-file catalog bootstrap.
+            val primaryCatalog = configurations.create("primaryCatalog") {
+                isCanBeResolved = true
+                isCanBeConsumed = false
+                attributes {
+                    attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.REGULAR_PLATFORM))
+                    attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.VERSION_CATALOG))
+                }
+            }
+            dependencies.add(primaryCatalog.name, "com.sphereon.gradle:library-bom:1.0@toml")
             val classifiedCatalog = configurations.create("classifiedCatalog") {
                 isCanBeResolved = true
                 isCanBeConsumed = false
@@ -84,13 +97,18 @@ class TomlCatalogCompositeFunctionalTest {
             dependencies.add(classifiedCatalog.name, "com.sphereon.gradle:library-bom:1.0:bom@toml")
             tasks.register("checkCatalog") {
                 doLast {
+                    val primary = primaryCatalog.singleFile
+                    val imported = file("../library-bom/build/tomlCatalog/sphereonLibraryBom.versioned.toml")
+                    check(primary.name == "sphereonLibraryBom.versioned.toml")
+                    check(primary.canonicalFile == imported.canonicalFile)
+                    check(primary.readText() == imported.readText())
+                    val classified = classifiedCatalog.singleFile
+                    check(classified.name == "sphereonLibraryBom.toml")
+                    check(classified.readText() == file("../library-bom/build/tomlCatalog/sphereonLibraryBom.toml").readText())
                     val catalogs = project.extensions.getByType(VersionCatalogsExtension::class.java)
                     val library = catalogs.named("libs").findLibrary("org-example-sample-lib").get().get()
                     check(library.module.toString() == "org.example:sample-lib")
                     check(library.versionConstraint.requiredVersion == "1.2.3")
-                    val classified = classifiedCatalog.singleFile
-                    check(classified.name == "sphereonLibraryBom.toml")
-                    check(classified.readText() == file("../library-bom/build/tomlCatalog/sphereonLibraryBom.toml").readText())
                 }
             }
         """.trimIndent())
