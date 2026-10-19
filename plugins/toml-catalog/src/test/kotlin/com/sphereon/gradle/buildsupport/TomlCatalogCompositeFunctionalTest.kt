@@ -57,7 +57,11 @@ class TomlCatalogCompositeFunctionalTest {
 
         write(consumer, "settings.gradle.kts", """
             rootProject.name = "catalog-consumer"
-            includeBuild("../library-bom")
+            includeBuild("../library-bom") {
+                dependencySubstitution {
+                    substitute(module("com.sphereon.gradle:library-bom")).using(project(":"))
+                }
+            }
             dependencyResolutionManagement {
                 versionCatalogs {
                     create("libs") { from("com.sphereon.gradle:library-bom:1.0@toml") }
