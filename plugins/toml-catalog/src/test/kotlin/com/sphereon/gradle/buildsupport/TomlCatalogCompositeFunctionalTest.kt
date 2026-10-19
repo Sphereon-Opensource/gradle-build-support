@@ -17,21 +17,31 @@ class TomlCatalogCompositeFunctionalTest {
     lateinit var temporary: Path
 
     @Test
-    fun includedBomResolvesPrimaryAndClassifiedCatalogCoordinates() {
+    fun includedBomResolvesPrimaryAndClassifiedCatalogCoordinates() = verifyCatalogCoordinates(false)
+
+    @Test
+    fun builtInCatalogVariantConflictsWithGeneratedCatalogCoordinates() = verifyCatalogCoordinates(true)
+
+    private fun verifyCatalogCoordinates(withBuiltInCatalog: Boolean) {
+        val productionPlugins = Files.readString(Path.of(requireNotNull(System.getProperty("sphereon.test.libraryBomBuild"))))
+            .substringAfter("plugins {").substringBefore("\n}").trim()
+        val producerPlugins = productionPlugins.replace("id(\"com.sphereon.gradle.toml-catalog\")", "")
+        val builtInApplication = if (withBuiltInCatalog) "apply(plugin = \"version-catalog\")" else ""
         val producer = Files.createDirectory(temporary.resolve("library-bom"))
         val consumer = Files.createDirectory(temporary.resolve("consumer"))
         write(producer, "settings.gradle.kts", "rootProject.name = \"library-bom\"\n")
+        write(producer, "gradle.properties", "group=com.sphereon.gradle\nversion=1.0\n")
         write(producer, "build.gradle.kts", """
             buildscript {
                 dependencies { classpath(files(${pluginClasspathLiteral()})) }
             }
             plugins {
-                `java-platform`
-                `maven-publish`
+                $producerPlugins
             }
             group = "com.sphereon.gradle"
             version = "1.0"
             apply(plugin = "com.sphereon.gradle.toml-catalog")
+            $builtInApplication
             javaPlatform { allowDependencies() }
             dependencies {
                 constraints { api("org.example:sample-lib:1.2.3") }
@@ -55,7 +65,8 @@ class TomlCatalogCompositeFunctionalTest {
         assertTrue(Files.isRegularFile(producer.resolve("build/tomlCatalog/sphereonLibraryBom.versioned.toml")))
         assertTrue(Files.isRegularFile(producer.resolve("build/tomlCatalog/sphereonLibraryBom.toml")))
 
-        // Settings-time catalog GAV substitution is unsupported: https://github.com/gradle/gradle/issues/18847
+        // Bootstrap this fixture's catalog aliases from the generated file.
+        // Primary and classified GAV selectors are exercised independently below.
         write(consumer, "settings.gradle.kts", """
             rootProject.name = "catalog-consumer"
             includeBuild("../library-bom") {
@@ -73,6 +84,7 @@ class TomlCatalogCompositeFunctionalTest {
         """.trimIndent())
         write(consumer, "build.gradle.kts", """
             import org.gradle.api.artifacts.VersionCatalogsExtension
+            import org.gradle.api.artifacts.result.ResolvedDependencyResult
             import org.gradle.api.attributes.Category
             import org.gradle.api.attributes.Usage
 
@@ -97,6 +109,8 @@ class TomlCatalogCompositeFunctionalTest {
             dependencies.add(classifiedCatalog.name, "com.sphereon.gradle:library-bom:1.0:bom@toml")
             tasks.register("checkCatalog") {
                 doLast {
+                    val selected = primaryCatalog.incoming.resolutionResult.root.dependencies.single() as ResolvedDependencyResult
+                    println("primary_selected_variant=" + selected.resolvedVariant.displayName)
                     val primary = primaryCatalog.singleFile
                     val imported = file("../library-bom/build/tomlCatalog/sphereonLibraryBom.versioned.toml")
                     check(primary.name == "sphereonLibraryBom.versioned.toml")
@@ -112,7 +126,14 @@ class TomlCatalogCompositeFunctionalTest {
                 }
             }
         """.trimIndent())
+        if (withBuiltInCatalog) {
+            val rejected = runner(consumer, "checkCatalog").buildAndFail()
+            assertTrue(Regex("primary_selected_variant=[^\r\n]*\\bversionCatalogElements\\b").containsMatchIn(rejected.output), rejected.output)
+            assertTrue(rejected.output.contains("Could not find library-bom.toml"), rejected.output)
+            return
+        }
         val resolved = runner(consumer, "checkCatalog").build()
+        assertTrue(Regex("primary_selected_variant=[^\r\n]*\\bsphereonLibraryBomCatalogElements\\b").containsMatchIn(resolved.output), resolved.output)
         assertEquals(TaskOutcome.SUCCESS, resolved.task(":checkCatalog")?.outcome)
         val metadata = runner(producer, "verifyCatalogMetadata").build()
         assertEquals(TaskOutcome.SUCCESS, metadata.task(":verifyCatalogMetadata")?.outcome)

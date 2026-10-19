@@ -16,8 +16,13 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
 }
 
+val libraryBomBuild = layout.projectDirectory.file("../../versions/library-bom/build.gradle.kts")
+
 tasks.test {
     useJUnitPlatform()
+    inputs.file(libraryBomBuild).withPropertyName("productionLibraryBomBuild")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    systemProperty("sphereon.test.libraryBomBuild", libraryBomBuild.asFile.absolutePath)
 }
 
 gradlePlugin {
