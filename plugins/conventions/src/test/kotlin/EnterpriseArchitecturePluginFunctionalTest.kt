@@ -187,7 +187,7 @@ class EnterpriseArchitecturePluginFunctionalTest {
         writePublishedComponent("lib-crypto-kms-remote")
         writePublishedComponent(
             "monolith-facade",
-            dependencies = "implementation(\"com.sphereon.edk:lib-crypto-kms-remote:1.0\")",
+            dependencies = "api(project(\":lib-crypto-kms-remote\"))",
         )
         writeMonolithConsumer("monolith-facade")
         publishComponents("lib-crypto-kms-remote", "monolith-facade")
