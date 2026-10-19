@@ -11,6 +11,13 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 gradlePlugin {
