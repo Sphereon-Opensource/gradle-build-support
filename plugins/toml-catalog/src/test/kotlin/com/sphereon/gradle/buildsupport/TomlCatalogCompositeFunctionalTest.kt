@@ -41,7 +41,7 @@ class TomlCatalogCompositeFunctionalTest {
                 doLast {
                     val artifacts = configurations.getByName("sphereonLibraryBomCatalogElements").outgoing.artifacts
                     check(artifacts.size == 2)
-                    check(artifacts.all { it.name == "library-bom" && it.extension == "toml" })
+                    check(artifacts.toList().all { it.name == "library-bom" && it.extension == "toml" })
                     check(artifacts.map { it.classifier }.toSet() == setOf(null, "bom"))
                     check(artifacts.map { it.file.name }.toSet() == setOf(
                         "sphereonLibraryBom.versioned.toml", "sphereonLibraryBom.toml"
