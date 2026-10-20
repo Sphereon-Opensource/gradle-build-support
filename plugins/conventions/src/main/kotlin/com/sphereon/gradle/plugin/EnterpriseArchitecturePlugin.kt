@@ -205,7 +205,20 @@ abstract class EnterpriseArchitectureReportTask : DefaultTask() {
                 "lib-conf-secret-management-persistence-mysql",
                 "secret-management-authority-persistence-postgresql",
             )
-            "monolith" -> listOf("lib-conf-secret-management-satellite-remote", "lib-conf-secret-management-remote")
+            "monolith" -> listOf(
+                "com.sphereon.edk:services-oauth2-as-rest",
+                "com.sphereon.edk:services-kms-rest",
+                "com.sphereon.edk:services-did-rest",
+                "com.sphereon.edk:services-oid4vci-issuer-rest",
+                "com.sphereon.edk:services-oid4vp-verifier-rest",
+                "com.sphereon.idk:services-oauth2-as-rest",
+                "-remote",
+                "ai.koog",
+                "koog-",
+                "io.modelcontextprotocol",
+                "vdx-integrations-llm-connector",
+                "integrations.llm.connector",
+            )
             else -> emptyList()
         }
         resolved.filter { component -> forbiddenComponents.any(component::contains) }.forEach {

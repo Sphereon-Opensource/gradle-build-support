@@ -117,10 +117,12 @@ class TomlCatalogPlugin @Inject constructor(
             }
             outgoing.artifact(versionedToml) {
                 builtBy(genToml)
+                name = project.name
                 extension = "toml"
             }
             outgoing.artifact(bomToml) {
                 builtBy(genToml)
+                name = project.name
                 extension = "toml"
                 classifier = "bom"
             }

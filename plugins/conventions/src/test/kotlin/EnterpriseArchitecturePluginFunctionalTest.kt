@@ -182,6 +182,74 @@ class EnterpriseArchitecturePluginFunctionalTest {
         assertContains(failure.buildResult.output, "Metro authority exclusion")
     }
 
+    @Test
+    fun monolithCorrectCapabilitiesRejectTransitiveFacadeToKmsRemote() {
+        writePublishedComponent("lib-crypto-kms-remote")
+        writePublishedComponent(
+            "monolith-facade",
+            dependencies = "api(project(\":lib-crypto-kms-remote\"))",
+        )
+        writeMonolithConsumer("monolith-facade")
+        publishComponents("lib-crypto-kms-remote", "monolith-facade")
+
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runCompile() }
+
+        assertContains(failure.buildResult.output, "monolith resolves forbidden enterprise component")
+        assertContains(failure.buildResult.output, "com.sphereon.edk:lib-crypto-kms-remote:1.0")
+    }
+
+    @Test
+    fun monolithLegacyExecutableAndAiRestrictionsRemainEnforced() {
+        writePublishedComponent("services-kms-rest", group = "com.sphereon.edk")
+        writePublishedComponent("services-oauth2-as-rest", group = "com.sphereon.idk")
+        writePublishedComponent("koog-runtime", group = "ai.koog")
+        writeMonolithConsumer(
+            "services-kms-rest",
+            "com.sphereon.idk:services-oauth2-as-rest:1.0",
+            "ai.koog:koog-runtime:1.0",
+        )
+        publishComponents("services-kms-rest", "services-oauth2-as-rest", "koog-runtime")
+
+        val failure = assertFailsWith<UnexpectedBuildFailure> { runCompile() }
+
+        assertContains(failure.buildResult.output, "com.sphereon.edk:services-kms-rest:1.0")
+        assertContains(failure.buildResult.output, "com.sphereon.idk:services-oauth2-as-rest:1.0")
+        assertContains(failure.buildResult.output, "ai.koog:koog-runtime:1.0")
+    }
+
+    @Test
+    fun monolithLocalProviderIsAllowed() {
+        writePublishedComponent("lib-crypto-kms-provider-software", group = "com.sphereon.edk")
+        writeMonolithConsumer("lib-crypto-kms-provider-software")
+        publishComponents("lib-crypto-kms-provider-software")
+
+        runCompile()
+    }
+
+    @Test
+    fun platformRemoteKmsRemainsAllowed() {
+        writePublishedComponent("lib-crypto-kms-remote", group = "com.sphereon.edk")
+        writeRoleConsumer("central-platform", "lib-crypto-kms-remote", capabilities = setOf(
+            "central-authority", "authority-persistence-postgresql",
+            "runtime-persistence-postgresql", "platform-database-route",
+        ))
+        publishComponents("lib-crypto-kms-remote")
+
+        runCompile()
+    }
+
+    @Test
+    fun satelliteRemoteKmsRemainsAllowed() {
+        writePublishedComponent("lib-crypto-kms-remote", group = "com.sphereon.edk")
+        writeRoleConsumer("issuer-satellite", "lib-crypto-kms-remote", capabilities = setOf(
+            "workload-execution", "remote-authority-adapter",
+            "runtime-persistence-postgresql", "tenant-database-route",
+        ))
+        publishComponents("lib-crypto-kms-remote")
+
+        runCompile()
+    }
+
     private fun runGate() = GradleRunner.create()
         .withProjectDir(projectDirectory.toFile())
         .withPluginClasspath()
@@ -318,6 +386,77 @@ class EnterpriseArchitecturePluginFunctionalTest {
         .withArguments(*tasks, "--stacktrace")
         .forwardOutput()
 
+    private fun runCompile() = runner("compileJava").build()
+
+    private fun publishComponents(vararg names: String) =
+        runner(*names.map { ":$it:publish" }.toTypedArray()).build()
+
+    private fun writeMonolithConsumer(vararg dependencies: String) =
+        writeRoleConsumer("monolith", *dependencies, capabilities = setOf(
+            "workload-execution", "central-authority", "local-authority-adapter",
+            "authority-persistence-postgresql", "runtime-persistence-postgresql",
+            "platform-database-route", "tenant-database-route",
+        ))
+
+    private fun writeRoleConsumer(role: String, vararg dependencies: String, capabilities: Set<String>) {
+        val dependencyLines = dependencies.joinToString("\n") {
+            val coordinate = if (it.count { character -> character == ':' } == 2) it else "com.sphereon.edk:$it:1.0"
+            "implementation(\"$coordinate\")"
+        }
+        projectDirectory.resolve("build.gradle.kts").writeText(
+            """
+            plugins {
+                `java-library`
+                id("com.sphereon.gradle.plugin.enterprise-architecture")
+            }
+            repositories { maven { url = uri("repo") } }
+            enterpriseArchitecture {
+                moduleRole.set("deployable")
+                runtimeRole.set("$role")
+                capabilities.set(setOf(${capabilities.joinToString { "\"$it\"" }}))
+            }
+            dependencies {
+                $dependencyLines
+            }
+            """.trimIndent() + "\n",
+        )
+        projectDirectory.resolve("src/main/java/fixture/CompileFixture.java").apply {
+            parent.createDirectories()
+            writeText("package fixture; public final class CompileFixture {}\n")
+        }
+    }
+
+    private fun writePublishedComponent(
+        name: String,
+        group: String = "com.sphereon.edk",
+        dependencies: String = "",
+    ) {
+        val settings = projectDirectory.resolve("settings.gradle.kts")
+        if (!settings.toFile().exists()) settings.writeText("rootProject.name = \"architecture-fixture\"\n")
+        settings.toFile().appendText("include(\":$name\")\n")
+        val directory = projectDirectory.resolve(name)
+        directory.createDirectories()
+        directory.resolve("build.gradle.kts").writeText(
+            """
+            plugins {
+                `java-library`
+                `maven-publish`
+            }
+            group = "$group"
+            version = "1.0"
+            dependencies { $dependencies }
+            publishing {
+                publications { create<MavenPublication>("library") { from(components["java"]) } }
+                repositories { maven { url = rootProject.uri("repo") } }
+            }
+            """.trimIndent() + "\n",
+        )
+        directory.resolve("src/main/java/fixture/CompileFixture.java").apply {
+            parent.createDirectories()
+            writeText("package fixture; public final class CompileFixture {}\n")
+        }
+    }
+
     private fun writeRoleProducer(name: String, role: String) {
         writeFixture("", subproject = name)
         projectDirectory.resolve(name).resolve("build.gradle.kts").writeText("""
@@ -368,5 +507,8 @@ class EnterpriseArchitecturePluginFunctionalTest {
             projectDirectory.resolve("src/main/kotlin/fixture").createDirectories()
             projectDirectory.resolve("src/main/kotlin/fixture/ForbiddenImport.kt").writeText(source + "\n")
         }
+        projectDirectory.resolve("src/main/java/fixture").createDirectories()
+        projectDirectory.resolve("src/main/java/fixture/CompileFixture.java")
+            .writeText("package fixture; public final class CompileFixture {}\n")
     }
 }

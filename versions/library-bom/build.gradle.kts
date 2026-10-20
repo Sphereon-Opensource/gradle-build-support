@@ -3,7 +3,6 @@ plugins {
     `java-platform`
     `maven-publish`
     id("com.sphereon.gradle.toml-catalog")
-    `version-catalog`
 //    alias(libs.plugins.vanniktech.mavenPublish)
 }
 
