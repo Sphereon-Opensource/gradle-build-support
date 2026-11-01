@@ -1,9 +1,21 @@
+# Pull requests build and test without publishing (open, new commits, reopen,
+# marked ready for review; drafts are skipped). A merge into develop or main only
+# publishes the snapshot, because its pull request already ran the tests.
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
+    branches: [main, develop]
   workflow_dispatch:
+
+# A new commit on a pull request cancels the run for the previous commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   snapshot:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,25 +33,40 @@ jobs:
 
       # Root publish does not publish plugins included through pluginManagement.
       # Product BOM generation needs this implementation and plugin marker in Maven.
-      - name: Build and publish catalog plugin
-        run: |
-          ./gradlew -p plugins/toml-catalog build
-          ./gradlew -p plugins/toml-catalog publish
+      - name: Build catalog plugin
+        if: github.event_name != 'push'
+        run: ./gradlew -p plugins/toml-catalog build
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Publish catalog plugin
+        if: github.event_name != 'pull_request'
+        run: ./gradlew -p plugins/toml-catalog publish
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Verify OpenAPI archive compatibility freshly
+        if: github.event_name != 'push'
         run: ./gradlew :plugins:conventions:test --tests '*OpenApiResolverArchiveTest' --rerun
       - name: Archive focused OpenAPI regression evidence
-        if: always()
+        if: always() && github.event_name != 'push'
         uses: actions/upload-artifact@v4
         with:
           name: openapi-regression-junit
           path: plugins/conventions/build/test-results/test/*.xml
           if-no-files-found: warn
-      - name: Build and publish
-        run: ./gradlew build publish
+      - name: Build and test
+        if: github.event_name != 'push'
+        run: ./gradlew build
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Publish
+        if: github.event_name != 'pull_request'
+        run: ./gradlew publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -47,7 +74,7 @@ jobs:
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Archive JUnit evidence
-        if: always()
+        if: always() && github.event_name != 'push'
         uses: actions/upload-artifact@v4
         with:
           name: gbs-junit-results
