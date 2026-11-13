@@ -74,7 +74,7 @@ dependencies {
         api("org.openapi.generator:7.16.0")
 
         // Spring boot
-        api("org.springframework.boot:3.5.13")
+        api("org.springframework.boot:3.5.16")
         api("io.spring.dependency-management:1.1.7")
 
         // Ktor
@@ -88,6 +88,16 @@ dependencies {
 
         // Static Analysis
         api("io.gitlab.arturbosch.detekt:1.23.8")
+
+        // Build tooling resolved as dependencies (migrated, software inventory 2026-11-11)
+        api("org.cyclonedx:cyclonedx-gradle-plugin:3.5.1")
+        api("org.graalvm.buildtools:native-gradle-plugin:0.10.6")
+        api("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8")
+        api("com.google.devtools.ksp:symbol-processing-api:2.3.6")
+        api("com.google.protobuf:protoc:4.29.3")
+        api("io.grpc:protoc-gen-grpc-java:1.70.0")
+        api("io.grpc:protoc-gen-grpc-kotlin:1.4.1")
+        api("aws.sdk.kotlin:version-catalog:1.6.107")
     }
 }
 
