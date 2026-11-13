@@ -37,6 +37,8 @@ dependencies {
     compileOnly(libs.android.gradleApi)
     implementation(libs.dependency.analysis.gradlePlugin)
     implementation(libs.nexus.publish)
+    // Module SBOMs published next to each artifact with classifier cyclonedx.
+    implementation(libs.cyclonedx.gradlePlugin)
     api("com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin:0.31.0")
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))

@@ -163,14 +163,14 @@ dependencies {
         // and the test/server retries forever — the caller-side `workflow.run(...)`
         // hangs because the workflow never reaches a terminal state.
         // See vdx-lib-temporal-impl's TemporalDataConverter.
-        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.4")
+        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.23.0")
 
         // Azure
         api("com.azure:azure-sdk-bom:1.3.0")
         api("com.azure:azure-identity:1.18.1")
         api("com.azure:azure-security-keyvault-administration:4.7.3")
         api("com.azure:azure-security-keyvault-certificates:4.8.3")
-        api("com.azure:azure-security-keyvault-keys:4.10.3")
+        api("com.azure:azure-security-keyvault-keys:4.10.7")
 
 
         // Apps, todo move to separate bom
@@ -192,7 +192,7 @@ dependencies {
         api("app.cash.sqldelight:sqlite-driver:2.3.2")
         api("app.cash.sqldelight:native-driver:2.3.2")
         api("com.zaxxer:HikariCP:7.0.2")
-        api("org.postgresql:postgresql:42.7.10")
+        api("org.postgresql:postgresql:42.7.14")
         api("com.mysql:mysql-connector-j:9.6.0")
         api("org.xerial:sqlite-jdbc:3.51.3.0")
 
@@ -203,10 +203,10 @@ dependencies {
 
 
         // Keycloak SPI
-        api("org.keycloak:keycloak-core:26.6.0")
-        api("org.keycloak:keycloak-server-spi:26.6.0")
-        api("org.keycloak:keycloak-server-spi-private:26.6.0")
-        api("org.keycloak:keycloak-services:26.6.0")
+        api("org.keycloak:keycloak-core:26.7.5")
+        api("org.keycloak:keycloak-server-spi:26.7.5")
+        api("org.keycloak:keycloak-server-spi-private:26.7.5")
+        api("org.keycloak:keycloak-services:26.7.5")
         api("org.keycloak:keycloak-admin-client:26.0.8")
 
         // JBoss Logging (provided by Keycloak at runtime)
@@ -215,7 +215,7 @@ dependencies {
         // Testing
         api("io.mockk:mockk:1.14.9")
         api("app.cash.turbine:turbine:1.2.0")
-        api("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+        api("org.junit.jupiter:junit-jupiter-engine:5.13.4")
         api("org.slf4j:slf4j-simple:2.0.16")
 
         // sqlx4k - Native PostgreSQL and MySQL drivers for Kotlin Native
@@ -239,33 +239,43 @@ dependencies {
         api("com.github.docker-java:docker-java-api:3.7.1")
 
         // Spring
-        api("org.springframework.boot:spring-boot-starter-web:3.5.13")
-        api("org.springframework.boot:spring-boot-starter-test:3.5.13")
+        api("org.springframework.boot:spring-boot-starter-web:3.5.16")
+        api("org.springframework.boot:spring-boot-starter-test:3.5.16")
+        api("org.springframework.boot:spring-boot-starter:3.5.16")
+        api("org.springframework.boot:spring-boot-autoconfigure:3.5.16")
+        api("org.springframework.boot:spring-boot-starter-jdbc:3.5.16")
+        api("org.springframework.boot:spring-boot-starter-security:3.5.16")
+        api("org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.5.16")
+        // Spring Security as managed by spring-boot-dependencies 3.5.16
+        api("org.springframework.security:spring-security-core:6.5.11")
+        api("org.springframework.security:spring-security-oauth2-jose:6.5.11")
+        api("org.springframework.security:spring-security-oauth2-resource-server:6.5.11")
+        api("org.springframework.security:spring-security-test:6.5.11")
 
         //Jakarta
         api("jakarta.validation:jakarta.validation-api:3.1.1")
 
         // Reactive
         api("org.reactivestreams:reactive-streams:1.0.4")
-        api("io.projectreactor:reactor-core:3.7.11")
+        api("io.projectreactor:reactor-core:3.7.17")
 
         // gRPC
-        api("io.grpc:grpc-netty-shaded:1.70.0")
-        api("io.grpc:grpc-protobuf:1.70.0")
-        api("io.grpc:grpc-stub:1.70.0")
+        api("io.grpc:grpc-netty-shaded:1.76.0")
+        api("io.grpc:grpc-protobuf:1.76.0")
+        api("io.grpc:grpc-stub:1.76.0")
         api("io.grpc:grpc-kotlin-stub:1.4.1")
-        api("io.grpc:grpc-services:1.70.0")
-        api("io.grpc:grpc-api:1.70.0")
+        api("io.grpc:grpc-services:1.76.0")
+        api("io.grpc:grpc-api:1.76.0")
         api("com.google.protobuf:protobuf-kotlin:4.29.3")
 
         // XML / Trust
-        api("io.github.pdvrieze.xmlutil:core:0.90.1")
-        api("io.github.pdvrieze.xmlutil:serialization:0.90.1")
+        api("io.github.pdvrieze.xmlutil:core:0.91.3")
+        api("io.github.pdvrieze.xmlutil:serialization:0.91.3")
 
         // Crypto (Bouncy Castle)
-        api("org.bouncycastle:bcprov-jdk18on:1.79")
-        api("org.bouncycastle:bcpkix-jdk18on:1.79")
-        api("org.bouncycastle:bcutil-jdk18on:1.79")
+        api("org.bouncycastle:bcprov-jdk18on:1.85.2")
+        api("org.bouncycastle:bcpkix-jdk18on:1.85")
+        api("org.bouncycastle:bcutil-jdk18on:1.85")
 
         // SKIE (Swift/Kotlin interop annotations)
         api("co.touchlab.skie:configuration-annotations:0.10.12")
@@ -284,12 +294,12 @@ dependencies {
         api("com.squareup:kotlinpoet-ksp:2.3.0")
 
         // Okio (file system + KMP I/O); fakefilesystem only used in tests
-        api("com.squareup.okio:okio:3.17.0")
-        api("com.squareup.okio:okio-nodefilesystem:3.17.0")
-        api("com.squareup.okio:okio-fakefilesystem:3.17.0")
+        api("com.squareup.okio:okio:3.18.1")
+        api("com.squareup.okio:okio-nodefilesystem:3.18.1")
+        api("com.squareup.okio:okio-fakefilesystem:3.18.1")
 
         // Logging
-        api("ch.qos.logback:logback-classic:1.5.16")
+        api("ch.qos.logback:logback-classic:1.5.38")
 
         // Email
         api("org.simplejavamail:simple-java-mail:8.12.6")
@@ -304,6 +314,59 @@ dependencies {
 
         // Compile Testing
         api("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0")
+
+        // Migrated from repository-local catalogs and build scripts (software inventory, 2026-11-11).
+        // Every external library is pinned here so the gbs BOMs are the complete third-party catalog.
+        api("ai.koog:agents-core-jvm:1.1.1")
+        api("androidx.biometric:biometric:1.1.0")
+        api("androidx.camera:camera-camera2:1.4.2")
+        api("androidx.camera:camera-core:1.4.2")
+        api("androidx.camera:camera-lifecycle:1.4.2")
+        api("androidx.camera:camera-view:1.4.2")
+        api("androidx.credentials.registry:registry-digitalcredentials-mdoc:1.0.0-alpha05")
+        api("androidx.credentials.registry:registry-digitalcredentials-openid:1.0.0-alpha05")
+        api("androidx.credentials.registry:registry-digitalcredentials-sdjwtvc:1.0.0-alpha05")
+        api("androidx.credentials.registry:registry-provider:1.0.0-alpha05")
+        api("androidx.credentials.registry:registry-provider-play-services:1.0.0-alpha05")
+        api("androidx.credentials:credentials:1.6.0")
+        api("androidx.credentials:credentials-play-services-auth:1.6.0")
+        api("androidx.test:runner:1.6.2")
+        api("androidx.work:work-runtime-ktx:2.10.1")
+        api("app.cash.sqldelight:mysql-dialect:2.3.2")
+        api("app.cash.sqldelight:postgresql-dialect:2.3.2")
+        api("app.cash.sqldelight:sqlite-3-38-dialect:2.3.2")
+        api("app.cash.sqldelight:web-worker-driver:2.3.2")
+        api("at.asitplus.signum:indispensable:3.16.3")
+        api("com.atlassian.oai:swagger-request-validator-core:2.46.1")
+        api("com.github.weisj:jsvg:1.7.2")
+        api("com.google.mlkit:barcode-scanning:17.3.0")
+        api("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20260102.1")
+        api("com.microsoft.playwright:playwright:1.63.0")
+        api("com.nimbusds:nimbus-jose-jwt:10.0.2")
+        api("com.yubico:webauthn-server-core:2.9.0")
+        api("dev.zacsweers.metro:runtime:1.4.4")
+        api("io.github.oshai:kotlin-logging-jvm:7.0.14")
+        api("io.ktor:ktor-server-default-headers:3.5.0")
+        api("io.ktor:ktor-server-websockets:3.5.0")
+        api("io.modelcontextprotocol:kotlin-sdk:0.15.0")
+        api("it.krzeminski:snakeyaml-engine-kmp:4.0.1")
+        api("net.lingala.zip4j:zip4j:2.11.5")
+        api("org.apache.commons:commons-compress:1.28.0")
+        api("org.apache.poi:poi-ooxml:5.5.0")
+        api("org.eclipse.rdf4j:rdf4j-rio-ntriples:5.3.2")
+        api("org.eclipse.rdf4j:rdf4j-rio-rdfxml:5.3.2")
+        api("org.eclipse.rdf4j:rdf4j-rio-turtle:5.3.2")
+        api("org.graalvm.sdk:graal-sdk:20.0.0")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.10.0")
+        api("org.jetbrains:markdown:0.7.17")
+        api("org.junit.jupiter:junit-jupiter:5.13.4")
+        api("org.junit.platform:junit-platform-launcher:1.13.4")
+        api("org.springframework.boot:spring-boot-dependencies:3.5.16")
+        api("org.springframework.boot:spring-boot-configuration-processor:3.5.16")
+        api("org.yaml:snakeyaml:2.4")
+        api("software.amazon.app.platform:di-common-public-js:0.0.16SPH-SNAPSHOT")
+        api("software.amazon.app.platform:kotlin-inject-impl-js:0.0.16SPH-SNAPSHOT")
+        api("software.amazon.app.platform:presenter-molecule-testing:0.0.16SPH-SNAPSHOT")
     }
 }
 

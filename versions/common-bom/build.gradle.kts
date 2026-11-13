@@ -54,7 +54,7 @@ dependencies {
         // plain 0.7.x once Dataframe ships a release compiled against
         // `kotlin.time.Instant`.
         api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
-        api("org.jetbrains.kotlinx:kotlinx-io-core:0.9.0")
+        api("org.jetbrains.kotlinx:kotlinx-io-core:0.9.1")
         api("org.jetbrains.kotlinx:atomicfu:0.32.1")
 
 
