@@ -344,7 +344,7 @@ dependencies {
         api("com.microsoft.playwright:playwright:1.63.0")
         api("com.nimbusds:nimbus-jose-jwt:10.0.2")
         api("com.yubico:webauthn-server-core:2.9.0")
-        api("dev.zacsweers.metro:runtime:1.4.4")
+        api("dev.zacsweers.metro:runtime:1.5.2")
         api("io.github.oshai:kotlin-logging-jvm:7.0.14")
         api("io.ktor:ktor-server-default-headers:3.5.0")
         api("io.ktor:ktor-server-websockets:3.5.0")

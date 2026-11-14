@@ -53,7 +53,7 @@ dependencies {
 
         // DI
         api("software.amazon.app.platform:0.0.16SPH-SNAPSHOT")
-        api("dev.zacsweers.metro:1.4.4")
+        api("dev.zacsweers.metro:1.5.2")
 
 
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
