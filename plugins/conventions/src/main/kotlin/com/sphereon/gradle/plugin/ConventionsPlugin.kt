@@ -67,6 +67,11 @@ class ConventionsPlugin : Plugin<Project> {
             // Android SDK levels are a shared policy, not a per-module choice.
             configureAndroidConventions()
 
+            // External libraries and versions come only from the gradle-build-support BOMs.
+            configureGbsDependencyPolicy()
+            configureGbsDependencyLocking()
+            configureGbsModuleSbom()
+
             // Hook into Multiplatform projects
             project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
                 if (isApplied) { // Ensure configuration is only applied once
