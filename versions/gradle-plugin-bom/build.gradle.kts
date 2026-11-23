@@ -52,8 +52,8 @@ dependencies {
         api("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.6")
 
         // DI
-        api("software.amazon.app.platform:0.0.16SPH-SNAPSHOT")
-        api("dev.zacsweers.metro:1.5.2")
+        api("software.amazon.app.platform:0.0.17SPH-SNAPSHOT")
+        api("dev.zacsweers.metro:1.6.0")
 
 
         api("org.jetbrains.kotlinx.atomicfu:0.32.1")
