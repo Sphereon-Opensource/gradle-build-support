@@ -109,6 +109,11 @@ fun Project.configureGbsDependencyPolicy() {
         val configurationName = name
         dependencies.configureEach {
             if (this !is ExternalModuleDependency) return@configureEach
+            // The analyzer puts its Gradle-version-specific metadata reader in an isolated worker.
+            if (configurationName == "dependencyAnalysisKotlinMetadata" &&
+                group == "org.jetbrains.kotlin" && name == "kotlin-metadata-jvm" &&
+                pluginManager.hasPlugin("com.autonomousapps.dependency-analysis")
+            ) return@configureEach
             val violation = GbsDependencyPolicy.evaluate(group, name, version, approved) ?: return@configureEach
             val entry = "$path $configurationName: $violation"
             if (failOnDeclaration) throw GradleException("Dependency policy: $entry")
